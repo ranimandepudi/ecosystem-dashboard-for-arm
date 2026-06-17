@@ -1,29 +1,29 @@
 ---
-name: Redis
+name: redis
 category: Databases - noSQL
-description: Redis is an open-source, in-memory data structure store used as a database, cache, message broker, and streaming engine.
-download_url: https://redis.io/download/
+description: Redis is an open-source, in-memory data structure store used as a database,
+  cache, message broker, and streaming engine.
+download_url: https://github.com/redis/redis/releases
 works_on_arm: true
 supported_minimum_version:
-  version_number: 4.0.0
-  release_date: 2017/07/14
+  version_number: 6.2-rc2
+  release_date: 2021/01/12
 optional_info:
-  homepage_url: https://redis.io/
+  homepage_url: https://redis.io
   support_caveats: null
   alternative_options: null
   getting_started_resources:
-    official_docs: https://github.com/redis/redis/#readme
+    official_docs: https://redis.io/docs/getting-started/
     arm_content: https://learn.arm.com/learning-paths/servers-and-cloud-computing/redis/
-    partner_content:
-      - display_name: Amazon AWS
-        url: https://aws.amazon.com/elasticache/redis/
+    partner_content: null
   arm_recommended_minimum_version:
-    version_number: 6.0.9
-    release_date: 2022/12/07
-    reference_content: https://community.arm.com/arm-community-blogs/b/infrastructure-solutions-blog/posts/improve-redis-performance-by-deploying-on-alibaba-cloud-yitian-710-instances
-    rationale: Benchmarking is done on Redis 6.0.9.
+    version_number: null
+    release_date: null
+    reference_content: null
+    rationale: null
 optional_hidden_info:
-  release_notes__supported_minimum: null
+  release_notes__supported_minimum: https://github.com/redis/redis/releases/tag/6.2-rc2
   release_notes__recommended_minimum: null
-  other_info: No arm64 specific release notes are available. However, arm support is mentioned here- https://redis.io/docs/reference/arm/
+  other_info: Arm support confirmed via official release notes. Minimum supported
+    version 6.2-rc2 determined from evidence at https://github.com/redis/redis/releases/tag/6.2-rc2.
 ---
