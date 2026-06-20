@@ -2,14 +2,14 @@
   "schema_version": "2.0",
   "package": {
     "name": "Mattermost",
-    "version": "10.4.0"
+    "version": "unknown"
   },
   "run": {
-    "id": "27456544666",
+    "id": "27863451086",
     "attempt": "1",
-    "url": "https://github.com/ArmDeveloperEcosystem/ecosystem-dashboard-for-arm/actions/runs/27456544666/job/81162048934",
-    "timestamp": "2026-06-13T04:28:39Z",
-    "status": "success",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360546",
+    "timestamp": "2026-06-20T07:14:30Z",
+    "status": "failure",
     "runner": {
       "os": "ubuntu-24.04",
       "arch": "arm64"
@@ -17,52 +17,49 @@
     "job_name": "test-mattermost / test-mattermost"
   },
   "tests": {
-    "passed": 6,
-    "failed": 0,
-    "skipped": 0,
-    "duration_seconds": 8,
+    "passed": 0,
+    "failed": 1,
+    "skipped": 5,
+    "duration_seconds": 0,
     "details": [
       {
         "name": "Test 1 - Check mattermost binary exists",
-        "status": "passed",
+        "status": "skipped",
         "duration_seconds": 0,
-        "url": "https://github.com/ArmDeveloperEcosystem/ecosystem-dashboard-for-arm/actions/runs/27456544666/job/81162048934#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360546#step:6:1"
       },
       {
         "name": "Test 2 - Check exact baseline version",
-        "status": "passed",
+        "status": "skipped",
         "duration_seconds": 0,
-        "url": "https://github.com/ArmDeveloperEcosystem/ecosystem-dashboard-for-arm/actions/runs/27456544666/job/81162048934#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360546#step:7:1"
       },
       {
         "name": "Test 3 - Check help output",
-        "status": "passed",
+        "status": "skipped",
         "duration_seconds": 0,
-        "url": "https://github.com/ArmDeveloperEcosystem/ecosystem-dashboard-for-arm/actions/runs/27456544666/job/81162048934#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360546#step:8:1"
       },
       {
         "name": "Test 4 - Architecture verification",
-        "status": "passed",
+        "status": "skipped",
         "duration_seconds": 0,
-        "url": "https://github.com/ArmDeveloperEcosystem/ecosystem-dashboard-for-arm/actions/runs/27456544666/job/81162048934#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360546#step:9:1"
       },
       {
         "name": "Test 5 - Functional validation",
-        "status": "passed",
+        "status": "skipped",
         "duration_seconds": 0,
-        "url": "https://github.com/ArmDeveloperEcosystem/ecosystem-dashboard-for-arm/actions/runs/27456544666/job/81162048934#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360546#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
-        "status": "passed",
-        "duration_seconds": 8,
-        "url": "https://github.com/ArmDeveloperEcosystem/ecosystem-dashboard-for-arm/actions/runs/27456544666/job/81162048934#step:11:1",
-        "current_version": "10.4.0",
-        "latest_version": "10.4.1",
-        "next_installed_version": "10.4.1",
-        "decision": "next_install_validated",
-        "regression_result": "Next version installed successfully on Arm64",
-        "comparison": "Current pinned Mattermost version 10.4.0 passed smoke tests in this run. Regression validation installed candidate version 10.4.1 on Arm64, and the candidate binary reported version 10.4.1 while passing the real help and plugin-help checks."
+        "status": "failed",
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360546#step:11:1",
+        "decision": "result_not_emitted",
+        "regression_result": "Regression validation step failed before emitting terminal outputs",
+        "comparison": "The package job failed in Actions, but the workflow did not emit a terminal regression decision before exiting."
       }
     ]
   },
@@ -70,16 +67,16 @@
     "contract_version": "2.0",
     "package_slug": "mattermost",
     "dashboard_link": "/linux/opensource_packages/mattermost",
-    "badge_status": "passing",
-    "core_failed": 0,
+    "badge_status": "failing",
+    "core_failed": 5,
     "batch_title": "Batch 10",
     "job_url_resolution_status": "central_exact",
-    "regression_applicability": "applicable",
-    "regression_reason": "",
-    "regression_note": "",
-    "regression_status": "passed",
-    "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-13T05:45:25.452755+00:00",
+    "regression_applicability": "not_configured",
+    "regression_reason": "not_configured",
+    "regression_note": "Regression validation is not configured for this workflow.",
+    "regression_status": "failed",
+    "regression_decision": "result_not_emitted",
+    "production_refreshed_at": "2026-06-20T08:52:10.080937+00:00",
     "publish_state": "published"
   }
 }
