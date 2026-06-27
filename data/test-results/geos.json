@@ -5,10 +5,10 @@
     "version": "3.12.1"
   },
   "run": {
-    "id": "27863438359",
+    "id": "28280993665",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325428",
-    "timestamp": "2026-06-20T06:55:25Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601784",
+    "timestamp": "2026-06-27T06:28:34Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 4,
+    "duration_seconds": 1,
     "details": [
       {
         "name": "Test 1 - Check geos-config binary exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325428#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601784#step:6:1"
       },
       {
         "name": "Test 2 - Check geos-config version command",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325428#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601784#step:7:1"
       },
       {
         "name": "Test 3 - Check geos-config cflags",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325428#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601784#step:8:1"
       },
       {
         "name": "Test 4 - Compile simple C++ program using GEOS",
         "status": "passed",
-        "duration_seconds": 4,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325428#step:9:1"
+        "duration_seconds": 1,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601784#step:9:1"
       },
       {
         "name": "Test 5 - Run compiled program",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325428#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601784#step:10:1"
       },
       {
         "name": "Regression applicability - package manager installed",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325428#step:11:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601784#step:11:1"
       }
     ]
   },
@@ -71,7 +71,7 @@
     "regression_applicability": "not_applicable",
     "regression_reason": "package_manager_installed",
     "regression_note": "Regression validation not applicable: tested package installed via package manager in Tests 1-5.",
-    "production_refreshed_at": "2026-06-20T08:52:10.045152+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.261690+00:00",
     "publish_state": "published"
   }
 }

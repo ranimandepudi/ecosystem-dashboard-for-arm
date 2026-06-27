@@ -5,10 +5,10 @@
     "version": "43"
   },
   "run": {
-    "id": "27863441455",
+    "id": "28280996564",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863441455/job/82463333881",
-    "timestamp": "2026-06-20T06:56:17Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280996564/job/83796610272",
+    "timestamp": "2026-06-27T06:25:30Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 5,
     "failed": 0,
     "skipped": 1,
-    "duration_seconds": 3,
+    "duration_seconds": 2,
     "details": [
       {
         "name": "Test 1 - Baseline artifact existence",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863441455/job/82463333881#step:6:1"
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280996564/job/83796610272#step:6:1"
       },
       {
         "name": "Test 2 - Baseline index validation",
         "status": "passed",
-        "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863441455/job/82463333881#step:7:1"
+        "duration_seconds": 1,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280996564/job/83796610272#step:7:1"
       },
       {
         "name": "Test 3 - Baseline checksum manifest validation",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863441455/job/82463333881#step:8:1"
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280996564/job/83796610272#step:8:1"
       },
       {
         "name": "Test 4 - Architecture verification",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863441455/job/82463333881#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280996564/job/83796610272#step:9:1"
       },
       {
         "name": "Test 5 - Baseline image validation",
         "status": "passed",
         "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863441455/job/82463333881#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280996564/job/83796610272#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "skipped",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863441455/job/82463333881#step:11:1",
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280996564/job/83796610272#step:11:1",
         "current_version": "43",
         "latest_version": "43",
         "next_installed_version": "43",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "skipped",
     "regression_decision": "no_newer_stable_available",
-    "production_refreshed_at": "2026-06-20T08:52:10.144306+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.363136+00:00",
     "publish_state": "published"
   }
 }

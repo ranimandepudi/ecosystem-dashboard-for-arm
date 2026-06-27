@@ -5,10 +5,10 @@
     "version": "3.0.0"
   },
   "run": {
-    "id": "27863439918",
+    "id": "28280995126",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329610",
-    "timestamp": "2026-06-20T06:59:30Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796605879",
+    "timestamp": "2026-06-27T06:20:17Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -25,38 +25,38 @@
       {
         "name": "Test 1 - Check jar files exist in local repo",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329610#step:6:1"
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796605879#step:6:1"
       },
       {
         "name": "Test 2 - Check dependency tree",
         "status": "passed",
         "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329610#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796605879#step:7:1"
       },
       {
         "name": "Test 3 - Compile Spring Cloud Task app",
         "status": "passed",
         "duration_seconds": 6,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329610#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796605879#step:8:1"
       },
       {
         "name": "Test 4 - Architecture Verification",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329610#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796605879#step:9:1"
       },
       {
         "name": "Test 5 - Functional Validation",
         "status": "passed",
         "duration_seconds": 3,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329610#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796605879#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 8,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329610#step:11:1"
+        "duration_seconds": 6,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796605879#step:11:1"
       }
     ]
   },
@@ -72,7 +72,7 @@
     "regression_reason": "package_manager_installed",
     "regression_note": "Regression validation not applicable: tested package installed via package manager in Tests 1-5.",
     "regression_status": "passed",
-    "production_refreshed_at": "2026-06-20T08:52:10.133512+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.352093+00:00",
     "publish_state": "published"
   }
 }

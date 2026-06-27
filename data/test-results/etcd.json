@@ -5,10 +5,10 @@
     "version": "3.5.22"
   },
   "run": {
-    "id": "27863464652",
+    "id": "28281017823",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863464652/job/82463396522",
-    "timestamp": "2026-06-20T07:40:30Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281017823/job/83796670501",
+    "timestamp": "2026-06-27T07:05:22Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -26,37 +26,37 @@
         "name": "Test 1 - Check Etcd binaries exist",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863464652/job/82463396522#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281017823/job/83796670501#step:6:1"
       },
       {
         "name": "Test 2 - Check Etcd version output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863464652/job/82463396522#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281017823/job/83796670501#step:7:1"
       },
       {
         "name": "Test 3 - Check Etcdctl and Etcdutl version output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863464652/job/82463396522#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281017823/job/83796670501#step:8:1"
       },
       {
         "name": "Test 4 - Architecture verification",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863464652/job/82463396522#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281017823/job/83796670501#step:9:1"
       },
       {
         "name": "Test 5 - Functional validation",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863464652/job/82463396522#step:10:1"
+        "duration_seconds": 2,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281017823/job/83796670501#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 2,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863464652/job/82463396522#step:11:1",
+        "duration_seconds": 1,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281017823/job/83796670501#step:11:1",
         "current_version": "3.5.22",
         "latest_version": "3.5.23",
         "next_installed_version": "3.5.23",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-20T08:52:10.035632+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.252078+00:00",
     "publish_state": "published"
   }
 }

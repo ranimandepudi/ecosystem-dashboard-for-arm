@@ -5,10 +5,10 @@
     "version": "Groovy 4.0.30 / Grails 6.2.3"
   },
   "run": {
-    "id": "27863439918",
+    "id": "28280995126",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329771",
-    "timestamp": "2026-06-20T07:11:03Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606091",
+    "timestamp": "2026-06-27T06:23:34Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 36,
+    "duration_seconds": 52,
     "details": [
       {
         "name": "Test 1 - Check Groovy binary exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329771#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606091#step:6:1"
       },
       {
         "name": "Test 2 - Check Grails binary exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329771#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606091#step:7:1"
       },
       {
         "name": "Test 3 - Check Groovy version output",
         "status": "passed",
         "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329771#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606091#step:8:1"
       },
       {
         "name": "Test 4 - Check Grails version output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329771#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606091#step:9:1"
       },
       {
         "name": "Test 5 - Functional validation",
         "status": "passed",
         "duration_seconds": 3,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329771#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606091#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 32,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329771#step:11:1",
+        "duration_seconds": 49,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606091#step:11:1",
         "current_version": "Groovy 4.0.30 / Grails 6.2.3",
         "latest_version": "Groovy 5.0.0 / Grails 7.0.0",
         "next_installed_version": "Groovy 5.0.0 / Grails 7.0.0",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-20T08:52:10.050271+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.266946+00:00",
     "publish_state": "published"
   }
 }

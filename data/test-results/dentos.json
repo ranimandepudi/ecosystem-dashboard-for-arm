@@ -5,10 +5,10 @@
     "version": "v3.1"
   },
   "run": {
-    "id": "27863447770",
+    "id": "28281002970",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863447770/job/82463351499",
-    "timestamp": "2026-06-20T07:12:41Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281002970/job/83796627969",
+    "timestamp": "2026-06-27T06:37:42Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 3,
+    "duration_seconds": 2,
     "details": [
       {
         "name": "Test 1 - Check build scripts",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863447770/job/82463351499#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281002970/job/83796627969#step:6:1"
       },
       {
         "name": "Test 2 - Check documentation",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863447770/job/82463351499#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281002970/job/83796627969#step:7:1"
       },
       {
         "name": "Test 3 - Check build environment setup",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863447770/job/82463351499#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281002970/job/83796627969#step:8:1"
       },
       {
         "name": "Test 4 - Architecture verification",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863447770/job/82463351499#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281002970/job/83796627969#step:9:1"
       },
       {
         "name": "Test 5 - Validate Arm64 Image Tooling",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863447770/job/82463351499#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281002970/job/83796627969#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 3,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863447770/job/82463351499#step:11:1",
+        "duration_seconds": 2,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281002970/job/83796627969#step:11:1",
         "current_version": "v3.1",
         "latest_version": "v3.2",
         "next_installed_version": "v3.2",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-20T08:52:10.025012+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.241152+00:00",
     "publish_state": "published"
   }
 }

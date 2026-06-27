@@ -5,10 +5,10 @@
     "version": "dubbo-3.2.17"
   },
   "run": {
-    "id": "27863459417",
+    "id": "28281013752",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863459417/job/82463383252",
-    "timestamp": "2026-06-20T07:33:30Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657869",
+    "timestamp": "2026-06-27T06:56:42Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -26,37 +26,37 @@
         "name": "Test 1 - Check pom.xml exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863459417/job/82463383252#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657869#step:6:1"
       },
       {
         "name": "Test 2 - Check dubbo-common jar exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863459417/job/82463383252#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657869#step:7:1"
       },
       {
         "name": "Test 3 - Check dubbo-common classes",
         "status": "passed",
-        "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863459417/job/82463383252#step:8:1"
+        "duration_seconds": 1,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657869#step:8:1"
       },
       {
         "name": "Test 4 - Architecture verification",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863459417/job/82463383252#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657869#step:9:1"
       },
       {
         "name": "Test 5 - Functional validation",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863459417/job/82463383252#step:10:1"
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657869#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 18,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863459417/job/82463383252#step:11:1",
+        "duration_seconds": 19,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657869#step:11:1",
         "current_version": "dubbo-3.2.17",
         "latest_version": "dubbo-3.2.18",
         "next_installed_version": "dubbo-3.2.18",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-20T08:52:10.029575+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.245889+00:00",
     "publish_state": "published"
   }
 }

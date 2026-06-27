@@ -5,10 +5,10 @@
     "version": "4.13.1"
   },
   "run": {
-    "id": "27863436746",
+    "id": "28280992313",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863436746/job/82463321052",
-    "timestamp": "2026-06-20T06:52:37Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280992313/job/83796598305",
+    "timestamp": "2026-06-27T06:31:29Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 2,
+    "duration_seconds": 1,
     "details": [
       {
         "name": "Test 1 - Check JAR Execution",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863436746/job/82463321052#step:7:1"
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280992313/job/83796598305#step:7:1"
       },
       {
         "name": "Test 2 - Create Grammar File",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863436746/job/82463321052#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280992313/job/83796598305#step:8:1"
       },
       {
         "name": "Test 3 - Compile Grammar",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863436746/job/82463321052#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280992313/job/83796598305#step:9:1"
       },
       {
         "name": "Test 4 - Check Generated Files",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863436746/job/82463321052#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280992313/job/83796598305#step:10:1"
       },
       {
         "name": "Test 5 - Compile Generated Java Code",
         "status": "passed",
         "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863436746/job/82463321052#step:11:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280992313/job/83796598305#step:11:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863436746/job/82463321052#step:12:1",
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280992313/job/83796598305#step:12:1",
         "current_version": "4.13.1",
         "latest_version": "4.13.2",
         "next_installed_version": "4.13.2",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-20T08:52:09.999690+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.215003+00:00",
     "publish_state": "published"
   }
 }

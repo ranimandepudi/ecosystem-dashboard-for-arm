@@ -5,10 +5,10 @@
     "version": "0.8.19"
   },
   "run": {
-    "id": "27863452794",
+    "id": "28281007886",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863452794/job/82463364734",
-    "timestamp": "2026-06-20T07:26:52Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281007886/job/83796640997",
+    "timestamp": "2026-06-27T06:47:19Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,46 +20,46 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 92,
+    "duration_seconds": 93,
     "details": [
       {
         "name": "Test 1 - Baseline package evidence",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863452794/job/82463364734#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281007886/job/83796640997#step:7:1"
       },
       {
         "name": "Test 2 - Baseline version and release alignment",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863452794/job/82463364734#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281007886/job/83796640997#step:8:1"
       },
       {
         "name": "Test 3 - Package-specific source or docs evidence",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863452794/job/82463364734#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281007886/job/83796640997#step:9:1"
       },
       {
         "name": "Test 4 - Arm64 support gate",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863452794/job/82463364734#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281007886/job/83796640997#step:10:1"
       },
       {
         "name": "Test 5 - Bounded package-specific smoke",
         "status": "passed",
-        "duration_seconds": 190,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863452794/job/82463364734#step:11:1"
+        "duration_seconds": 193,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281007886/job/83796640997#step:11:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 92,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863452794/job/82463364734#step:12:1",
+        "duration_seconds": 93,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281007886/job/83796640997#step:12:1",
         "current_version": "0.8.19",
-        "latest_version": "2.0.24",
-        "next_installed_version": "2.0.24",
+        "latest_version": "2.0.26",
+        "next_installed_version": "2.0.26",
         "decision": "limited_cpu_smoke_validated",
         "regression_result": "Arm preflight proof passed on Arm64",
         "comparison": "Test 6 reran the scoped Flyte Arm preflight against the next stable source tag: Go package discovery, linux/arm64 compile smoke, chart/manifest validation, and a tiny local Flytekit workflow. A live Flyte control plane and Kubernetes execution backend remain out of scope."
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "limited_cpu_smoke_validated",
-    "production_refreshed_at": "2026-06-20T08:52:10.040295+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.256637+00:00",
     "publish_state": "published"
   }
 }

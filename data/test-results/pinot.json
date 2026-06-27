@@ -5,10 +5,10 @@
     "version": "1.2.0"
   },
   "run": {
-    "id": "27863438359",
+    "id": "28280993665",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325510",
-    "timestamp": "2026-06-20T07:03:27Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601911",
+    "timestamp": "2026-06-27T06:21:52Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 175,
+    "duration_seconds": 132,
     "details": [
       {
         "name": "Test 1 - Check Pinot admin launcher exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325510#step:11:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601911#step:11:1"
       },
       {
         "name": "Test 2 - Check exact release version",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325510#step:12:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601911#step:12:1"
       },
       {
         "name": "Test 3 - Check Pinot quickstart admin path",
         "status": "passed",
         "duration_seconds": 3,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325510#step:13:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601911#step:13:1"
       },
       {
         "name": "Test 4 - Architecture Verification",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325510#step:14:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601911#step:14:1"
       },
       {
         "name": "Test 5 - Functional validation",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325510#step:15:1"
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601911#step:15:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 171,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863438359/job/82463325510#step:16:1",
+        "duration_seconds": 130,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280993665/job/83796601911#step:16:1",
         "current_version": "1.2.0",
         "latest_version": "1.3.0",
         "next_installed_version": "1.3.0",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-20T08:52:10.110194+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.328097+00:00",
     "publish_state": "published"
   }
 }

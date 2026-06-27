@@ -5,10 +5,10 @@
     "version": "0.0.8"
   },
   "run": {
-    "id": "27863467886",
+    "id": "28281021548",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863467886/job/82463406016",
-    "timestamp": "2026-06-20T07:49:09Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281021548/job/83796681098",
+    "timestamp": "2026-06-27T07:12:03Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 44,
+    "duration_seconds": 43,
     "details": [
       {
         "name": "Test 1 - Check package-specific baseline markers",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863467886/job/82463406016#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281021548/job/83796681098#step:8:1"
       },
       {
         "name": "Test 2 - Check published package metadata",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863467886/job/82463406016#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281021548/job/83796681098#step:9:1"
       },
       {
         "name": "Test 3 - Check package-specific docs and manifests",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863467886/job/82463406016#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281021548/job/83796681098#step:10:1"
       },
       {
         "name": "Test 4 - Verify Arm64 runner and lane assumptions",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863467886/job/82463406016#step:11:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281021548/job/83796681098#step:11:1"
       },
       {
         "name": "Test 5 - Run bounded package-specific smoke",
         "status": "passed",
         "duration_seconds": 42,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863467886/job/82463406016#step:12:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281021548/job/83796681098#step:12:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 2,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863467886/job/82463406016#step:13:1",
+        "duration_seconds": 1,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281021548/job/83796681098#step:13:1",
         "current_version": "0.0.8",
         "latest_version": "0.2.5",
         "next_installed_version": "0.2.5",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "limited_cpu_smoke_validated",
-    "production_refreshed_at": "2026-06-20T08:52:10.106853+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.324672+00:00",
     "publish_state": "published"
   }
 }

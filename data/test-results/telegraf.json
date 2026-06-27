@@ -5,10 +5,10 @@
     "version": "1.34.0"
   },
   "run": {
-    "id": "27863451086",
+    "id": "28281006213",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360671",
-    "timestamp": "2026-06-20T07:17:07Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637015",
+    "timestamp": "2026-06-27T06:39:38Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 6,
+    "duration_seconds": 4,
     "details": [
       {
         "name": "Test 1 - Check Binary Existence",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360671#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637015#step:6:1"
       },
       {
         "name": "Test 2 - Check Version Output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360671#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637015#step:7:1"
       },
       {
         "name": "Test 3 - Check Help Output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360671#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637015#step:8:1"
       },
       {
         "name": "Test 4 - Architecture Verification",
         "status": "passed",
-        "duration_seconds": 3,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360671#step:9:1"
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637015#step:9:1"
       },
       {
         "name": "Test 5 - Functional Validation",
         "status": "passed",
-        "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360671#step:10:1"
+        "duration_seconds": 1,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637015#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
         "duration_seconds": 3,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863451086/job/82463360671#step:11:1",
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637015#step:11:1",
         "current_version": "1.34.0",
         "latest_version": "1.34.1",
         "next_installed_version": "1.34.1",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-20T08:52:10.138608+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.357182+00:00",
     "publish_state": "published"
   }
 }

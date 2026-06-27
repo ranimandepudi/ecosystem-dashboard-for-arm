@@ -5,10 +5,10 @@
     "version": "2.6.27"
   },
   "run": {
-    "id": "27863449538",
+    "id": "28281004625",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863449538/job/82463355918",
-    "timestamp": "2026-06-20T07:10:08Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281004625/job/83796632498",
+    "timestamp": "2026-06-27T06:50:42Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -25,38 +25,38 @@
       {
         "name": "Test 1 - Check source tree exists",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863449538/job/82463355918#step:7:1"
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281004625/job/83796632498#step:7:1"
       },
       {
         "name": "Test 2 - Check Maven modules exist",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863449538/job/82463355918#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281004625/job/83796632498#step:8:1"
       },
       {
         "name": "Test 3 - Check SQL assets exist",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863449538/job/82463355918#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281004625/job/83796632498#step:9:1"
       },
       {
         "name": "Test 4 - Architecture verification",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863449538/job/82463355918#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281004625/job/83796632498#step:10:1"
       },
       {
         "name": "Test 5 - Build baseline disconf-core in Temurin 8 container",
         "status": "passed",
-        "duration_seconds": 26,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863449538/job/82463355918#step:11:1"
+        "duration_seconds": 24,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281004625/job/83796632498#step:11:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 15,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863449538/job/82463355918#step:12:1",
+        "duration_seconds": 17,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281004625/job/83796632498#step:12:1",
         "current_version": "2.6.27",
         "latest_version": "2.6.28",
         "next_installed_version": "2.6.28",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-20T08:52:10.025705+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.241865+00:00",
     "publish_state": "published"
   }
 }

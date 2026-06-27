@@ -5,10 +5,10 @@
     "version": "0.4.11"
   },
   "run": {
-    "id": "27863454353",
+    "id": "28281009346",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863454353/job/82463370020",
-    "timestamp": "2026-06-20T07:31:02Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281009346/job/83796644802",
+    "timestamp": "2026-06-27T06:50:11Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -26,37 +26,37 @@
         "name": "Test 1 - Check qperf binary exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863454353/job/82463370020#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281009346/job/83796644802#step:6:1"
       },
       {
         "name": "Test 2 - Check version output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863454353/job/82463370020#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281009346/job/83796644802#step:7:1"
       },
       {
         "name": "Test 3 - Check help output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863454353/job/82463370020#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281009346/job/83796644802#step:8:1"
       },
       {
         "name": "Test 4 - Architecture verification",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863454353/job/82463370020#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281009346/job/83796644802#step:9:1"
       },
       {
         "name": "Test 5 - Functional validation",
         "status": "passed",
         "duration_seconds": 6,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863454353/job/82463370020#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281009346/job/83796644802#step:10:1"
       },
       {
         "name": "Regression applicability - package manager installed",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863454353/job/82463370020#step:11:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281009346/job/83796644802#step:11:1"
       }
     ]
   },
@@ -71,7 +71,7 @@
     "regression_applicability": "not_applicable",
     "regression_reason": "package_manager_installed",
     "regression_note": "Regression validation not applicable: tested package installed via package manager in Tests 1-5.",
-    "production_refreshed_at": "2026-06-20T08:52:10.116942+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.335079+00:00",
     "publish_state": "published"
   }
 }

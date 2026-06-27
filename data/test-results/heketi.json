@@ -5,10 +5,10 @@
     "version": "v10.3.0"
   },
   "run": {
-    "id": "27863439918",
+    "id": "28280995126",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329778",
-    "timestamp": "2026-06-20T06:56:51Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606149",
+    "timestamp": "2026-06-27T06:21:40Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -26,37 +26,37 @@
         "name": "Test 1 - Check Heketi binaries exist",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329778#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606149#step:6:1"
       },
       {
         "name": "Test 2 - Check exact Heketi version output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329778#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606149#step:7:1"
       },
       {
         "name": "Test 3 - Check help output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329778#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606149#step:8:1"
       },
       {
         "name": "Test 4 - Verify architecture and binary format",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329778#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606149#step:9:1"
       },
       {
         "name": "Test 5 - Validate offline database import/export",
         "status": "passed",
-        "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329778#step:10:1"
+        "duration_seconds": 1,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606149#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 2,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/27863439918/job/82463329778#step:11:1",
+        "duration_seconds": 1,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606149#step:11:1",
         "current_version": "v10.3.0",
         "latest_version": "v10.4.0-release-10",
         "next_installed_version": "v10.4.0-release-10",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-20T08:52:10.053847+00:00",
+    "production_refreshed_at": "2026-06-27T08:11:49.270475+00:00",
     "publish_state": "published"
   }
 }
