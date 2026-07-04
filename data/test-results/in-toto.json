@@ -5,10 +5,10 @@
     "version": "2.0.0"
   },
   "run": {
-    "id": "28280995126",
+    "id": "28697225458",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606116",
-    "timestamp": "2026-06-27T06:25:42Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904606",
+    "timestamp": "2026-07-04T06:15:16Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -26,37 +26,37 @@
         "name": "Test 1 - Check in-toto-run binary exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606116#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904606#step:6:1"
       },
       {
         "name": "Test 2 - Check in-toto-verify binary exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606116#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904606#step:7:1"
       },
       {
         "name": "Test 3 - Check version command",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606116#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904606#step:8:1"
       },
       {
         "name": "Test 4 - Check help command",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606116#step:9:1"
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904606#step:9:1"
       },
       {
         "name": "Test 5 - Generate key (if possible)",
         "status": "passed",
-        "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606116#step:10:1"
+        "duration_seconds": 1,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904606#step:10:1"
       },
       {
         "name": "Regression applicability - package manager installed",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606116#step:11:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904606#step:11:1"
       }
     ]
   },
@@ -71,7 +71,7 @@
     "regression_applicability": "not_applicable",
     "regression_reason": "package_manager_installed",
     "regression_note": "Regression validation not applicable: tested package installed via package manager in Tests 1-5.",
-    "production_refreshed_at": "2026-06-27T08:11:49.273964+00:00",
+    "production_refreshed_at": "2026-07-04T08:02:44.648061+00:00",
     "publish_state": "published"
   }
 }

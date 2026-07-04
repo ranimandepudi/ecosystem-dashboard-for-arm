@@ -5,10 +5,10 @@
     "version": "5.5.0"
   },
   "run": {
-    "id": "28280999818",
+    "id": "28697231116",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619520",
-    "timestamp": "2026-06-27T06:40:47Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920047",
+    "timestamp": "2026-07-04T06:21:25Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 18,
+    "duration_seconds": 34,
     "details": [
       {
         "name": "Test 1 - Check start script exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619520#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920047#step:6:1"
       },
       {
         "name": "Test 2 - Check exact core JAR version",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619520#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920047#step:7:1"
       },
       {
         "name": "Test 3 - Check config file",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619520#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920047#step:8:1"
       },
       {
         "name": "Test 4 - Run CLI help",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619520#step:9:1"
+        "duration_seconds": 2,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920047#step:9:1"
       },
       {
         "name": "Test 5 - Start Hazelcast briefly",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619520#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920047#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 17,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619520#step:11:1",
+        "duration_seconds": 32,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920047#step:11:1",
         "current_version": "5.5.0",
         "latest_version": "5.6.0",
         "next_installed_version": "5.6.0",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-27T08:11:49.269788+00:00",
+    "production_refreshed_at": "2026-07-04T08:02:44.643952+00:00",
     "publish_state": "published"
   }
 }

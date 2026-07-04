@@ -5,10 +5,10 @@
     "version": "9.0.4"
   },
   "run": {
-    "id": "28281006213",
+    "id": "28697237825",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637045",
-    "timestamp": "2026-06-27T06:57:17Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697237825/job/85108939101",
+    "timestamp": "2026-07-04T06:38:11Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 6,
+    "duration_seconds": 4,
     "details": [
       {
         "name": "Test 1 - Check Metricbeat binary exists",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637045#step:6:1"
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697237825/job/85108939101#step:6:1"
       },
       {
         "name": "Test 2 - Check Metricbeat version output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637045#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697237825/job/85108939101#step:7:1"
       },
       {
         "name": "Test 3 - Check Metricbeat help output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637045#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697237825/job/85108939101#step:8:1"
       },
       {
         "name": "Test 4 - Check Metricbeat configuration",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637045#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697237825/job/85108939101#step:9:1"
       },
       {
         "name": "Test 5 - List modules and verify architecture",
         "status": "passed",
-        "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637045#step:10:1"
+        "duration_seconds": 1,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697237825/job/85108939101#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 6,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281006213/job/83796637045#step:11:1",
+        "duration_seconds": 3,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697237825/job/85108939101#step:11:1",
         "current_version": "9.0.4",
         "latest_version": "9.0.5",
         "next_installed_version": "9.0.5",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-27T08:11:49.300314+00:00",
+    "production_refreshed_at": "2026-07-04T08:02:44.674337+00:00",
     "publish_state": "published"
   }
 }

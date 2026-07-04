@@ -5,10 +5,10 @@
     "version": "0.6.3"
   },
   "run": {
-    "id": "28280999818",
+    "id": "28697231116",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619648",
-    "timestamp": "2026-06-27T06:31:38Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920118",
+    "timestamp": "2026-07-04T06:17:27Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -25,38 +25,38 @@
       {
         "name": "Test 1 - Check Exechealthz binary exists",
         "status": "passed",
-        "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619648#step:7:1"
+        "duration_seconds": 1,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920118#step:7:1"
       },
       {
         "name": "Test 2 - Check Exechealthz help output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619648#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920118#step:8:1"
       },
       {
         "name": "Test 3 - Architecture verification",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619648#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920118#step:9:1"
       },
       {
         "name": "Test 4 - Functional healthy probe",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619648#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920118#step:10:1"
       },
       {
         "name": "Test 5 - Functional unhealthy probe",
         "status": "passed",
         "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619648#step:11:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920118#step:11:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 5,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619648#step:12:1",
+        "duration_seconds": 6,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920118#step:12:1",
         "current_version": "0.6.3",
         "latest_version": "0.7.0",
         "next_installed_version": "0.7.0",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-27T08:11:49.252446+00:00",
+    "production_refreshed_at": "2026-07-04T08:02:44.627119+00:00",
     "publish_state": "published"
   }
 }

@@ -5,10 +5,10 @@
     "version": "0.6"
   },
   "run": {
-    "id": "28281016429",
+    "id": "28697249133",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796666075",
-    "timestamp": "2026-06-27T07:07:55Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970486",
+    "timestamp": "2026-07-04T06:51:11Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 22,
+    "duration_seconds": 20,
     "details": [
       {
         "name": "Test 1 - Check Xebium jar artifacts exist",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796666075#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970486#step:6:1"
       },
       {
         "name": "Test 2 - Check exact version metadata",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796666075#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970486#step:7:1"
       },
       {
         "name": "Test 3 - Check built classes are present",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796666075#step:8:1"
+        "duration_seconds": 2,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970486#step:8:1"
       },
       {
         "name": "Test 4 - Architecture verification",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796666075#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970486#step:9:1"
       },
       {
         "name": "Test 5 - Functional artifact validation",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796666075#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970486#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 21,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796666075#step:11:1",
+        "duration_seconds": 18,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970486#step:11:1",
         "current_version": "0.6",
         "latest_version": "0.14",
         "next_installed_version": "0.14",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-27T08:11:49.392945+00:00",
+    "production_refreshed_at": "2026-07-04T08:02:44.760238+00:00",
     "publish_state": "published"
   }
 }

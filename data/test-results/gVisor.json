@@ -5,10 +5,10 @@
     "version": "release-20250127.0"
   },
   "run": {
-    "id": "28281013752",
+    "id": "28697245869",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657871",
-    "timestamp": "2026-06-27T06:59:54Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697245869/job/85108961168",
+    "timestamp": "2026-07-04T06:45:18Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -26,37 +26,37 @@
         "name": "Test 1 - Check runsc binary exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657871#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697245869/job/85108961168#step:6:1"
       },
       {
         "name": "Test 2 - Check runsc version output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657871#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697245869/job/85108961168#step:7:1"
       },
       {
         "name": "Test 3 - Check runsc help output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657871#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697245869/job/85108961168#step:8:1"
       },
       {
         "name": "Test 4 - Verify architecture",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657871#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697245869/job/85108961168#step:9:1"
       },
       {
         "name": "Test 5 - Validate runsc command path",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657871#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697245869/job/85108961168#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
         "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281013752/job/83796657871#step:11:1",
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697245869/job/85108961168#step:11:1",
         "current_version": "release-20250127.0",
         "latest_version": "release-20250203.0",
         "next_installed_version": "release-20250203.0",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-27T08:11:49.259298+00:00",
+    "production_refreshed_at": "2026-07-04T08:02:44.633671+00:00",
     "publish_state": "published"
   }
 }

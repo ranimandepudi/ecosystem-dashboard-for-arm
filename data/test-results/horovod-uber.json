@@ -5,10 +5,10 @@
     "version": "0.28.1"
   },
   "run": {
-    "id": "28280997975",
+    "id": "28697229272",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280997975/job/83796614512",
-    "timestamp": "2026-06-27T06:28:56Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697229272/job/85108914737",
+    "timestamp": "2026-07-04T06:19:01Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 0,
+    "duration_seconds": 1,
     "details": [
       {
         "name": "Test 1 - Check horovodrun exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280997975/job/83796614512#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697229272/job/85108914737#step:6:1"
       },
       {
         "name": "Test 2 - Check exact version output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280997975/job/83796614512#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697229272/job/85108914737#step:7:1"
       },
       {
         "name": "Test 3 - Check horovodrun help",
         "status": "passed",
-        "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280997975/job/83796614512#step:8:1"
+        "duration_seconds": 1,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697229272/job/85108914737#step:8:1"
       },
       {
         "name": "Test 4 - Verify Arm64 and MPI path",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280997975/job/83796614512#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697229272/job/85108914737#step:9:1"
       },
       {
         "name": "Test 5 - Import Horovod runner modules",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280997975/job/83796614512#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697229272/job/85108914737#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280997975/job/83796614512#step:11:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697229272/job/85108914737#step:11:1"
       }
     ]
   },
@@ -72,7 +72,7 @@
     "regression_reason": "package_manager_installed",
     "regression_note": "Regression validation not applicable: tested package installed via package manager in Tests 1-5.",
     "regression_status": "passed",
-    "production_refreshed_at": "2026-06-27T08:11:49.271836+00:00",
+    "production_refreshed_at": "2026-07-04T08:02:44.646031+00:00",
     "publish_state": "published"
   }
 }

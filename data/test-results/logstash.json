@@ -5,10 +5,10 @@
     "version": "8.19.12"
   },
   "run": {
-    "id": "28280995126",
+    "id": "28697225458",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606135",
-    "timestamp": "2026-06-27T06:22:52Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904596",
+    "timestamp": "2026-07-04T06:17:43Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -26,43 +26,43 @@
         "name": "Test 1 - Check Logstash binary exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606135#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904596#step:6:1"
       },
       {
         "name": "Test 2 - Check Logstash version output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606135#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904596#step:7:1"
       },
       {
         "name": "Test 3 - Check Logstash help output",
         "status": "passed",
-        "duration_seconds": 9,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606135#step:8:1"
+        "duration_seconds": 8,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904596#step:8:1"
       },
       {
         "name": "Test 4 - Check Logstash config test",
         "status": "passed",
-        "duration_seconds": 8,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606135#step:9:1"
+        "duration_seconds": 9,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904596#step:9:1"
       },
       {
         "name": "Test 5 - Check package architecture",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606135#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904596#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 53,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280995126/job/83796606135#step:11:1",
+        "duration_seconds": 32,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697225458/job/85108904596#step:11:1",
         "current_version": "8.19.12",
-        "latest_version": "8.19.13",
-        "next_installed_version": "8.19.13",
+        "latest_version": "8.19.16",
+        "next_installed_version": "8.19.16",
         "decision": "next_install_validated",
         "regression_result": "Next stable Logstash candidate installed and validated successfully on Arm64.",
-        "comparison": "Baseline 8.19.12 passed tests 1-5, and candidate 8.19.13 passed install, version, help, architecture, and config validation in Test 6."
+        "comparison": "Baseline 8.19.12 passed tests 1-5, and candidate 8.19.16 passed install, version, help, architecture, and config validation in Test 6."
       }
     ]
   },
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-27T08:11:49.294602+00:00",
+    "production_refreshed_at": "2026-07-04T08:02:44.668685+00:00",
     "publish_state": "published"
   }
 }

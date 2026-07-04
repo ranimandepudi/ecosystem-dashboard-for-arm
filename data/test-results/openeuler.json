@@ -5,10 +5,10 @@
     "version": "24.03-lts-sp2"
   },
   "run": {
-    "id": "28281016429",
+    "id": "28697249133",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796665764",
-    "timestamp": "2026-06-27T07:00:36Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970153",
+    "timestamp": "2026-07-04T06:57:16Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 9,
+    "duration_seconds": 8,
     "details": [
       {
         "name": "Test 1 - Check OpenEuler image exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796665764#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970153#step:6:1"
       },
       {
         "name": "Test 2 - Check OpenEuler version output",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796665764#step:7:1"
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970153#step:7:1"
       },
       {
         "name": "Test 3 - Check dnf help output",
         "status": "passed",
         "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796665764#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970153#step:8:1"
       },
       {
         "name": "Test 4 - Architecture Verification",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796665764#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970153#step:9:1"
       },
       {
         "name": "Test 5 - Functional Validation",
         "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796665764#step:10:1"
+        "duration_seconds": 2,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970153#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 6,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28281016429/job/83796665764#step:11:1",
+        "duration_seconds": 5,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697249133/job/85108970153#step:11:1",
         "current_version": "24.03-lts-sp2",
         "latest_version": "24.03-lts-sp3",
         "next_installed_version": "24.03-lts-sp3",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-06-27T08:11:49.316683+00:00",
+    "production_refreshed_at": "2026-07-04T08:02:44.691025+00:00",
     "publish_state": "published"
   }
 }

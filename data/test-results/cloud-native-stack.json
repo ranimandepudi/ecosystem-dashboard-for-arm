@@ -5,10 +5,10 @@
     "version": "8.0"
   },
   "run": {
-    "id": "28280999818",
+    "id": "28697231116",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619676",
-    "timestamp": "2026-06-27T06:30:24Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920156",
+    "timestamp": "2026-07-04T06:21:30Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -26,40 +26,40 @@
         "name": "Test 1 - Check package-specific baseline markers",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619676#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920156#step:8:1"
       },
       {
         "name": "Test 2 - Check package-specific version and release evidence",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619676#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920156#step:9:1"
       },
       {
         "name": "Test 3 - Check package-specific docs and entrypoints",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619676#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920156#step:10:1"
       },
       {
         "name": "Test 4 - Verify Arm64 runner and lane assumptions",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619676#step:11:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920156#step:11:1"
       },
       {
         "name": "Test 5 - Run bounded package-specific smoke",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619676#step:12:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920156#step:12:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
         "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28280999818/job/83796619676#step:13:1",
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697231116/job/85108920156#step:13:1",
         "current_version": "8.0",
-        "latest_version": "25.12.0",
-        "next_installed_version": "25.12.0",
+        "latest_version": "26.6.0",
+        "next_installed_version": "26.6.0",
         "decision": "limited_cpu_smoke_validated",
         "regression_result": "Arm preflight proof passed on Arm64",
         "comparison": "Test 6 reran the scoped Cloud Native Stack Arm preflight against the next stable source tag: Helm dependency/build best effort, chart render, Kubernetes resource validation, and image inventory extraction. No cluster deployment or GPU reconciliation is claimed."
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "limited_cpu_smoke_validated",
-    "production_refreshed_at": "2026-06-27T08:11:49.231589+00:00",
+    "production_refreshed_at": "2026-07-04T08:02:44.607432+00:00",
     "publish_state": "published"
   }
 }
