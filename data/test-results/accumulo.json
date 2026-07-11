@@ -5,10 +5,10 @@
     "version": "2.1.4"
   },
   "run": {
-    "id": "28697221869",
+    "id": "29141308195",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697221869/job/85108894285",
-    "timestamp": "2026-07-04T06:08:09Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141308195/job/86514932948",
+    "timestamp": "2026-07-11T05:31:06Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 6,
+    "duration_seconds": 24,
     "details": [
       {
         "name": "Test 1 - Check accumulo binary exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697221869/job/85108894285#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141308195/job/86514932948#step:6:1"
       },
       {
         "name": "Test 2 - Check 'accumulo version' reachability",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697221869/job/85108894285#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141308195/job/86514932948#step:7:1"
       },
       {
         "name": "Test 3 - Check 'accumulo help' reachability",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697221869/job/85108894285#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141308195/job/86514932948#step:8:1"
       },
       {
         "name": "Test 4 - Check accumulo-util helper exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697221869/job/85108894285#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141308195/job/86514932948#step:9:1"
       },
       {
         "name": "Test 5 - Check 'accumulo classpath' reachability",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697221869/job/85108894285#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141308195/job/86514932948#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 6,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/28697221869/job/85108894285#step:11:1",
+        "duration_seconds": 24,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141308195/job/86514932948#step:11:1",
         "current_version": "2.1.4",
         "latest_version": "3.0.0",
         "next_installed_version": "3.0.0",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-07-04T08:02:44.587071+00:00",
+    "production_refreshed_at": "2026-07-11T07:26:27.593005+00:00",
     "publish_state": "published"
   }
 }
