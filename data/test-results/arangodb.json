@@ -2,14 +2,14 @@
   "schema_version": "2.0",
   "package": {
     "name": "ArangoDB",
-    "version": "3.12.4"
+    "version": "unknown"
   },
   "run": {
-    "id": "29141310369",
+    "id": "29631903267",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141310369/job/86514939412",
-    "timestamp": "2026-07-11T05:34:11Z",
-    "status": "success",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631903267/job/88047157251",
+    "timestamp": "2026-07-18T05:16:04Z",
+    "status": "failure",
     "runner": {
       "os": "ubuntu-24.04",
       "arch": "arm64"
@@ -17,52 +17,49 @@
     "job_name": "test-arangodb / test-arangodb"
   },
   "tests": {
-    "passed": 6,
-    "failed": 0,
-    "skipped": 0,
-    "duration_seconds": 17,
+    "passed": 0,
+    "failed": 1,
+    "skipped": 5,
+    "duration_seconds": 0,
     "details": [
       {
         "name": "Test 1 - Check Database Binary",
-        "status": "passed",
-        "duration_seconds": 1,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141310369/job/86514939412#step:6:1"
+        "status": "skipped",
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631903267/job/88047157251#step:6:1"
       },
       {
         "name": "Test 2 - Check Version Output",
-        "status": "passed",
+        "status": "skipped",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141310369/job/86514939412#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631903267/job/88047157251#step:7:1"
       },
       {
         "name": "Test 3 - Check Help Output",
-        "status": "passed",
+        "status": "skipped",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141310369/job/86514939412#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631903267/job/88047157251#step:8:1"
       },
       {
         "name": "Test 4 - Architecture Verification",
-        "status": "passed",
+        "status": "skipped",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141310369/job/86514939412#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631903267/job/88047157251#step:9:1"
       },
       {
         "name": "Test 5 - Functional Validation",
-        "status": "passed",
-        "duration_seconds": 5,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141310369/job/86514939412#step:10:1"
+        "status": "skipped",
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631903267/job/88047157251#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
-        "status": "passed",
-        "duration_seconds": 11,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141310369/job/86514939412#step:11:1",
-        "current_version": "3.12.4",
-        "latest_version": "3.12.5",
-        "next_installed_version": "3.12.5",
-        "decision": "next_install_validated",
-        "regression_result": "Next version installed successfully on Arm64",
-        "comparison": "Current pinned ArangoDB version 3.12.4 passed smoke tests in this run. Regression validation pulled candidate container 3.12.5 on Arm64, and the installed server binary reported version 3.12.5."
+        "status": "failed",
+        "duration_seconds": 0,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631903267/job/88047157251#step:11:1",
+        "decision": "result_not_emitted",
+        "regression_result": "Regression validation step failed before emitting terminal outputs",
+        "comparison": "The package job failed in Actions, but the workflow did not emit a terminal regression decision before exiting."
       }
     ]
   },
@@ -70,16 +67,16 @@
     "contract_version": "2.0",
     "package_slug": "arangodb",
     "dashboard_link": "/linux/opensource_packages/arangodb",
-    "badge_status": "passing",
-    "core_failed": 0,
+    "badge_status": "failing",
+    "core_failed": 5,
     "batch_title": "Batch 2",
     "job_url_resolution_status": "central_exact",
-    "regression_applicability": "applicable",
-    "regression_reason": "",
-    "regression_note": "",
-    "regression_status": "passed",
-    "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-07-11T07:26:27.599453+00:00",
+    "regression_applicability": "not_configured",
+    "regression_reason": "not_configured",
+    "regression_note": "Regression validation is not configured for this workflow.",
+    "regression_status": "failed",
+    "regression_decision": "result_not_emitted",
+    "production_refreshed_at": "2026-07-18T07:19:14.812635+00:00",
     "publish_state": "published"
   }
 }

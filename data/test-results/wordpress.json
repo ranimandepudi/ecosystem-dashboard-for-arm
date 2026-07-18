@@ -5,10 +5,10 @@
     "version": "6.8"
   },
   "run": {
-    "id": "29141336344",
+    "id": "29631928645",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141336344/job/86515006640",
-    "timestamp": "2026-07-11T06:20:48Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631928645/job/88047230634",
+    "timestamp": "2026-07-18T06:02:10Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,49 +20,49 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 6,
+    "duration_seconds": 7,
     "details": [
       {
         "name": "Test 1 - Check Binary Existence",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141336344/job/86515006640#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631928645/job/88047230634#step:6:1"
       },
       {
         "name": "Test 2 - Check Version Output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141336344/job/86515006640#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631928645/job/88047230634#step:7:1"
       },
       {
         "name": "Test 3 - Check Help Output or Configuration",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141336344/job/86515006640#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631928645/job/88047230634#step:8:1"
       },
       {
         "name": "Test 4 - Architecture Verification",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141336344/job/86515006640#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631928645/job/88047230634#step:9:1"
       },
       {
         "name": "Test 5 - Functional Validation",
         "status": "passed",
-        "duration_seconds": 3,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141336344/job/86515006640#step:10:1"
+        "duration_seconds": 2,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631928645/job/88047230634#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 3,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141336344/job/86515006640#step:11:1",
+        "duration_seconds": 5,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631928645/job/88047230634#step:11:1",
         "current_version": "6.8",
-        "latest_version": "7.0.1",
-        "next_installed_version": "7.0.1",
+        "latest_version": "7.0.2",
+        "next_installed_version": "7.0.2",
         "decision": "next_install_validated",
         "regression_result": "Next version installed successfully on Arm64",
-        "comparison": "Current pinned WordPress version 6.8 passed source tarball validation in this run, and candidate release 7.0.1 also passed PHP lint plus installer-page smoke on Arm64 from a fresh isolated install."
+        "comparison": "Current pinned WordPress version 6.8 passed source tarball validation in this run, and candidate release 7.0.2 also passed PHP lint plus installer-page smoke on Arm64 from a fresh isolated install."
       }
     ]
   },
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-07-11T07:26:27.770474+00:00",
+    "production_refreshed_at": "2026-07-18T07:19:14.978991+00:00",
     "publish_state": "published"
   }
 }

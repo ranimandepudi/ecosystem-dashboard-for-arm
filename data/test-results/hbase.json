@@ -5,10 +5,10 @@
     "version": "2.5.13-hadoop3"
   },
   "run": {
-    "id": "29141318646",
+    "id": "29631911243",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962598",
-    "timestamp": "2026-07-11T05:51:07Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181740",
+    "timestamp": "2026-07-18T05:28:03Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 105,
+    "duration_seconds": 106,
     "details": [
       {
         "name": "Test 1 - Check hbase script exists",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962598#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181740#step:7:1"
       },
       {
         "name": "Test 2 - Check exact version output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962598#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181740#step:8:1"
       },
       {
         "name": "Test 3 - Check configuration files",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962598#step:9:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181740#step:9:1"
       },
       {
         "name": "Test 4 - Check exact server jar",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962598#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181740#step:10:1"
       },
       {
         "name": "Test 5 - Start HBase master briefly",
         "status": "passed",
         "duration_seconds": 21,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962598#step:11:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181740#step:11:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 84,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962598#step:12:1",
+        "duration_seconds": 85,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181740#step:12:1",
         "current_version": "2.5.13-hadoop3",
         "latest_version": "2.5.14",
         "next_installed_version": "2.5.14-hadoop3",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-07-11T07:26:27.650764+00:00",
+    "production_refreshed_at": "2026-07-18T07:19:14.871557+00:00",
     "publish_state": "published"
   }
 }

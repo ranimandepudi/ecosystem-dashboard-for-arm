@@ -5,10 +5,10 @@
     "version": "9.1.0"
   },
   "run": {
-    "id": "29141318646",
+    "id": "29631911243",
     "attempt": "1",
-    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962582",
-    "timestamp": "2026-07-11T05:40:14Z",
+    "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181830",
+    "timestamp": "2026-07-18T05:23:31Z",
     "status": "success",
     "runner": {
       "os": "ubuntu-24.04",
@@ -20,43 +20,43 @@
     "passed": 6,
     "failed": 0,
     "skipped": 0,
-    "duration_seconds": 24,
+    "duration_seconds": 41,
     "details": [
       {
         "name": "Test 1 - Check Carrier Binary and Component Existence",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962582#step:6:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181830#step:6:1"
       },
       {
         "name": "Test 2 - Check Carrier Version Output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962582#step:7:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181830#step:7:1"
       },
       {
         "name": "Test 3 - Check Carrier Help Output",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962582#step:8:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181830#step:8:1"
       },
       {
         "name": "Test 4 - Architecture Verification",
         "status": "passed",
-        "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962582#step:9:1"
+        "duration_seconds": 1,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181830#step:9:1"
       },
       {
         "name": "Test 5 - Embedded Component Validation",
         "status": "passed",
         "duration_seconds": 0,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962582#step:10:1"
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181830#step:10:1"
       },
       {
         "name": "Test 6 - Regression Validation",
         "status": "passed",
-        "duration_seconds": 24,
-        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29141318646/job/86514962582#step:11:1",
+        "duration_seconds": 40,
+        "url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/29631911243/job/88047181830#step:11:1",
         "current_version": "9.1.0",
         "latest_version": "9.4.3",
         "next_installed_version": "9.4.3",
@@ -79,7 +79,7 @@
     "regression_note": "",
     "regression_status": "passed",
     "regression_decision": "next_install_validated",
-    "production_refreshed_at": "2026-07-11T07:26:27.629842+00:00",
+    "production_refreshed_at": "2026-07-18T07:19:14.847936+00:00",
     "publish_state": "published"
   }
 }
