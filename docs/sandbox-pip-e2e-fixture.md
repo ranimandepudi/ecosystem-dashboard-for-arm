@@ -4,8 +4,8 @@ This branch is an isolated test fixture for the AI-assisted package-onboarding
 service. It is not a production dashboard branch and must not be merged into
 `main`.
 
-Its service-side source revision is the immutable, green PR 17 candidate
-`e3d4a977ef44f97271bdcb84177a16444d2322b8`. Publication of this fixture does
+Its service-side source revision is the immutable, merged PR 17 commit
+`6aa4eebc802685281cee88dfc3101921b1408e97`. Publication of this fixture does
 not merge that service change or enable either sandbox or production delivery.
 
 ## Purpose

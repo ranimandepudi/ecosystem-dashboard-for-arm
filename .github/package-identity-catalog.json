@@ -18,7 +18,7 @@
               "source_locator": "https://pypi.org/pypi/numpy/json",
               "source_revision": "796d8cfb1e101561086725e9dcecafb48c740b01e0e157b11d53958e000096e1",
               "verified_at": "2026-07-29T14:55:00+00:00",
-              "verified_by": "arm-ecosystem-sandbox-fixture-builder@e3d4a977ef44f97271bdcb84177a16444d2322b8"
+              "verified_by": "arm-ecosystem-sandbox-fixture-builder@6aa4eebc802685281cee88dfc3101921b1408e97"
             }
           ],
           "exhaustive": false,
@@ -34,7 +34,7 @@
               "source_locator": "https://api.github.com/repos/numpy/numpy/commits/4350526858b0e8ce8932538da664aa8d1a182410",
               "source_revision": "4350526858b0e8ce8932538da664aa8d1a182410",
               "verified_at": "2026-07-29T14:55:00+00:00",
-              "verified_by": "arm-ecosystem-sandbox-fixture-builder@e3d4a977ef44f97271bdcb84177a16444d2322b8"
+              "verified_by": "arm-ecosystem-sandbox-fixture-builder@6aa4eebc802685281cee88dfc3101921b1408e97"
             },
             {
               "evidence_sha256": "796d8cfb1e101561086725e9dcecafb48c740b01e0e157b11d53958e000096e1",
@@ -43,7 +43,7 @@
               "source_locator": "https://pypi.org/pypi/numpy/json",
               "source_revision": "796d8cfb1e101561086725e9dcecafb48c740b01e0e157b11d53958e000096e1",
               "verified_at": "2026-07-29T14:55:00+00:00",
-              "verified_by": "arm-ecosystem-sandbox-fixture-builder@e3d4a977ef44f97271bdcb84177a16444d2322b8"
+              "verified_by": "arm-ecosystem-sandbox-fixture-builder@6aa4eebc802685281cee88dfc3101921b1408e97"
             }
           ],
           "exhaustive": false,
