@@ -1,0 +1,125 @@
+{
+  "sha": "4350526858b0e8ce8932538da664aa8d1a182410",
+  "node_id": "C_kwDOAA3dP9oAKDQzNTA1MjY4NThiMGU4Y2U4OTMyNTM4ZGE2NjRhYThkMWExODI0MTA",
+  "commit": {
+    "author": {
+      "name": "Iason Krommydas",
+      "email": "iason.krom@gmail.com",
+      "date": "2026-07-29T14:20:26Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-07-29T14:20:26Z"
+    },
+    "message": "BUG: NEP 50 promotion for python scalars in `ufunc.outer` (#32090)\n\nSigned-off-by: Iason Krommydas <iason.krom@gmail.com>",
+    "tree": {
+      "sha": "7f2ce8c348c74a95d8d0160176576246de49f427",
+      "url": "https://api.github.com/repos/numpy/numpy/git/trees/7f2ce8c348c74a95d8d0160176576246de49f427"
+    },
+    "url": "https://api.github.com/repos/numpy/numpy/git/commits/4350526858b0e8ce8932538da664aa8d1a182410",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJqagwqCRC1aQ7uu5UhlAAA8nwQADob/x0+KrQbq5nuTcez1PN8\nwYLoykYEcY+hQglQvRSLtztb3Uno86oX8hnUuEqph1fAWf+kM0BBbVhvEMbAoyEj\nsFy9zRBU+WjvRk4d3Qk+aIDw1BQFb/kVN0nE5ZoSzMA5LaokwHwO2xroWLJOJpgS\nJ8j4mb9eb2QbQZe8YxqUegY73Y2ApRsCTB6Ongyx1UU559uf7ynB9UTPpUEmFdlE\nrtx/+v0eEE8Hv/o+EyNmXTtzhPWOJ/BHIa5WYWUDISpuZ96R4osPl+MjLcEcTxWa\nlRHYfz6y5wTnZM0/NLmS5tIcQvcvPxKDY+v9gapyNaY31wjYbHN1QpWdq/v/f1by\n7sN5AGX2ES+3TNNOX4e4hbdMVmu3zhNH98HqRFNICN97kK+6xFK/8X9eeixJP2PS\nWp5NtEniWKBKe6sEVaLLyytTWneaJF1jdfgJ/iWWLLTC5WW91gfhQ0vWX+6G/5zn\n17Vn8OfD59bMta20ODgvnNo+u8t1hcUETX8trwb+LTAtKRX4N5ZOh4AVqx9wIMvm\nEZK+Vbvko2X5Owq6NuVm4p9cnZvdBmiwZNuRvuW7pOxGCwAEFvnXZksKjZ+Gi22S\nKYCkQTltfTI4un5sOxlkzYvq7y48sghx19Cif2fUOgMVBgap50htP6DLCR+yG5dy\nyxelNsWxqLQ3/3z8xh82\n=wnS7\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 7f2ce8c348c74a95d8d0160176576246de49f427\nparent ab2199763cb17878cd8f34fcbc97106c5397f922\nauthor Iason Krommydas <iason.krom@gmail.com> 1785334826 -0500\ncommitter GitHub <noreply@github.com> 1785334826 -0600\n\nBUG: NEP 50 promotion for python scalars in `ufunc.outer` (#32090)\n\nSigned-off-by: Iason Krommydas <iason.krom@gmail.com>",
+      "verified_at": "2026-07-29T14:20:27Z"
+    }
+  },
+  "url": "https://api.github.com/repos/numpy/numpy/commits/4350526858b0e8ce8932538da664aa8d1a182410",
+  "html_url": "https://github.com/numpy/numpy/commit/4350526858b0e8ce8932538da664aa8d1a182410",
+  "comments_url": "https://api.github.com/repos/numpy/numpy/commits/4350526858b0e8ce8932538da664aa8d1a182410/comments",
+  "author": {
+    "login": "ikrommyd",
+    "id": 82155404,
+    "node_id": "MDQ6VXNlcjgyMTU1NDA0",
+    "avatar_url": "https://avatars.githubusercontent.com/u/82155404?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/ikrommyd",
+    "html_url": "https://github.com/ikrommyd",
+    "followers_url": "https://api.github.com/users/ikrommyd/followers",
+    "following_url": "https://api.github.com/users/ikrommyd/following{/other_user}",
+    "gists_url": "https://api.github.com/users/ikrommyd/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/ikrommyd/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/ikrommyd/subscriptions",
+    "organizations_url": "https://api.github.com/users/ikrommyd/orgs",
+    "repos_url": "https://api.github.com/users/ikrommyd/repos",
+    "events_url": "https://api.github.com/users/ikrommyd/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/ikrommyd/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "ab2199763cb17878cd8f34fcbc97106c5397f922",
+      "url": "https://api.github.com/repos/numpy/numpy/commits/ab2199763cb17878cd8f34fcbc97106c5397f922",
+      "html_url": "https://github.com/numpy/numpy/commit/ab2199763cb17878cd8f34fcbc97106c5397f922"
+    }
+  ],
+  "stats": {
+    "total": 90,
+    "additions": 75,
+    "deletions": 15
+  },
+  "files": [
+    {
+      "sha": "991a0341161bedff896a3742edcfaaef83019a21",
+      "filename": "doc/release/upcoming_changes/32090.change.rst",
+      "status": "added",
+      "additions": 7,
+      "deletions": 0,
+      "changes": 7,
+      "blob_url": "https://github.com/numpy/numpy/blob/4350526858b0e8ce8932538da664aa8d1a182410/doc%2Frelease%2Fupcoming_changes%2F32090.change.rst",
+      "raw_url": "https://github.com/numpy/numpy/raw/4350526858b0e8ce8932538da664aa8d1a182410/doc%2Frelease%2Fupcoming_changes%2F32090.change.rst",
+      "contents_url": "https://api.github.com/repos/numpy/numpy/contents/doc%2Frelease%2Fupcoming_changes%2F32090.change.rst?ref=4350526858b0e8ce8932538da664aa8d1a182410",
+      "patch": "@@ -0,0 +1,7 @@\n+``ufunc.outer`` now follows NEP 50 promotion\n+--------------------------------------------\n+Python scalars passed to ``ufunc.outer`` were converted to arrays and thus\n+treated as strongly typed, unlike for a normal ufunc call.  They are now weak,\n+so that e.g. ``np.add.outer(1., np.zeros(3, dtype=\"float32\"))`` returns a\n+``float32`` rather than a ``float64`` array.  As a consequence, huge Python\n+integers now raise an ``OverflowError`` here as they do for ``ufunc.__call__``."
+    },
+    {
+      "sha": "9b5f25a15c953705d2c2b3d5a5d04cbfabfa2af4",
+      "filename": "numpy/_core/src/umath/ufunc_object.c",
+      "status": "modified",
+      "additions": 38,
+      "deletions": 15,
+      "changes": 53,
+      "blob_url": "https://github.com/numpy/numpy/blob/4350526858b0e8ce8932538da664aa8d1a182410/numpy%2F_core%2Fsrc%2Fumath%2Fufunc_object.c",
+      "raw_url": "https://github.com/numpy/numpy/raw/4350526858b0e8ce8932538da664aa8d1a182410/numpy%2F_core%2Fsrc%2Fumath%2Fufunc_object.c",
+      "contents_url": "https://api.github.com/repos/numpy/numpy/contents/numpy%2F_core%2Fsrc%2Fumath%2Fufunc_object.c?ref=4350526858b0e8ce8932538da664aa8d1a182410",
+      "patch": "@@ -5655,43 +5655,66 @@ ufunc_outer(PyUFuncObject *ufunc,\n }\n \n \n+static inline int\n+is_known_scalar(PyObject *obj)\n+{\n+    return (PyLong_CheckExact(obj) || PyFloat_CheckExact(obj)\n+            || PyComplex_CheckExact(obj) || is_anyscalar_exact(obj));\n+}\n+\n+\n static PyObject *\n prepare_input_arguments_for_outer(PyObject *args, PyUFuncObject *ufunc)\n {\n     PyArrayObject *ap1 = NULL;\n-    PyObject *tmp;\n-    npy_cache_import_runtime(\"numpy\", \"matrix\",\n-                             &npy_runtime_imports.numpy_matrix);\n+\n+    if (npy_cache_import_runtime(\"numpy\", \"matrix\",\n+                                 &npy_runtime_imports.numpy_matrix) == -1) {\n+        return NULL;\n+    }\n \n     const char *matrix_deprecation_msg = (\n             \"%s.outer() was passed a numpy matrix as %s argument. \"\n             \"Special handling of matrix is removed. Convert to a \"\n             \"ndarray via 'matrix.A' \");\n \n-    tmp = PyTuple_GET_ITEM(args, 0);\n+    PyObject *tmp1 = PyTuple_GET_ITEM(args, 0);\n+    PyObject *tmp2 = PyTuple_GET_ITEM(args, 1);\n \n-    if (PyObject_IsInstance(tmp, npy_runtime_imports.numpy_matrix)) {\n+    int is_matrix = PyObject_IsInstance(tmp1, npy_runtime_imports.numpy_matrix);\n+    if (is_matrix == -1) {\n+        return NULL;\n+    }\n+    else if (is_matrix) {\n         PyErr_Format(PyExc_TypeError,\n                 matrix_deprecation_msg, ufunc->name, \"first\");\n         return NULL;\n     }\n-    else {\n-        ap1 = (PyArrayObject *) PyArray_FROM_O(tmp);\n-    }\n-    if (ap1 == NULL) {\n+\n+    is_matrix = PyObject_IsInstance(tmp2, npy_runtime_imports.numpy_matrix);\n+    if (is_matrix == -1) {\n         return NULL;\n     }\n-\n-    PyArrayObject *ap2 = NULL;\n-    tmp = PyTuple_GET_ITEM(args, 1);\n-    if (PyObject_IsInstance(tmp, npy_runtime_imports.numpy_matrix)) {\n+    else if (is_matrix) {\n         PyErr_Format(PyExc_TypeError,\n                 matrix_deprecation_msg, ufunc->name, \"second\");\n         return NULL;\n     }\n-    else {\n-        ap2 = (PyArrayObject *) PyArray_FROM_O(tmp);\n+    /*\n+     * 0-d inputs contribute no dimensions to the result and broadcast the same\n+     * without the inserted 1s, so the reshape below is unnecessary\n+     */\n+    if (is_known_scalar(tmp1) || is_known_scalar(tmp2)) {\n+        Py_INCREF(args);\n+        return args;\n     }\n+\n+    ap1 = (PyArrayObject *) PyArray_FROM_O(tmp1);\n+    if (ap1 == NULL) {\n+        return NULL;\n+    }\n+\n+    PyArrayObject *ap2 = (PyArrayObject *) PyArray_FROM_O(tmp2);\n     if (ap2 == NULL) {\n         Py_DECREF(ap1);\n         return NULL;"
+    },
+    {
+      "sha": "586b5a6faf82910b53c1f783f2247dd912e02bab",
+      "filename": "numpy/_core/tests/test_nep50_promotions.py",
+      "status": "modified",
+      "additions": 30,
+      "deletions": 0,
+      "changes": 30,
+      "blob_url": "https://github.com/numpy/numpy/blob/4350526858b0e8ce8932538da664aa8d1a182410/numpy%2F_core%2Ftests%2Ftest_nep50_promotions.py",
+      "raw_url": "https://github.com/numpy/numpy/raw/4350526858b0e8ce8932538da664aa8d1a182410/numpy%2F_core%2Ftests%2Ftest_nep50_promotions.py",
+      "contents_url": "https://api.github.com/repos/numpy/numpy/contents/numpy%2F_core%2Ftests%2Ftest_nep50_promotions.py?ref=4350526858b0e8ce8932538da664aa8d1a182410",
+      "patch": "@@ -186,6 +186,36 @@ def test_nep50_in_concat_and_choose():\n     assert res.dtype == \"float32\"\n \n \n+@pytest.mark.parametrize(\"scalar,expected\", [\n+    (1, \"float32\"), (1., \"float32\"), (1j, \"complex64\")])\n+def test_nep50_in_ufunc_outer(scalar, expected):\n+    # gh-32076: outer used to convert Python scalars to arrays, making them\n+    # strongly typed.\n+    arr = np.arange(6, dtype=\"float32\").reshape(3, 2)\n+\n+    res = np.add.outer(scalar, arr)\n+    assert res.dtype == expected\n+    assert_array_equal(res, np.add(scalar, arr))\n+\n+    res = np.add.outer(arr, scalar)\n+    assert res.dtype == expected\n+    assert_array_equal(res, np.add(arr, scalar))\n+\n+\n+def test_nep50_in_ufunc_outer_strong_operands():\n+    # gh-32076: NumPy scalars and 0-d arrays remain strongly typed.\n+    arr = np.arange(6, dtype=\"float32\").reshape(3, 2)\n+    assert np.add.outer(np.float64(1), arr).dtype == \"float64\"\n+    assert np.add.outer(np.array(1.), arr).dtype == \"float64\"\n+\n+\n+def test_nep50_in_ufunc_outer_huge_integer():\n+    # gh-32076: a weak Python int stays weak, so a huge one overflows here\n+    # rather than silently going to object dtype (matching ufunc.__call__).\n+    with pytest.raises(OverflowError):\n+        np.add.outer(2**100, 1)\n+\n+\n @pytest.mark.parametrize(\"expected,dtypes,optional_dtypes\", [\n         (np.float32, [np.float32],\n             [np.float16, 0.0, np.uint16, np.int16, np.int8, 0]),"
+    }
+  ]
+}

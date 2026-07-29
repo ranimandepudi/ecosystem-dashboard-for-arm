@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       run_manifest:
-        description: Canonical compact JSON manifest of the exact 22 batch runs
+        description: Canonical compact JSON manifest of the exact 1 batch run
         required: true
         default: ""
         type: string
@@ -98,7 +98,7 @@ jobs:
           DOWNLOAD_FAILURES=0
           : > downloaded-results/.batch-runs.tsv
 
-          for i in {1..22}; do
+          for i in {1..1}; do
             WORKFLOW="test-all-packages-batch${i}.yml"
             ARTIFACT="batch${i}-test-results"
             runtime="$(python3 "$helper" record-runtime \

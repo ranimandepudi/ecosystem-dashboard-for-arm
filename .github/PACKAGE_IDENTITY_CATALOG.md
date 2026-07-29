@@ -12,36 +12,33 @@ workflow text, or an AI response. A digest proves that reviewed bytes have not
 changed; it does not prove that a registry identity or an exhaustive-coverage
 decision is true.
 
-The production catalog path is:
+The catalog path is:
 
 ```text
 .github/package-identity-catalog.json
 ```
 
-That file is intentionally not bootstrapped by this safeguard slice. The
-repository does not currently contain reviewed pip/npm decisions, evidence
-reviewers, or exhaustive-coverage determinations for the complete package
-corpus. Generating positive or `not_applicable` decisions from existing shell
-commands would create an unsupported trust claim.
+This bounded sandbox contains a one-record catalog for the reviewed NumPy seed.
+It is not a production-corpus bootstrap and makes no claim about packages
+outside the fixture.
 
-## Audited Baseline
+## Fixture Baseline
 
-At dashboard commit
-`a3cdc05f04278a65ad1e89adf1895d004f31eaac` (`origin/main` when audited), the
-repository contains:
+The fixture is derived from dashboard commit
+`550f5cbc578783170b9b0706e9257653ed4dddea`, but deliberately reduces the
+package corpus to:
 
-- 983 non-index package pages
-- 960 exact `.github/workflows/test-<slug>.yml` package workflows
-- 23 package pages with no package workflow
-- no orphan package workflow
-- no case-insensitive package filename collision
-- no package identity catalog or CODEOWNERS file
+- one non-index NumPy package page;
+- one exact `.github/workflows/test-numpy.yml` package workflow;
+- no page without its package workflow;
+- no orphan package workflow;
+- no case-insensitive package filename collision; and
+- one generated identity catalog protected by fixture CODEOWNERS.
 
-These counts are corpus inventory, not package-identity evidence. The 23 absent
-workflows include pages whose download URLs are missing or outside the approved
-evidence hosts. A catalog bootstrap must therefore represent unresolved
-registry dimensions as unknown and non-exhaustive unless independently
-verified; the inventory alone cannot produce a fully approved final catalog.
+The archived PyPI and GitHub snapshots under
+`.github/catalog-evidence/numpy/` support only the fixture's NumPy identity.
+The npm dimension remains unknown and non-exhaustive. Inventory alone never
+authorizes a package-identity claim.
 
 ## Deterministic Format
 
@@ -225,18 +222,12 @@ frontmatter, or generated shell commands.
 Until that bootstrap and required check are independently reviewed, a missing
 catalog must remain a fail-closed condition.
 
-## Unresolved Ownership Mapping
+## Sandbox Ownership
 
-No `.github/CODEOWNERS`, `OWNERS`, or `MAINTAINERS` file currently identifies an
-accountable catalog steward or workflow-security owner. The existing test
-documentation refers only to generic maintainer roles, and commit frequency is
-not ownership evidence. Therefore this change does not invent GitHub users or
-teams and does not add CODEOWNERS entries.
-
-The repository teams endpoint was empty when audited. Direct repository access
-showed `zachlasiuk` (admin), `chrismoroney` (maintain), and `ranimandepudi`
-(admin), but permission level does not establish responsibility for this
-catalog. Those accounts are therefore not used as inferred CODEOWNERS.
+The fixture's `.github/CODEOWNERS` assigns the catalog and validator controls
+to `@ranimandepudi` and `@pareenaverma`. This file records the intended human
+reviewers; repository rules must still require an independent approval and
+successful validation checks for it to be an enforced control.
 
 The following exact path mapping remains unresolved:
 

@@ -1,0 +1,79 @@
+name: Set up pinned Hugo Extended
+description: Install a checksum-verified Hugo Extended binary for dashboard validation.
+
+inputs:
+  version:
+    description: Exact Hugo version without a leading v.
+    required: true
+  amd64-archive-sha256:
+    description: SHA-256 of the official Linux AMD64 archive.
+    required: true
+  arm64-archive-sha256:
+    description: SHA-256 of the official Linux ARM64 archive.
+    required: true
+
+outputs:
+  binary:
+    description: Absolute path to the verified Hugo binary.
+    value: ${{ steps.install.outputs.binary }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install verified Hugo Extended
+      id: install
+      shell: bash
+      env:
+        HUGO_VERSION: ${{ inputs.version }}
+        HUGO_AMD64_ARCHIVE_SHA256: ${{ inputs.amd64-archive-sha256 }}
+        HUGO_ARM64_ARCHIVE_SHA256: ${{ inputs.arm64-archive-sha256 }}
+      run: |
+        set -euo pipefail
+        [[ "$HUGO_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+        [[ "$HUGO_AMD64_ARCHIVE_SHA256" =~ ^[0-9a-f]{64}$ ]]
+        [[ "$HUGO_ARM64_ARCHIVE_SHA256" =~ ^[0-9a-f]{64}$ ]]
+
+        case "$(uname -m)" in
+          x86_64|amd64)
+            architecture="amd64"
+            archive_sha256="$HUGO_AMD64_ARCHIVE_SHA256"
+            ;;
+          aarch64|arm64)
+            architecture="arm64"
+            archive_sha256="$HUGO_ARM64_ARCHIVE_SHA256"
+            ;;
+          *)
+            printf 'Unsupported runner architecture: %s\n' "$(uname -m)" >&2
+            exit 1
+            ;;
+        esac
+
+        archive="hugo_extended_${HUGO_VERSION}_linux-${architecture}.tar.gz"
+        install_dir="${RUNNER_TEMP}/hugo-${HUGO_VERSION}-${architecture}"
+        mkdir -p "$install_dir"
+        cd "$install_dir"
+
+        curl \
+          --fail \
+          --silent \
+          --show-error \
+          --location \
+          --proto '=https' \
+          --tlsv1.2 \
+          --retry 3 \
+          --retry-all-errors \
+          --connect-timeout 10 \
+          --max-time 120 \
+          --output "$archive" \
+          "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/${archive}"
+        printf '%s  %s\n' "$archive_sha256" "$archive" | sha256sum --check --strict
+        tar --extract --gzip --file "$archive" hugo
+        chmod 0755 hugo
+        rm "$archive"
+
+        version_output="$("$install_dir/hugo" version)"
+        grep -Fq "v${HUGO_VERSION}" <<< "$version_output"
+        grep -Eq "linux/${architecture}([[:space:]]|$)" <<< "$version_output"
+        printf '%s\n' "$version_output"
+        printf '%s\n' "$install_dir" >> "$GITHUB_PATH"
+        printf 'binary=%s\n' "$install_dir/hugo" >> "$GITHUB_OUTPUT"

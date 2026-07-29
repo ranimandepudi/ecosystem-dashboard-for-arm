@@ -18,6 +18,7 @@ from batch_artifact_attestation import (  # noqa: E402
     load_registrations,
     verify_attestation,
 )
+from orchestration_contract import BATCH_COUNT  # noqa: E402
 
 BATCH = 1
 REPOSITORY = "example/dashboard"
@@ -96,9 +97,7 @@ jobs:
                     "metadata": {
                         "package_slug": slug,
                         "batch_title": "Batch 1",
-                        "badge_status": (
-                            "passing" if status == "success" else "failing"
-                        ),
+                        "badge_status": ("passing" if status == "success" else "failing"),
                         "core_failed": 0 if status == "success" else 1,
                     },
                 },
@@ -164,9 +163,7 @@ jobs:
 
         self._write_result("beta", status="failure")
         payload = json.loads(
-            (self.results / "beta-test-results" / "beta.json").read_text(
-                encoding="utf-8"
-            )
+            (self.results / "beta-test-results" / "beta.json").read_text(encoding="utf-8")
         )
         del payload["metadata"]["package_slug"]
         (self.results / "beta-test-results" / "beta.json").write_text(
@@ -229,19 +226,27 @@ jobs:
 
 
 class RepositoryBatchAttestationContractTests(unittest.TestCase):
-    def test_helper_parses_all_960_exact_wrapper_registrations(self) -> None:
+    def test_helper_parses_all_exact_wrapper_registrations(self) -> None:
         workflow_root = SCRIPT_ROOT.parents[1] / ".github/workflows"
         registrations = []
         counts = []
-        for batch in range(1, 23):
+        for batch in range(1, BATCH_COUNT + 1):
             current = load_registrations(
                 workflow_root / f"test-all-packages-batch{batch}.yml",
                 batch=batch,
             )
             counts.append(len(current))
             registrations.extend(current)
-        self.assertEqual(len(registrations), 960)
-        self.assertEqual(len({workflow for _, workflow in registrations}), 960)
+        package_workflows = {
+            path.name
+            for path in workflow_root.glob("test-*.yml")
+            if not path.name.startswith("test-all-packages-")
+        }
+        self.assertEqual(len(registrations), len(package_workflows))
+        self.assertEqual(
+            {workflow for _, workflow in registrations},
+            package_workflows,
+        )
         self.assertLessEqual(max(counts), 45)
 
 

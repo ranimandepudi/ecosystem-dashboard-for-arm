@@ -113,7 +113,7 @@ def artifacts_payload(
 
 
 class ManifestContractTests(unittest.TestCase):
-    def test_builds_one_canonical_compact_22_record_manifest(self) -> None:
+    def test_builds_one_canonical_compact_batch_manifest(self) -> None:
         payload = manifest()
         self.assertEqual(len(payload["batches"]), BATCH_COUNT)
         self.assertEqual(
@@ -136,26 +136,28 @@ class ManifestContractTests(unittest.TestCase):
         extra["batches"] = [*extra["batches"], copy.deepcopy(extra["batches"][-1])]
         mutations.append(extra)
 
-        duplicate_id = manifest()
-        duplicate_id["batches"][1]["run_id"] = duplicate_id["batches"][0]["run_id"]
-        mutations.append(duplicate_id)
+        if BATCH_COUNT > 1:
+            duplicate_id = manifest()
+            duplicate_id["batches"][1]["run_id"] = duplicate_id["batches"][0]["run_id"]
+            mutations.append(duplicate_id)
 
-        duplicate_nonce = manifest()
-        duplicate_nonce["batches"][1]["dispatch_nonce"] = duplicate_nonce["batches"][0][
-            "dispatch_nonce"
-        ]
-        mutations.append(duplicate_nonce)
+            duplicate_nonce = manifest()
+            duplicate_nonce["batches"][1]["dispatch_nonce"] = duplicate_nonce["batches"][0][
+                "dispatch_nonce"
+            ]
+            mutations.append(duplicate_nonce)
 
         rerun_attempt = manifest()
         rerun_attempt["batches"][0]["run_attempt"] = 2
         mutations.append(rerun_attempt)
 
-        reordered = manifest()
-        reordered["batches"][0], reordered["batches"][1] = (
-            reordered["batches"][1],
-            reordered["batches"][0],
-        )
-        mutations.append(reordered)
+        if BATCH_COUNT > 1:
+            reordered = manifest()
+            reordered["batches"][0], reordered["batches"][1] = (
+                reordered["batches"][1],
+                reordered["batches"][0],
+            )
+            mutations.append(reordered)
 
         for payload in mutations:
             with self.subTest(payload=payload):
@@ -419,8 +421,7 @@ class RunIdentityTests(unittest.TestCase):
     def test_behavior_changing_prefetch_run_cannot_match_orchestration(self) -> None:
         malicious = run_payload(1, status="queued", conclusion=None)
         malicious["display_title"] = (
-            f"Arm64 Batch 1 [{ORCHESTRATION_ID}] "
-            f"[nonce:{nonce_for(1)}] [prefetch:present]"
+            f"Arm64 Batch 1 [{ORCHESTRATION_ID}] [nonce:{nonce_for(1)}] [prefetch:present]"
         )
         self.assertIsNone(
             select_exact_registration(
@@ -491,9 +492,7 @@ class RunIdentityTests(unittest.TestCase):
                 repository=REPOSITORY,
             )
 
-        manual_title = (
-            "Arm64 Batch 1 [manual-123-1] [nonce:manual-only] [prefetch:none]"
-        )
+        manual_title = "Arm64 Batch 1 [manual-123-1] [nonce:manual-only] [prefetch:none]"
         self.assertNotEqual(
             manual_title,
             expected_run_name(1, ORCHESTRATION_ID, nonce_for(1)),
@@ -690,18 +689,14 @@ class WorkflowExactRunBindingTests(unittest.TestCase):
                 dispatch_section = text.split("  workflow_dispatch:", 1)[1].split(
                     "  workflow_call:", 1
                 )[0]
-                call_section = text.split("  workflow_call:", 1)[1].split(
-                    "jobs:", 1
-                )[0]
+                call_section = text.split("  workflow_call:", 1)[1].split("jobs:", 1)[0]
 
                 def input_block(section: str, input_name: str) -> str:
                     lines = section.splitlines()
                     start = lines.index(f"      {input_name}") + 1
                     body = []
                     for line in lines[start:]:
-                        if line.startswith("      ") and not line.startswith(
-                            "        "
-                        ):
+                        if line.startswith("      ") and not line.startswith("        "):
                             break
                         body.append(line)
                     return "\n".join(body)
@@ -758,12 +753,10 @@ class WorkflowExactRunBindingTests(unittest.TestCase):
                     self.assertNotIn("prefetch_artifact_name", inputs)
 
     def test_orchestrator_and_summary_use_only_exact_structured_binding(self) -> None:
-        orchestrator = (
-            self.workflow_root / "test-all-packages-orchestrator.yml"
-        ).read_text(encoding="utf-8")
-        summary = (
-            self.workflow_root / "test-all-packages-summary.yml"
-        ).read_text(encoding="utf-8")
+        orchestrator = (self.workflow_root / "test-all-packages-orchestrator.yml").read_text(
+            encoding="utf-8"
+        )
+        summary = (self.workflow_root / "test-all-packages-summary.yml").read_text(encoding="utf-8")
 
         for forbidden in (
             "createdAt",
@@ -775,18 +768,18 @@ class WorkflowExactRunBindingTests(unittest.TestCase):
             self.assertNotIn(forbidden, orchestrator)
         self.assertIn("orchestration-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}", orchestrator)
         self.assertIn("gh api --paginate --slurp", orchestrator)
-        self.assertIn("--expected-sha \"$EXPECTED_SHA\"", orchestrator)
+        self.assertIn('--expected-sha "$EXPECTED_SHA"', orchestrator)
         self.assertIn("generate-dispatch-nonce", orchestrator)
         self.assertIn("prepare-record", orchestrator)
         self.assertIn("bind-record-run", orchestrator)
-        self.assertIn("--dispatch-nonce-file \"$nonce_file\"", orchestrator)
+        self.assertIn('--dispatch-nonce-file "$nonce_file"', orchestrator)
         self.assertIn("select-registration", orchestrator)
         self.assertIn("record-runtime", orchestrator)
         self.assertIn("summary-dispatch-payload", orchestrator)
         self.assertIn("--input .orchestration/summary-dispatch.json", orchestrator)
-        dispatch_step = orchestrator.split(
-            "- name: Dispatch and capture exact batch runs", 1
-        )[1].split("- name: Wait for captured batch runs", 1)[0]
+        dispatch_step = orchestrator.split("- name: Dispatch and capture exact batch runs", 1)[
+            1
+        ].split("- name: Wait for captured batch runs", 1)[0]
         self.assertLess(
             dispatch_step.index("prepare-record"),
             dispatch_step.index("actions/workflows/${WORKFLOW}/dispatches"),
@@ -824,9 +817,9 @@ class WorkflowExactRunBindingTests(unittest.TestCase):
         checkout_step = summary.split("- name: Checkout repository", 1)[1].split(
             "- name: Bind exact generated-data base", 1
         )[0]
-        bind_step = summary.split("- name: Bind exact generated-data base", 1)[
-            1
-        ].split("- name: Validate exact batch-run manifest", 1)[0]
+        bind_step = summary.split("- name: Bind exact generated-data base", 1)[1].split(
+            "- name: Validate exact batch-run manifest", 1
+        )[0]
         self.assertIn("ref: ${{ github.sha }}", checkout_step)
         self.assertNotIn("inputs.expected_sha", checkout_step)
         self.assertIn("persist-credentials: false", checkout_step)
@@ -835,9 +828,7 @@ class WorkflowExactRunBindingTests(unittest.TestCase):
             '[[ "$actual_sha" == "$WORKFLOW_SHA" ]]',
             '[[ "$remote_sha" == "$WORKFLOW_SHA" ]]',
         )
-        helper_index = bind_step.index(
-            "python3 .github/scripts/orchestration_contract.py"
-        )
+        helper_index = bind_step.index("python3 .github/scripts/orchestration_contract.py")
         for comparison in comparisons:
             self.assertIn(comparison, bind_step)
             self.assertLess(bind_step.index(comparison), helper_index)
@@ -847,18 +838,12 @@ class WorkflowExactRunBindingTests(unittest.TestCase):
         self.assertLess(first_helper, summary.index("GH_TOKEN:"))
 
     def test_all_batch_wrappers_cap_permissions_and_pin_summary_actions(self) -> None:
-        checkout = (
-            "actions/checkout@"
-            "3d3c42e5aac5ba805825da76410c181273ba90b1"
-        )
-        upload = (
-            "actions/upload-artifact@"
-            "ea165f8d65b6e75b540449e92b4886f43607fa02"
-        )
+        checkout = "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+        upload = "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02"
         for batch in range(1, BATCH_COUNT + 1):
-            wrapper = (
-                self.workflow_root / f"test-all-packages-batch{batch}.yml"
-            ).read_text(encoding="utf-8")
+            wrapper = (self.workflow_root / f"test-all-packages-batch{batch}.yml").read_text(
+                encoding="utf-8"
+            )
             preamble, jobs = wrapper.split("jobs:", 1)
             summary = jobs.split("\n  summary:\n", 1)[1]
             with self.subTest(batch=batch):
@@ -868,9 +853,7 @@ class WorkflowExactRunBindingTests(unittest.TestCase):
                 )
                 self.assertTrue(
                     summary.startswith(
-                        "    permissions:\n"
-                        "      actions: read\n"
-                        "      contents: read\n"
+                        "    permissions:\n      actions: read\n      contents: read\n"
                     )
                 )
                 self.assertEqual(wrapper.count(checkout), 1)
@@ -884,9 +867,9 @@ class WorkflowExactRunBindingTests(unittest.TestCase):
 
     def test_collectors_attest_exact_results_before_artifact_upload(self) -> None:
         for batch in range(1, BATCH_COUNT + 1):
-            wrapper = (
-                self.workflow_root / f"test-all-packages-batch{batch}.yml"
-            ).read_text(encoding="utf-8")
+            wrapper = (self.workflow_root / f"test-all-packages-batch{batch}.yml").read_text(
+                encoding="utf-8"
+            )
             summary = wrapper.split("\n  summary:\n", 1)[1]
             collect_index = summary.index("- name: Collect batch results")
             attest_index = summary.index("- name: Attest complete batch results")
@@ -901,8 +884,7 @@ class WorkflowExactRunBindingTests(unittest.TestCase):
                     summary[attest_index:upload_index],
                 )
                 self.assertIn(
-                    "if: steps.collect.outcome == 'success' && "
-                    "steps.attest.outcome == 'success'",
+                    "if: steps.collect.outcome == 'success' && steps.attest.outcome == 'success'",
                     upload,
                 )
                 self.assertNotIn("if: always()", upload)
@@ -916,17 +898,14 @@ class WorkflowExactRunBindingTests(unittest.TestCase):
                 )
                 self.assertIn("--needs-environment-variable NEEDS_JSON", summary)
 
+    @unittest.skipIf(BATCH_COUNT < 21, "fixture has no package-read batch")
     def test_batch21_grants_packages_read_only_to_four_compatible_callers(
         self,
     ) -> None:
-        wrapper = (
-            self.workflow_root / "test-all-packages-batch21.yml"
-        ).read_text(encoding="utf-8")
+        wrapper = (self.workflow_root / "test-all-packages-batch21.yml").read_text(encoding="utf-8")
         callers = {
             "test-ironcore": "test-ironcore.yml",
-            "test-openmcp-control-plane-operator": (
-                "test-openmcp-control-plane-operator.yml"
-            ),
+            "test-openmcp-control-plane-operator": ("test-openmcp-control-plane-operator.yml"),
             "test-openmfp-portal": "test-openmfp-portal.yml",
             "test-platform-mesh-operator": "test-platform-mesh-operator.yml",
         }
@@ -950,13 +929,11 @@ class WorkflowExactRunBindingTests(unittest.TestCase):
                 )
                 called_job = called.split("jobs:", 1)[1]
                 self.assertIn(
-                    "permissions:\n"
-                    "      contents: read\n"
-                    "      packages: read",
+                    "permissions:\n      contents: read\n      packages: read",
                     called_job,
                 )
 
-    def test_all_960_package_workflows_are_registered_exactly_once(self) -> None:
+    def test_all_package_workflows_are_registered_exactly_once(self) -> None:
         registrations: list[str] = []
         for wrapper in self.workflow_root.glob("test-all-packages-batch*.yml"):
             registrations.extend(
@@ -965,13 +942,13 @@ class WorkflowExactRunBindingTests(unittest.TestCase):
                     wrapper.read_text(encoding="utf-8"),
                 )
             )
-        self.assertEqual(len(registrations), 960)
-        self.assertEqual(len(set(registrations)), 960)
         package_workflow_inventory = {
             path.name
             for path in self.workflow_root.glob("test-*.yml")
             if not path.name.startswith("test-all-packages-")
         }
+        self.assertEqual(len(registrations), len(package_workflow_inventory))
+        self.assertEqual(len(set(registrations)), len(package_workflow_inventory))
         self.assertEqual(set(registrations), package_workflow_inventory)
         for workflow in registrations:
             with self.subTest(workflow=workflow):

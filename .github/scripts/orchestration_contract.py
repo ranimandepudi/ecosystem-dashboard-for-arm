@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 from urllib.parse import urlencode
 
-BATCH_COUNT = 22
-PREFETCH_BATCHES = frozenset({1, 2, 7, 12, 13, 17})
+BATCH_COUNT = 1
+PREFETCH_BATCHES = frozenset()
 SCHEMA = "arm-dashboard-batch-orchestration"
 VERSION = 2
 MAX_MANIFEST_BYTES = 16_384
