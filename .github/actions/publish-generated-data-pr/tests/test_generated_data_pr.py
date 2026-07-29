@@ -964,6 +964,20 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertEqual(orchestrator.count(loop), 2)
         self.assertEqual(summary.count(loop), 1)
 
+    def test_new_control_workflows_run_only_on_arm64(self) -> None:
+        repository = ACTION_ROOT.parents[2]
+        workflow_root = repository / ".github/workflows"
+
+        for name in (
+            "generated-data-hardening-ci.yml",
+            "package-identity-bootstrap-unit-tests.yml",
+        ):
+            workflow = (workflow_root / name).read_text(encoding="utf-8")
+            self.assertIn("runs-on: ubuntu-24.04-arm", workflow)
+            self.assertNotIn("runs-on: ubuntu-latest", workflow)
+            self.assertNotIn("runs-on: ubuntu-24.04\n", workflow)
+            self.assertNotIn("actionlint_arch: amd64", workflow)
+
 
 def _git(root: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
     completed = subprocess.run(
