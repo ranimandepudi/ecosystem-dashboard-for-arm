@@ -44,6 +44,10 @@ class PipSandboxFixtureTests(unittest.TestCase):
         self.github_raw = fixture._read(fixture.GITHUB_SNAPSHOT)
         self.github = json.loads(self.github_raw)
         self.npm_review = fixture._read(fixture.NPM_REVIEW)
+        self.ninja_pypi = fixture._read(fixture.NINJA_PYPI_SNAPSHOT)
+        self.ninja_checksums = fixture._read(fixture.NINJA_SHA256SUMS)
+        self.ninja_workflow = fixture._read(fixture.NINJA_WORKFLOW_FIXTURE)
+        self.package_display_partial = fixture._read(fixture.PACKAGE_DISPLAY_PARTIAL)
         self.workflow_raw = fixture._read(fixture.WORKFLOW_PATH)
         self.result = json.loads(fixture._read(fixture.SEED_RESULT))
         self.index = json.loads(fixture._read(fixture.SEED_INDEX))
@@ -52,13 +56,35 @@ class PipSandboxFixtureTests(unittest.TestCase):
         fixture._validate_pypi_snapshot(self.pypi, self.pypi_raw)
         fixture._validate_github_snapshot(self.github, self.github_raw)
         fixture._validate_npm_review(self.npm_review)
+        fixture._validate_ninja_evidence(
+            self.ninja_pypi,
+            self.ninja_checksums,
+            self.ninja_workflow,
+        )
+        fixture._validate_binary_scope_rendering(self.package_display_partial)
         fixture._validate_workflow(self.workflow_raw)
         fixture._validate_seed_results(self.result, self.index)
 
         catalog = fixture._catalog_payload()
         registries = catalog["records"][0]["registries"]
-        self.assertFalse(registries["pip"]["exhaustive"])
+        self.assertTrue(registries["pip"]["exhaustive"])
+        self.assertEqual(registries["pip"]["identities"], ["numpy"])
+        manual_evidence = next(
+            item
+            for item in registries["pip"]["evidence"]
+            if item["source_kind"] == "manual_review"
+        )
+        self.assertIn(
+            "exhaustive decision applies only to this sandbox corpus",
+            manual_evidence["rationale"],
+        )
+        self.assertEqual(
+            manual_evidence["source_locator"],
+            "docs/sandbox-pip-e2e-fixture.md#identity-trust-root",
+        )
         self.assertFalse(registries["npm"]["exhaustive"])
+        self.assertEqual(registries["npm"]["status"], "unknown")
+        self.assertEqual(registries["npm"]["identities"], [])
         self.assertEqual(registries["npm"]["evidence"][0]["source_kind"], "pypi_api")
 
     def test_rejects_archived_latest_version_mismatch(self) -> None:
@@ -94,6 +120,38 @@ class PipSandboxFixtureTests(unittest.TestCase):
         with self.assertRaisesRegex(SystemExit, "reviewed boundary"):
             fixture._validate_npm_review(self.npm_review + b"\nchanged\n")
 
+    def test_rejects_modified_ninja_snapshot(self) -> None:
+        with self.assertRaisesRegex(SystemExit, "reviewed snapshot"):
+            fixture._validate_ninja_evidence(
+                self.ninja_pypi + b"\n",
+                self.ninja_checksums,
+                self.ninja_workflow,
+            )
+
+    def test_rejects_modified_ninja_checksum_manifest(self) -> None:
+        with self.assertRaisesRegex(SystemExit, "not canonical"):
+            fixture._validate_ninja_evidence(
+                self.ninja_pypi,
+                self.ninja_checksums + b"\n",
+                self.ninja_workflow,
+            )
+
+    def test_rejects_modified_ninja_workflow(self) -> None:
+        with self.assertRaisesRegex(SystemExit, "renderer output"):
+            fixture._validate_ninja_evidence(
+                self.ninja_pypi,
+                self.ninja_checksums,
+                self.ninja_workflow + b"\n",
+            )
+
+    def test_rejects_template_without_binary_scope_rendering(self) -> None:
+        altered = self.package_display_partial.replace(
+            b"official Linux AArch64 binary wheels for",
+            b"works on Arm from",
+        )
+        with self.assertRaisesRegex(SystemExit, "binary-distribution scope"):
+            fixture._validate_binary_scope_rendering(altered)
+
     def test_rejects_noncanonical_smoke_plan(self) -> None:
         workflow = self.workflow_raw.decode("utf-8")
         plan = fixture._decode_embedded_payload(workflow, "SMOKE_PLAN")
@@ -109,7 +167,7 @@ class PipSandboxFixtureTests(unittest.TestCase):
         pins = fixture._decode_embedded_payload(workflow, "SMOKE_ARTIFACT_PINS")
         self.assertIsInstance(pins, list)
         altered = copy.deepcopy(pins)
-        altered[0]["artifact_sha256"] = ["0" * 64]
+        altered[0]["artifacts"][0]["sha256"] = "0" * 64
         mutated = _replace_embedded_payload(workflow, "SMOKE_ARTIFACT_PINS", altered)
         with self.assertRaisesRegex(SystemExit, "exact AArch64 NumPy wheel"):
             fixture._validate_workflow(mutated)

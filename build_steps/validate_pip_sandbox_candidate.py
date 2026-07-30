@@ -11,14 +11,12 @@ import json
 import re
 import shutil
 import subprocess
-import urllib.error
-import urllib.request
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from pathlib import Path, PurePosixPath
 from typing import Any
-from urllib.parse import SplitResult, quote, unquote, unquote_to_bytes, urlsplit
+from urllib.parse import SplitResult, unquote, unquote_to_bytes, urlsplit
 
 import yaml
 from packaging.utils import (
@@ -35,6 +33,7 @@ MANIFEST_PATH = PurePosixPath(".github/fixture-manifest.json")
 CONTENT_ROOT = PurePosixPath("content/linux/opensource_packages")
 WORKFLOW_ROOT = PurePosixPath(".github/workflows")
 BATCH_PATH = WORKFLOW_ROOT / "test-all-packages-batch1.yml"
+NINJA_PYPI_SNAPSHOT = PurePosixPath(".github/catalog-evidence/ninja/pypi.json")
 MAX_FILE_BYTES = 20_000_000
 MAX_BATCH_JOBS = 45
 MAX_PYPI_RESPONSE_BYTES = 5_000_000
@@ -44,6 +43,9 @@ _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _GIT_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 _VERSION_RE = re.compile(r"^[0-9A-Za-z][0-9A-Za-z._+!-]{0,127}$")
 _PIP_DISTRIBUTION_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+_ARM64_LINUX_WHEEL_PLATFORM_RE = re.compile(
+    r"^(?:manylinux|musllinux)[A-Za-z0-9_.]*_aarch64$"
+)
 _PYTHON_IMPORT_RE = re.compile(
     r"^[A-Za-z_][A-Za-z0-9_]{0,127}(?:\.[A-Za-z_][A-Za-z0-9_]{0,127})*$"
 )
@@ -140,6 +142,19 @@ class CandidateValidationError(ValueError):
     """Raised when a sandbox candidate is not one exact onboarding change."""
 
 
+@dataclass(frozen=True, order=True)
+class _PinnedArtifact:
+    filename: str
+    url: str
+    sha256: str
+
+
+@dataclass(frozen=True)
+class _TrustedPypiBoundary:
+    minimum_release_date: date
+    artifacts_by_version: tuple[tuple[str, tuple[_PinnedArtifact, ...]], ...]
+
+
 @dataclass(frozen=True)
 class _WorkflowIdentity:
     package_name: str
@@ -149,6 +164,8 @@ class _WorkflowIdentity:
     baseline_version: str
     candidate_version: str | None
     regression_mode: str
+    binary_only: bool
+    artifacts_by_version: tuple[tuple[str, tuple[_PinnedArtifact, ...]], ...]
 
 
 @dataclass(frozen=True)
@@ -157,16 +174,37 @@ class _TrustedPackageIdentity:
     repository: str
     distribution: str
     import_module: str
+    baseline_version: str
+    candidate_version: str
+    minimum_release_date: date
+    supported_minimum_evidence_url: str
+    support_scope: str
+    support_caveat: str
     official_hosts: tuple[str, ...]
 
 
 _TRUSTED_SANDBOX_PACKAGE_IDENTITIES = {
-    "requests": _TrustedPackageIdentity(
-        package_name="Requests",
-        repository="https://github.com/psf/requests",
-        distribution="requests",
-        import_module="requests",
-        official_hosts=("requests.readthedocs.io",),
+    "ninja": _TrustedPackageIdentity(
+        package_name="Ninja",
+        repository="https://github.com/scikit-build/ninja-python-distributions",
+        distribution="ninja",
+        import_module="ninja",
+        baseline_version="1.10.0.post3",
+        candidate_version="1.13.0",
+        minimum_release_date=date(2021, 7, 17),
+        supported_minimum_evidence_url=(
+            "https://github.com/scikit-build/ninja-python-distributions/"
+            "releases/tag/1.10.0.post3"
+        ),
+        support_scope="pypi_binary_distribution",
+        support_caveat=(
+            "This minimum identifies the earliest stable, non-yanked PyPI release "
+            "in the complete registry history that publishes a manylinux or "
+            "musllinux AArch64 wheel. It does not claim that earlier source builds, "
+            "prereleases, yanked files, or other installation paths were "
+            "incompatible with Arm."
+        ),
+        official_hosts=(),
     ),
 }
 _ARM_CONTENT_HOSTS = frozenset(
@@ -984,19 +1022,25 @@ def _canonical_environment_identity(
             raise CandidateValidationError(
                 f"generated smoke plan evidence URL is not canonical: {label}"
             )
-        if (
-            parsed_evidence.hostname == "pypi.org"
-            and _normalize_pip_identity(
-                parsed_evidence.path.removeprefix("/pypi/").removesuffix("/json")
-            )
-            == normalized_distribution
-            and parsed_evidence.path.casefold() == expected_pypi_path.casefold()
-        ):
-            pypi_bound = True
         evidence_parts = _canonical_url_path_parts(
             parsed_evidence,
             f"generated smoke plan evidence URL {label}",
         )
+        if parsed_evidence.hostname == "pypi.org":
+            api_bound = (
+                _normalize_pip_identity(
+                    parsed_evidence.path.removeprefix("/pypi/").removesuffix("/json")
+                )
+                == normalized_distribution
+                and parsed_evidence.path.casefold() == expected_pypi_path.casefold()
+            )
+            project_bound = (
+                len(evidence_parts) in {2, 3}
+                and evidence_parts[0].casefold() == "project"
+                and _normalize_pip_identity(evidence_parts[1])
+                == normalized_distribution
+            )
+            pypi_bound = pypi_bound or api_bound or project_bound
         if (
             parsed_evidence.hostname == "github.com"
             and len(evidence_parts) >= 2
@@ -1045,28 +1089,19 @@ def _canonical_environment_identity(
             not isinstance(pin, dict)
             or set(pin)
             != {
-                "artifact_integrity",
-                "artifact_sha256",
-                "artifact_urls",
+                "artifacts",
+                "binary_only",
                 "recipe_kind",
                 "schema_version",
                 "version",
             }
-            or pin.get("schema_version") != "1.0"
+            or pin.get("schema_version") != "1.2"
             or pin.get("recipe_kind") != "pip"
-            or pin.get("artifact_integrity") is not None
+            or not isinstance(pin.get("binary_only"), bool)
             or not isinstance(pin.get("version"), str)
             or _VERSION_RE.fullmatch(pin["version"]) is None
-            or not isinstance(pin.get("artifact_urls"), list)
-            or not pin["artifact_urls"]
-            or pin["artifact_urls"] != sorted(set(pin["artifact_urls"]))
-            or not isinstance(pin.get("artifact_sha256"), list)
-            or not pin["artifact_sha256"]
-            or pin["artifact_sha256"] != sorted(set(pin["artifact_sha256"]))
-            or any(
-                not isinstance(digest, str) or _SHA256_RE.fullmatch(digest) is None
-                for digest in pin["artifact_sha256"]
-            )
+            or not isinstance(pin.get("artifacts"), list)
+            or not pin["artifacts"]
             for pin in pins
         )
     ):
@@ -1080,16 +1115,42 @@ def _canonical_environment_identity(
         raise CandidateValidationError(
             f"generated registry artifact pins do not exactly match required versions: {label}"
         )
+    binary_only = pins[0]["binary_only"]
+    if any(pin["binary_only"] is not binary_only for pin in pins):
+        raise CandidateValidationError(
+            f"generated registry artifact pins mix binary-only policy: {label}"
+        )
+    artifacts_by_version: list[tuple[str, tuple[_PinnedArtifact, ...]]] = []
     for pin in pins:
         pin_version = _stable_pep440_version(
             pin["version"],
             f"generated registry artifact version {label}",
         )
-        for raw_url in pin["artifact_urls"]:
-            if not isinstance(raw_url, str):
-                raise CandidateValidationError(
-                    f"generated registry artifact URL is malformed: {label}"
+        records = pin["artifacts"]
+        record_keys: list[tuple[str, str]] = []
+        pinned_artifacts: list[_PinnedArtifact] = []
+        for record in records:
+            if (
+                not isinstance(record, dict)
+                or set(record) != {"filename", "integrity", "sha256", "url"}
+                or not isinstance(record.get("filename"), str)
+                or not record["filename"]
+                or record["filename"] in {".", ".."}
+                or "/" in record["filename"]
+                or "\\" in record["filename"]
+                or any(
+                    ord(character) < 32 or ord(character) == 127
+                    for character in record["filename"]
                 )
+                or not isinstance(record.get("sha256"), str)
+                or _SHA256_RE.fullmatch(record["sha256"]) is None
+                or record.get("integrity") is not None
+                or not isinstance(record.get("url"), str)
+            ):
+                raise CandidateValidationError(
+                    f"generated registry artifact record is invalid: {label}"
+                )
+            raw_url = record["url"]
             try:
                 parsed = urlsplit(raw_url)
                 artifact_port = parsed.port
@@ -1118,6 +1179,19 @@ def _canonical_environment_identity(
                 raise CandidateValidationError(
                     f"generated registry artifact URL is outside the approved path: {label}"
                 )
+            filename = unquote(PurePosixPath(parsed.path).name)
+            if filename != record["filename"]:
+                raise CandidateValidationError(
+                    f"generated registry artifact filename is not bound to its URL: {label}"
+                )
+            record_keys.append((filename, raw_url))
+            pinned_artifacts.append(
+                _PinnedArtifact(
+                    filename=filename,
+                    url=raw_url,
+                    sha256=record["sha256"],
+                )
+            )
             artifact_distribution, artifact_version = _artifact_filename_identity(
                 raw_url,
                 label,
@@ -1130,6 +1204,35 @@ def _canonical_environment_identity(
                 raise CandidateValidationError(
                     f"generated registry artifact does not match its pip identity and version: {label}"
                 )
+            if binary_only:
+                try:
+                    _, _, _, wheel_tags = parse_wheel_filename(filename)
+                except InvalidWheelFilename as exc:
+                    raise CandidateValidationError(
+                        "generated binary-only registry artifact is not a wheel: "
+                        f"{label}"
+                    ) from exc
+                if not any(
+                    _ARM64_LINUX_WHEEL_PLATFORM_RE.fullmatch(tag.platform)
+                    for tag in wheel_tags
+                ):
+                    raise CandidateValidationError(
+                        "generated binary-only registry artifact is not a Linux "
+                        f"Arm64 wheel: {label}"
+                    )
+        if record_keys != sorted(record_keys):
+            raise CandidateValidationError(
+                f"generated registry artifacts are not canonically sorted: {label}"
+            )
+        if len({url for _, url in record_keys}) != len(record_keys):
+            raise CandidateValidationError(
+                f"generated registry artifact URLs are not unique: {label}"
+            )
+        if len({filename for filename, _ in record_keys}) != len(record_keys):
+            raise CandidateValidationError(
+                f"generated registry artifact filenames are not unique: {label}"
+            )
+        artifacts_by_version.append((pin["version"], tuple(sorted(pinned_artifacts))))
     return _WorkflowIdentity(
         package_name=package_name,
         repository=repository,
@@ -1138,6 +1241,8 @@ def _canonical_environment_identity(
         baseline_version=baseline_version,
         candidate_version=candidate_version,
         regression_mode=regression_mode,
+        binary_only=binary_only,
+        artifacts_by_version=tuple(artifacts_by_version),
     )
 
 
@@ -1326,8 +1431,10 @@ def _frontmatter_text(
     required: bool,
     maximum: int = 4_000,
 ) -> str | None:
-    if value is None and not required:
-        return None
+    if value is None:
+        if not required:
+            return None
+        raise CandidateValidationError(f"{label} is required")
     if (
         not isinstance(value, str)
         or not value.strip()
@@ -1404,92 +1511,190 @@ def _identity_bound_public_url(
     return text
 
 
-def _trusted_pypi_release_date(distribution: str, version: str) -> date:
-    encoded_distribution = quote(distribution, safe="")
-    encoded_version = quote(version, safe="")
-    expected_path = f"/pypi/{encoded_distribution}/{encoded_version}/json"
-    url = f"https://pypi.org{expected_path}"
-    request = urllib.request.Request(
-        url,
-        headers={"User-Agent": "arm-ecosystem-sandbox-validator/1.0"},
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            final_url = urlsplit(response.geturl())
-            final_port = final_url.port
-            if (
-                final_url.scheme != "https"
-                or final_url.hostname != "pypi.org"
-                or final_url.username is not None
-                or final_url.password is not None
-                or final_port not in (None, 443)
-                or final_url.path.casefold() != expected_path.casefold()
-                or final_url.query
-                or final_url.fragment
-            ):
-                raise CandidateValidationError(
-                    "trusted PyPI release lookup redirected outside its exact identity"
-                )
-            declared_length = response.headers.get("Content-Length")
-            if (
-                declared_length is not None
-                and int(declared_length) > MAX_PYPI_RESPONSE_BYTES
-            ):
-                raise CandidateValidationError(
-                    "trusted PyPI release response exceeds the bounded size"
-                )
-            payload = response.read(MAX_PYPI_RESPONSE_BYTES + 1)
-    except CandidateValidationError:
-        raise
-    except (OSError, ValueError, urllib.error.URLError) as exc:
-        raise CandidateValidationError(
-            "trusted PyPI release evidence could not be retrieved"
-        ) from exc
+def _trusted_pypi_boundary(
+    base: Path,
+    trusted_identity: _TrustedPackageIdentity,
+) -> _TrustedPypiBoundary:
+    payload = _read(base, NINJA_PYPI_SNAPSHOT)
     if len(payload) > MAX_PYPI_RESPONSE_BYTES:
         raise CandidateValidationError(
-            "trusted PyPI release response exceeds the bounded size"
+            "trusted PyPI history snapshot exceeds the bounded size"
         )
-    document = _json(payload, "trusted PyPI release response")
-    info = _mapping(document.get("info"), "trusted PyPI release info")
+    document = _json(payload, "trusted PyPI history snapshot")
+    info = _mapping(document.get("info"), "trusted PyPI history info")
+    project_urls = _mapping(
+        info.get("project_urls"),
+        "trusted PyPI project URLs",
+    )
     if (
         not isinstance(info.get("name"), str)
         or _normalize_pip_identity(info["name"])
-        != _normalize_pip_identity(distribution)
-        or not isinstance(info.get("version"), str)
-        or _stable_pep440_version(
-            info["version"],
-            "trusted PyPI release version",
-        )
-        != _stable_pep440_version(version, "tested baseline version")
+        != _normalize_pip_identity(trusted_identity.distribution)
+        or trusted_identity.repository
+        not in {
+            value.rstrip("/")
+            for value in project_urls.values()
+            if isinstance(value, str)
+        }
     ):
         raise CandidateValidationError(
-            "trusted PyPI release response does not match the tested identity"
+            "trusted PyPI history does not match the reviewed package identity"
         )
-    urls = document.get("urls")
-    if not isinstance(urls, list) or not urls:
-        raise CandidateValidationError(
-            "trusted PyPI release response has no installable release files"
-        )
-    upload_dates: list[date] = []
-    for index, raw_file in enumerate(urls):
-        file_record = _mapping(raw_file, f"trusted PyPI release file {index}")
-        raw_timestamp = file_record.get("upload_time_iso_8601")
-        if not isinstance(raw_timestamp, str):
-            raise CandidateValidationError(
-                "trusted PyPI release file lacks an upload timestamp"
-            )
+
+    releases = _mapping(document.get("releases"), "trusted PyPI releases")
+    ordered: dict[
+        Version, tuple[str, tuple[_PinnedArtifact, ...], tuple[date, ...]]
+    ] = {}
+    for raw_version, raw_files in releases.items():
+        if not isinstance(raw_version, str) or not isinstance(raw_files, list):
+            raise CandidateValidationError("trusted PyPI release history is malformed")
         try:
-            timestamp = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
-        except ValueError as exc:
+            parsed_version = Version(raw_version)
+        except InvalidVersion as exc:
             raise CandidateValidationError(
-                "trusted PyPI release file timestamp is invalid"
+                "trusted PyPI release history contains an invalid version"
             ) from exc
-        if timestamp.utcoffset() is None:
+        if (
+            parsed_version.is_prerelease
+            or parsed_version.is_devrelease
+            or parsed_version.local is not None
+        ):
+            continue
+        if parsed_version in ordered:
             raise CandidateValidationError(
-                "trusted PyPI release file timestamp lacks a timezone"
+                "trusted PyPI release history contains duplicate stable versions"
             )
-        upload_dates.append(timestamp.astimezone(UTC).date())
-    return min(upload_dates)
+        if any(
+            not isinstance(item, dict)
+            or not isinstance(item.get("yanked", False), bool)
+            for item in raw_files
+        ):
+            raise CandidateValidationError("trusted PyPI release files are malformed")
+        installable = [item for item in raw_files if item.get("yanked") is not True]
+        if not installable:
+            continue
+
+        arm_artifacts: list[_PinnedArtifact] = []
+        arm_upload_dates: list[date] = []
+        for item in installable:
+            raw_url = item.get("url")
+            filename = item.get("filename")
+            digests = item.get("digests")
+            digest = digests.get("sha256") if isinstance(digests, dict) else None
+            timestamp_text = item.get("upload_time_iso_8601")
+            if (
+                not isinstance(raw_url, str)
+                or not isinstance(filename, str)
+                or not isinstance(digest, str)
+                or _SHA256_RE.fullmatch(digest) is None
+                or not isinstance(timestamp_text, str)
+            ):
+                raise CandidateValidationError(
+                    "trusted PyPI release artifact identity is incomplete"
+                )
+            try:
+                parsed_url = urlsplit(raw_url)
+                port = parsed_url.port
+                timestamp = datetime.fromisoformat(
+                    timestamp_text.replace("Z", "+00:00")
+                )
+            except ValueError as exc:
+                raise CandidateValidationError(
+                    "trusted PyPI release artifact is malformed"
+                ) from exc
+            if (
+                parsed_url.scheme != "https"
+                or parsed_url.hostname != "files.pythonhosted.org"
+                or parsed_url.username is not None
+                or parsed_url.password is not None
+                or port not in (None, 443)
+                or not parsed_url.path.startswith("/packages/")
+                or parsed_url.query
+                or parsed_url.fragment
+                or unquote(PurePosixPath(parsed_url.path).name) != filename
+                or timestamp.utcoffset() is None
+            ):
+                raise CandidateValidationError(
+                    "trusted PyPI release artifact is outside the approved identity"
+                )
+            artifact_distribution, artifact_version = _artifact_filename_identity(
+                raw_url,
+                "trusted PyPI release artifact",
+            )
+            if (
+                canonicalize_name(artifact_distribution)
+                != canonicalize_name(trusted_identity.distribution)
+                or artifact_version != parsed_version
+            ):
+                raise CandidateValidationError(
+                    "trusted PyPI artifact does not match its release identity"
+                )
+            if not filename.casefold().endswith(".whl"):
+                continue
+            try:
+                _, _, _, wheel_tags = parse_wheel_filename(filename)
+            except InvalidWheelFilename as exc:
+                raise CandidateValidationError(
+                    "trusted PyPI release contains a malformed wheel"
+                ) from exc
+            if any(
+                _ARM64_LINUX_WHEEL_PLATFORM_RE.fullmatch(tag.platform)
+                for tag in wheel_tags
+            ):
+                arm_artifacts.append(
+                    _PinnedArtifact(
+                        filename=filename,
+                        url=raw_url,
+                        sha256=digest,
+                    )
+                )
+                arm_upload_dates.append(timestamp.astimezone(UTC).date())
+        ordered[parsed_version] = (
+            raw_version,
+            tuple(sorted(arm_artifacts)),
+            tuple(sorted(arm_upload_dates)),
+        )
+
+    baseline = _stable_pep440_version(
+        trusted_identity.baseline_version,
+        "trusted baseline version",
+    )
+    candidate = _stable_pep440_version(
+        trusted_identity.candidate_version,
+        "trusted candidate version",
+    )
+    if not ordered or max(ordered) != candidate or baseline not in ordered:
+        raise CandidateValidationError(
+            "trusted PyPI history does not preserve the reviewed version boundary"
+        )
+    earlier_with_arm = [
+        raw_version
+        for parsed_version, (raw_version, artifacts, _) in sorted(ordered.items())
+        if parsed_version < baseline and artifacts
+    ]
+    missing_from_boundary = [
+        raw_version
+        for parsed_version, (raw_version, artifacts, _) in sorted(ordered.items())
+        if parsed_version >= baseline and not artifacts
+    ]
+    if earlier_with_arm or missing_from_boundary:
+        raise CandidateValidationError(
+            "trusted PyPI history contradicts the reviewed continuous Arm64 "
+            "binary boundary"
+        )
+    baseline_artifacts = ordered[baseline][1]
+    baseline_dates = ordered[baseline][2]
+    if not baseline_artifacts or not baseline_dates:
+        raise CandidateValidationError(
+            "trusted PyPI baseline lacks dated Linux Arm64 wheels"
+        )
+    return _TrustedPypiBoundary(
+        minimum_release_date=min(baseline_dates),
+        artifacts_by_version=(
+            (trusted_identity.baseline_version, baseline_artifacts),
+            (trusted_identity.candidate_version, ordered[candidate][1]),
+        ),
+    )
 
 
 def _validate_candidate_frontmatter(
@@ -1541,9 +1746,19 @@ def _validate_candidate_frontmatter(
     )
     _require_exact_keys(
         supported,
-        {"release_date", "version_number"},
+        {"release_date", "support_scope", "version_number"},
         "candidate supported minimum version",
     )
+    support_scope = _frontmatter_text(
+        supported.get("support_scope"),
+        "candidate supported minimum support scope",
+        required=True,
+        maximum=64,
+    )
+    if support_scope != trusted_identity.support_scope:
+        raise CandidateValidationError(
+            "candidate support scope does not preserve the reviewed binary boundary"
+        )
     public_version = _frontmatter_text(
         supported.get("version_number"),
         "candidate supported minimum version number",
@@ -1602,11 +1817,15 @@ def _validate_candidate_frontmatter(
         trusted_identity=trusted_identity,
         required=False,
     )
-    _frontmatter_text(
+    support_caveat = _frontmatter_text(
         optional.get("support_caveats"),
         "candidate support caveats",
-        required=False,
+        required=True,
     )
+    if support_caveat != trusted_identity.support_caveat:
+        raise CandidateValidationError(
+            "candidate support caveat does not preserve the reviewed binary scope"
+        )
     _frontmatter_text(
         optional.get("alternative_options"),
         "candidate alternative options",
@@ -1677,21 +1896,29 @@ def _validate_candidate_frontmatter(
         required=True,
     )
     assert supported_evidence is not None
+    if supported_evidence != trusted_identity.supported_minimum_evidence_url:
+        raise CandidateValidationError(
+            "candidate supported-minimum evidence is not bound to the reviewed release"
+        )
     parsed_supported_evidence = urlsplit(supported_evidence)
     evidence_parts = _canonical_url_path_parts(
         parsed_supported_evidence,
         "candidate supported-minimum evidence URL",
     )
     if (
-        parsed_supported_evidence.hostname != "pypi.org"
+        parsed_supported_evidence.hostname != "github.com"
         or parsed_supported_evidence.query
-        or parsed_supported_evidence.fragment not in {"", "files"}
-        or len(evidence_parts) != 3
-        or evidence_parts[0].casefold() != "project"
-        or _normalize_pip_identity(evidence_parts[1])
-        != _normalize_pip_identity(identity.distribution)
+        or parsed_supported_evidence.fragment
+        or len(evidence_parts) != 5
+        or tuple(part.casefold() for part in evidence_parts[:4])
+        != (
+            "scikit-build",
+            "ninja-python-distributions",
+            "releases",
+            "tag",
+        )
         or _stable_pep440_version(
-            evidence_parts[2],
+            evidence_parts[4],
             "candidate supported-minimum evidence version",
         )
         != _stable_pep440_version(
@@ -1700,7 +1927,8 @@ def _validate_candidate_frontmatter(
         )
     ):
         raise CandidateValidationError(
-            "candidate supported-minimum evidence is not bound to the tested PyPI release"
+            "candidate supported-minimum evidence is not bound to the reviewed "
+            "official release note"
         )
     if hidden.get("release_notes__recommended_minimum") is not None:
         raise CandidateValidationError(
@@ -1722,7 +1950,8 @@ def _validate_candidate_semantic_binding(
     slug: str,
     expected_source_revision: str,
     expected_verified_at: datetime,
-    expected_minimum_release_date: date | None,
+    expected_minimum_release_date: date,
+    expected_artifacts_by_version: tuple[tuple[str, tuple[_PinnedArtifact, ...]], ...],
 ) -> None:
     workflow_path = WORKFLOW_ROOT / f"test-{slug}.yml"
     identity = _candidate_workflow_identity(
@@ -1745,14 +1974,25 @@ def _validate_candidate_semantic_binding(
         raise CandidateValidationError(
             "new sandbox candidates require a strict, executed Test 6"
         )
-    minimum_release_date = (
-        expected_minimum_release_date
-        if expected_minimum_release_date is not None
-        else _trusted_pypi_release_date(
-            identity.distribution,
-            identity.baseline_version,
+    if not identity.binary_only:
+        raise CandidateValidationError(
+            "binary-distribution sandbox candidate requires binary-only artifact pins"
         )
-    )
+    if (
+        identity.baseline_version != trusted_identity.baseline_version
+        or identity.candidate_version != trusted_identity.candidate_version
+    ):
+        raise CandidateValidationError(
+            "candidate does not match a trusted sandbox package identity"
+        )
+    if expected_minimum_release_date != trusted_identity.minimum_release_date:
+        raise CandidateValidationError(
+            "trusted PyPI release date does not match the reviewed sandbox policy"
+        )
+    if identity.artifacts_by_version != expected_artifacts_by_version:
+        raise CandidateValidationError(
+            "candidate artifact pins do not match the reviewed PyPI snapshot"
+        )
 
     frontmatter = _frontmatter(
         page_payload,
@@ -1762,7 +2002,7 @@ def _validate_candidate_semantic_binding(
         frontmatter,
         identity=identity,
         trusted_identity=trusted_identity,
-        expected_minimum_release_date=minimum_release_date,
+        expected_minimum_release_date=trusted_identity.minimum_release_date,
     )
     if frontmatter.get("name") != identity.package_name:
         raise CandidateValidationError(
@@ -2538,7 +2778,6 @@ def validate(
     *,
     expected_source_revision: str | None = None,
     expected_verified_at: datetime | None = None,
-    expected_minimum_release_date: date | None = None,
 ) -> None:
     base = _safe_root(base_root)
     candidate = _safe_root(candidate_root)
@@ -2652,6 +2891,12 @@ def validate(
         raise CandidateValidationError(
             "candidate catalog does not bind the exact new page and workflow bytes"
         )
+    trusted_identity = _TRUSTED_SANDBOX_PACKAGE_IDENTITIES.get(slug)
+    if trusted_identity is None:
+        raise CandidateValidationError(
+            "candidate does not match a trusted sandbox package identity"
+        )
+    trusted_boundary = _trusted_pypi_boundary(base, trusted_identity)
     workflow_payload = _read(candidate, workflow)
     _validate_candidate_semantic_binding(
         page_payload=_read(candidate, page),
@@ -2661,7 +2906,8 @@ def validate(
         slug=slug,
         expected_source_revision=expected_source_revision,
         expected_verified_at=expected_verified_at,
-        expected_minimum_release_date=expected_minimum_release_date,
+        expected_minimum_release_date=trusted_boundary.minimum_release_date,
+        expected_artifacts_by_version=trusted_boundary.artifacts_by_version,
     )
 
     corpus = candidate_catalog.get("corpus")
