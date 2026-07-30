@@ -1,0 +1,53 @@
+{
+  "catalog_sha256": "c5100437ee9e95806aa1f484a13c553bac5fe9c81b0fbe781d79daeb4e691e38",
+  "evidence": {
+    ".github/catalog-evidence/numpy/github-commit.json": "56406eb1e1ad9a4abfccf6e66ff35a935c0cb3d7368a4cf1be15848d2f6c6de0",
+    ".github/catalog-evidence/numpy/npm-review.md": "e0a5e28123d90cc913f33bb784d1ec09bc53e302dbeb46f9fc15784db5cce87a",
+    ".github/catalog-evidence/numpy/pypi.json": "796d8cfb1e101561086725e9dcecafb48c740b01e0e157b11d53958e000096e1"
+  },
+  "fixture_control_files": {
+    ".github/CODEOWNERS": "4b86990e59bf9522fe31f170f1801c92b3f57943c1f0d595aa0a00a8dd7b4b74",
+    ".github/PACKAGE_IDENTITY_CATALOG.md": "69908e59037a5389436c6f53668531bed8bbf65bbd6fa6ac48c17e8befb877b3",
+    ".github/actions/publish-generated-data-pr/tests/test_batch_artifact_attestation.py": "21bc66e6ce611bcccd231a12c65709cc0a9138d62786c77a29e3cc8fafd1d7db",
+    ".github/actions/publish-generated-data-pr/tests/test_orchestration_contract.py": "020049d997593bf6c92600702fb69c2c8aa171c75e078f47f586f8d69ff4da75",
+    ".github/scripts/batch_artifact_attestation.py": "1f15776d2a4cece8a539a4759586fc95684279f23556100ffee7bb783da41ecb",
+    ".github/scripts/orchestration_contract.py": "bf575fa3f1e1e09206e6b4c2ab86747edc2adf385da2c26c18f9096f1778f8d1",
+    ".github/workflows/sandbox-dashboard-validation.yml": "9864cfc5ea7a204ee64f82b67d0988bdbf73d2ae83317b6e241b5891b6036417",
+    ".github/workflows/test-all-packages-orchestrator.yml": "e8816e735fa8610e1f3ced5d90b3b0f124911047f75df7516c2a3510cf23e118",
+    ".github/workflows/test-all-packages-summary.yml": "37f0c81af47c83e06a4958854f5374e950cc6a765151b2fb31cfca17023d1e78",
+    "build_steps/build_pip_sandbox_fixture.py": "3e6999dfe6c5fca83f348008f572c24f2aae13077277b33e0df438766189c13c",
+    "build_steps/requirements-validation.txt": "45ece703b337c85eaed1fecc28005cc09c3e8ebdd8a3f8a960a9aad6e3985853",
+    "build_steps/tests/test_build_pip_sandbox_fixture.py": "0d28c1733b8d4f560754a7007d944caa5b4bc640df7432dc7c124ccbc10fc081",
+    "build_steps/tests/test_validate_pip_sandbox_candidate.py": "34111e2624ed6575f43d59785f1847aa68661f95cbd0e598c7ce84fc663e667c",
+    "build_steps/validate_package_identity_catalog.py": "711cfcac6fdc6c927008114daaf0207d9695b8a31194340806cb8c8a4f62d14f",
+    "build_steps/validate_pip_sandbox_candidate.py": "d7324a49e780043d12839857be30588ee4c59573604b533632fab74d109a18e7",
+    "data/test-results-index.json": "cae23482866c1b5d81cb16dd41abba93407f9c445f80f117869cf9622eb715e9",
+    "data/test-results/numpy.json": "34fc52df50dab57f85d8bafe05ebf5269dab2be3719c3e1a13b1bf5b90012671",
+    "docs/sandbox-pip-e2e-fixture.md": "d59c362967b9568d1f28d04f80efd06a6168e49a5d56cfe8f14d79d9592c770e"
+  },
+  "fixture_kind": "bounded-real-pip-onboarding",
+  "schema_version": "1.0",
+  "seed_package": {
+    "name": "NumPy",
+    "pip_identity": "numpy",
+    "slug": "numpy"
+  },
+  "service_support_files": {
+    ".github/actions/setup-hugo/action.yml": "156de430b414c6e47dfe7d710f1bbab70be57e17fab2d29b9cc1750b748fcabe"
+  },
+  "source_dashboard_commit": "550f5cbc578783170b9b0706e9257653ed4dddea",
+  "source_files": {
+    ".github/actions/apt-bootstrap/action.yml": "0192a998ec208783b4e29341b01028b987220e1c8146df28fe0a1f8fae8daaac",
+    ".github/actions/apt-bootstrap/bootstrap.sh": "563dabb86b68f17b3511766630d00817aab03b24c0c8828a35b8afaa65c6ca79",
+    ".github/actions/collect-batch-results/action.yml": "d7ff177013c56135b86f49ee0b4729c2e4d77575a315804811008376b6890385",
+    ".github/actions/emit-package-result/action.yml": "ff80aa2424c59e62f7fca362f95f102eba425197879c31a942e3116703fd085a",
+    ".github/workflows/test-numpy.yml": "43c1f33b84fd713a3665f71d13ee268ed888c4fa05617a625ee2925dccd7c146",
+    "content/linux/opensource_packages/numpy.md": "6f03b4fc31b51fc6c196780cb59d462eddb7242b93b8f655cfccc7af82dc2eb0"
+  },
+  "source_service_commit": "6aa4eebc802685281cee88dfc3101921b1408e97",
+  "unsupported_claims": [
+    "npm identity coverage",
+    "production dashboard corpus coverage",
+    "production activation approval"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "corpus": {
+    "content_root": "content/linux/opensource_packages",
+    "corpus_sha256": "58d2cf46c99c3b8e8f55e32ee2cf0216a04db4213e19aed8506e4705ad7b8922",
+    "entry_count": 1
+  },
+  "records": [
+    {
+      "content_path": "content/linux/opensource_packages/numpy.md",
+      "content_sha256": "6f03b4fc31b51fc6c196780cb59d462eddb7242b93b8f655cfccc7af82dc2eb0",
+      "registries": {
+        "npm": {
+          "evidence": [
+            {
+              "evidence_sha256": "796d8cfb1e101561086725e9dcecafb48c740b01e0e157b11d53958e000096e1",
+              "rationale": "The archived PyPI project evidence identifies NumPy's Python distribution but does not establish ownership of any npm identity; the npm dimension remains unknown and non-exhaustive.",
+              "source_kind": "pypi_api",
+              "source_locator": "https://pypi.org/pypi/numpy/json",
+              "source_revision": "796d8cfb1e101561086725e9dcecafb48c740b01e0e157b11d53958e000096e1",
+              "verified_at": "2026-07-29T14:55:00+00:00",
+              "verified_by": "arm-ecosystem-sandbox-fixture-builder@6aa4eebc802685281cee88dfc3101921b1408e97"
+            }
+          ],
+          "exhaustive": false,
+          "identities": [],
+          "status": "unknown"
+        },
+        "pip": {
+          "evidence": [
+            {
+              "evidence_sha256": "56406eb1e1ad9a4abfccf6e66ff35a935c0cb3d7368a4cf1be15848d2f6c6de0",
+              "rationale": "Archived GitHub API evidence binds the canonical NumPy source repository to an immutable commit.",
+              "source_kind": "github_api",
+              "source_locator": "https://api.github.com/repos/numpy/numpy/commits/4350526858b0e8ce8932538da664aa8d1a182410",
+              "source_revision": "4350526858b0e8ce8932538da664aa8d1a182410",
+              "verified_at": "2026-07-29T14:55:00+00:00",
+              "verified_by": "arm-ecosystem-sandbox-fixture-builder@6aa4eebc802685281cee88dfc3101921b1408e97"
+            },
+            {
+              "evidence_sha256": "796d8cfb1e101561086725e9dcecafb48c740b01e0e157b11d53958e000096e1",
+              "rationale": "Archived PyPI API evidence identifies the normalized numpy distribution and its canonical numpy/numpy source repository.",
+              "source_kind": "pypi_api",
+              "source_locator": "https://pypi.org/pypi/numpy/json",
+              "source_revision": "796d8cfb1e101561086725e9dcecafb48c740b01e0e157b11d53958e000096e1",
+              "verified_at": "2026-07-29T14:55:00+00:00",
+              "verified_by": "arm-ecosystem-sandbox-fixture-builder@6aa4eebc802685281cee88dfc3101921b1408e97"
+            }
+          ],
+          "exhaustive": false,
+          "identities": [
+            "numpy"
+          ],
+          "status": "verified"
+        }
+      },
+      "slug": "numpy",
+      "workflow": {
+        "path": ".github/workflows/test-numpy.yml",
+        "presence": "present",
+        "sha256": "43c1f33b84fd713a3665f71d13ee268ed888c4fa05617a625ee2925dccd7c146"
+      }
+    }
+  ],
+  "schema_version": "1.1"
+}

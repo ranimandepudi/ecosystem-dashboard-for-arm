@@ -1,0 +1,7 @@
+* @ranimandepudi @pareenaverma
+
+/.github/package-identity-catalog.json @ranimandepudi @pareenaverma
+/.github/PACKAGE_IDENTITY_CATALOG.md @ranimandepudi @pareenaverma
+/.github/workflows/package-identity-bootstrap-unit-tests.yml @ranimandepudi @pareenaverma
+/build_steps/validate_package_identity_catalog.py @ranimandepudi @pareenaverma
+/tests/test_package_identity_catalog.py @ranimandepudi @pareenaverma

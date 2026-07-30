@@ -1,362 +1,1383 @@
-name: Test NumPy on Arm64
+name: "Test numpy on Arm64"
+
 on:
+  workflow_dispatch:
   workflow_call:
     outputs:
       contract_version:
-        description: Output contract version
-        value: ${{ jobs.test-numpy.outputs.contract_version }}
+        description: "Output contract version"
+        value: "${{ jobs.test-numpy.outputs.contract_version }}"
       package_slug:
-        description: Canonical package slug
-        value: ${{ jobs.test-numpy.outputs.package_slug }}
+        description: "Canonical package slug"
+        value: "${{ jobs.test-numpy.outputs.package_slug }}"
       package_name:
-        description: Display package name
-        value: ${{ jobs.test-numpy.outputs.package_name }}
+        description: "Display package name"
+        value: "${{ jobs.test-numpy.outputs.package_name }}"
       package_version:
-        description: Baseline version tested in this run
-        value: ${{ jobs.test-numpy.outputs.package_version }}
+        description: "Baseline version tested in this run"
+        value: "${{ jobs.test-numpy.outputs.package_version }}"
       run_status:
-        description: Overall package run status
-        value: ${{ jobs.test-numpy.outputs.run_status }}
+        description: "Overall package run status"
+        value: "${{ jobs.test-numpy.outputs.run_status }}"
       badge_status:
-        description: Badge status derived from core baseline checks
-        value: ${{ jobs.test-numpy.outputs.badge_status }}
+        description: "Badge status derived from all required checks"
+        value: "${{ jobs.test-numpy.outputs.badge_status }}"
       core_failed:
-        description: Number of failed baseline core checks (Tests 1-5)
-        value: ${{ jobs.test-numpy.outputs.core_failed }}
+        description: "Number of failed or skipped baseline checks"
+        value: "${{ jobs.test-numpy.outputs.core_failed }}"
       tests_passed:
-        description: Count of passed tests
-        value: ${{ jobs.test-numpy.outputs.tests_passed }}
+        description: "Count of passed tests"
+        value: "${{ jobs.test-numpy.outputs.tests_passed }}"
       tests_failed:
-        description: Count of failed tests
-        value: ${{ jobs.test-numpy.outputs.tests_failed }}
+        description: "Count of failed tests"
+        value: "${{ jobs.test-numpy.outputs.tests_failed }}"
       tests_skipped:
-        description: Count of skipped tests
-        value: ${{ jobs.test-numpy.outputs.tests_skipped }}
+        description: "Count of skipped or deferred tests"
+        value: "${{ jobs.test-numpy.outputs.tests_skipped }}"
       duration_seconds:
-        description: Total duration across tests
-        value: ${{ jobs.test-numpy.outputs.duration_seconds }}
+        description: "Total duration across tests"
+        value: "${{ jobs.test-numpy.outputs.duration_seconds }}"
       regression_status:
-        description: Regression test status
-        value: ${{ jobs.test-numpy.outputs.regression_status }}
+        description: "Regression test status"
+        value: "${{ jobs.test-numpy.outputs.regression_status }}"
       regression_decision:
-        description: Regression decision label
-        value: ${{ jobs.test-numpy.outputs.regression_decision }}
+        description: "Regression decision label"
+        value: "${{ jobs.test-numpy.outputs.regression_decision }}"
       regression_result:
-        description: Human readable regression result
-        value: ${{ jobs.test-numpy.outputs.regression_result }}
+        description: "Human-readable regression result"
+        value: "${{ jobs.test-numpy.outputs.regression_result }}"
       regression_comparison:
-        description: Regression comparison note
-        value: ${{ jobs.test-numpy.outputs.regression_comparison }}
+        description: "Regression comparison note"
+        value: "${{ jobs.test-numpy.outputs.regression_comparison }}"
       regression_current_version:
-        description: Baseline version used for regression comparison
-        value: ${{ jobs.test-numpy.outputs.regression_current_version }}
+        description: "Baseline version used for comparison"
+        value: "${{ jobs.test-numpy.outputs.regression_current_version }}"
       regression_latest_version:
-        description: Next candidate version selected for regression validation
-        value: ${{ jobs.test-numpy.outputs.regression_latest_version }}
+        description: "Candidate version selected for validation"
+        value: "${{ jobs.test-numpy.outputs.regression_latest_version }}"
       regression_next_installed_version:
-        description: Candidate version reported by installed next artifact
-        value: ${{ jobs.test-numpy.outputs.regression_next_installed_version }}
+        description: "Candidate version verified after installation"
+        value: "${{ jobs.test-numpy.outputs.regression_next_installed_version }}"
+      regression_policy:
+        description: "Regression applicability policy"
+        value: "${{ jobs.test-numpy.outputs.regression_policy }}"
       run_id:
-        description: GitHub run id
-        value: ${{ jobs.test-numpy.outputs.run_id }}
+        description: "GitHub run id"
+        value: "${{ jobs.test-numpy.outputs.run_id }}"
       run_attempt:
-        description: GitHub run attempt
-        value: ${{ jobs.test-numpy.outputs.run_attempt }}
+        description: "GitHub run attempt"
+        value: "${{ jobs.test-numpy.outputs.run_attempt }}"
       job_name:
-        description: GitHub job identifier
-        value: ${{ jobs.test-numpy.outputs.job_name }}
+        description: "GitHub job display name"
+        value: "${{ jobs.test-numpy.outputs.job_name }}"
       dashboard_link:
-        description: Dashboard route for this package
-        value: ${{ jobs.test-numpy.outputs.dashboard_link }}
+        description: "Dashboard route for this package"
+        value: "${{ jobs.test-numpy.outputs.dashboard_link }}"
       timestamp:
-        description: UTC timestamp for this package run
-        value: ${{ jobs.test-numpy.outputs.timestamp }}
+        description: "UTC timestamp for this package run"
+        value: "${{ jobs.test-numpy.outputs.timestamp }}"
+
+permissions:
+  contents: read
+
+env:
+  SMOKE_PACKAGE_SLUG: "numpy"
+  SMOKE_PACKAGE_NAME_B64: "TnVtUHk="
+  SMOKE_PACKAGE_REPOSITORY: "https://github.com/numpy/numpy"
+  SMOKE_ARTIFACT_PINS_B64: "W3siYXJ0aWZhY3RfaW50ZWdyaXR5IjpudWxsLCJhcnRpZmFjdF9zaGEyNTYiOlsiNjFhYzQ3ZTc3MmU2YjhlYTQ4OWUxZDJmNDQxYTM0YzVjM2FjMTczMjdlN2NlMjk0Y2JkZjUzNTc5NWFkNGU3NSJdLCJhcnRpZmFjdF91cmxzIjpbImh0dHBzOi8vZmlsZXMucHl0aG9uaG9zdGVkLm9yZy9wYWNrYWdlcy9hOS80Yi9hMmIzMmRkOTRlZTlmZmJlZWNiMjgxNTIyNDAwNDJhMzk0OWRiMzNiMWM4MzRkNDQwOTBiODBlMWIzYjgvbnVtcHktMi41LjEtY3AzMTItY3AzMTItbWFueWxpbnV4XzJfMjdfYWFyY2g2NC5tYW55bGludXhfMl8yOF9hYXJjaDY0LndobCJdLCJyZWNpcGVfa2luZCI6InBpcCIsInNjaGVtYV92ZXJzaW9uIjoiMS4wIiwidmVyc2lvbiI6IjIuNS4xIn1d"
+  SMOKE_ARTIFACT_PINS_DIGEST: "5abb908d986e972368af8567f190b07e14b30c4caafbe234bd2c80d39c6a0e56"
+  SMOKE_PLAN_B64: "eyJiYXNlbGluZV92ZXJzaW9uIjoiMi41LjEiLCJldmlkZW5jZV91cmxzIjpbImh0dHBzOi8vcHlwaS5vcmcvcHlwaS9udW1weS9qc29uIiwiaHR0cHM6Ly9naXRodWIuY29tL251bXB5L251bXB5L2NvbW1pdC80MzUwNTI2ODU4YjBlOGNlODkzMjUzOGRhNjY0YWE4ZDFhMTgyNDEwIl0sImZ1bmN0aW9uYWxfcHJvYmUiOnsiYXNzZXJ0aW9ucyI6W3siZXhwZWN0ZWQiOjAsImtpbmQiOiJleGl0X2NvZGUifSx7ImNhc2Vfc2Vuc2l0aXZlIjp0cnVlLCJraW5kIjoib3V0cHV0X2NvbnRhaW5zIiwidmFsdWUiOiJpbXBvcnRfb2s6bnVtcHkifV0sImludm9jYXRpb24iOnsiYXJndW1lbnRzIjpbInNtb2tlX2ltcG9ydC5weSJdLCJwcm9ncmFtIjoicHl0aG9uMyIsInRpbWVvdXRfc2Vjb25kcyI6NjB9fSwicmVjaXBlIjp7ImRpc3RyaWJ1dGlvbiI6Im51bXB5IiwiaW1wb3J0X21vZHVsZSI6Im51bXB5Iiwia2luZCI6InBpcCJ9LCJyZWdyZXNzaW9uX3BvbGljeSI6eyJjYW5kaWRhdGVfdmVyc2lvbiI6bnVsbCwiZGVmZXJyYWxfZGVjaXNpb24iOiJub19uZXdlcl9zdGFibGVfYXZhaWxhYmxlIiwibW9kZSI6ImFwcHJvdmVkX2RlZmVycmFsIiwicmF0aW9uYWxlIjoiVGhlIGFyY2hpdmVkIFB5UEkgc25hcHNob3QgaWRlbnRpZmllcyAyLjUuMSBhcyB0aGUgbGF0ZXN0IHN0YWJsZSByZWxlYXNlLCBzbyB0aGVyZSBpcyBubyBuZXdlciBzdGFibGUgY2FuZGlkYXRlIHRvIHRlc3QuIn0sInNjaGVtYV92ZXJzaW9uIjoiMS4wIiwidmVyc2lvbl9wcm9iZSI6eyJhcmd1bWVudHMiOlsic21va2VfdmVyc2lvbi5weSJdLCJwcm9ncmFtIjoicHl0aG9uMyIsInRpbWVvdXRfc2Vjb25kcyI6MzB9fQ=="
+  SMOKE_PLAN_DIGEST: "42369dda8ddfceb631f4d03f6ca9905ec34f47377a14070620acc22c0a8965d3"
+
 jobs:
   test-numpy:
+    name: "Native Arm64 smoke validation"
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+    permissions:
+      contents: read
     outputs:
       contract_version: "2.0"
-      package_slug: ${{ steps.metadata.outputs.package_slug }}
-      package_name: 'NumPy'
-      package_version: ${{ steps.version.outputs.version || 'unknown' }}
-      run_status: ${{ steps.summary.outputs.overall_status || 'failure' }}
-      badge_status: ${{ steps.summary.outputs.badge_status || 'failing' }}
-      core_failed: ${{ steps.summary.outputs.core_failed || '0' }}
-      tests_passed: ${{ steps.summary.outputs.passed || '0' }}
-      tests_failed: ${{ steps.summary.outputs.failed || '0' }}
-      tests_skipped: ${{ steps.summary.outputs.skipped || '0' }}
-      duration_seconds: ${{ steps.summary.outputs.duration || '0' }}
-      regression_status: ${{ steps.test6.outputs.status || 'skipped' }}
-      regression_decision: ${{ steps.test6.outputs.decision || 'not_configured' }}
-      regression_result: ${{ steps.test6.outputs.regression_result || '' }}
-      regression_comparison: ${{ steps.test6.outputs.comparison || 'Regression comparison summary unavailable.' }}
-      regression_current_version: ${{ steps.test6.outputs.current_version || steps.version.outputs.version || 'unknown' }}
-      regression_latest_version: ${{ steps.test6.outputs.latest_version || 'unknown' }}
-      regression_next_installed_version: ${{ steps.test6.outputs.next_installed_version || 'not_installed' }}
-      run_id: ${{ github.run_id }}
-      run_attempt: ${{ github.run_attempt }}
-      job_name: ${{ github.job }}
-      dashboard_link: ${{ steps.metadata.outputs.dashboard_link }}
-      timestamp: ${{ steps.metadata.outputs.timestamp }}
+      package_slug: "numpy"
+      package_name: "NumPy"
+      package_version: "2.5.1"
+      run_status: "${{ steps.summary.outputs.overall_status || 'failure' }}"
+      badge_status: "${{ steps.summary.outputs.badge_status || 'failing' }}"
+      core_failed: "${{ steps.summary.outputs.core_failed || '5' }}"
+      tests_passed: "${{ steps.summary.outputs.passed || '0' }}"
+      tests_failed: "${{ steps.summary.outputs.failed || '0' }}"
+      tests_skipped: "${{ steps.summary.outputs.skipped || '6' }}"
+      duration_seconds: "${{ steps.summary.outputs.duration || '0' }}"
+      regression_status: "${{ steps.test6.outputs.status || 'failed' }}"
+      regression_decision: "${{ steps.test6.outputs.regression_decision || 'candidate_failed' }}"
+      regression_result: "${{ steps.test6.outputs.regression_result || 'Regression validation did not complete.' }}"
+      regression_comparison: "${{ steps.test6.outputs.details || 'Regression comparison unavailable because validation did not complete.' }}"
+      regression_current_version: "2.5.1"
+      regression_latest_version: "${{ steps.test6.outputs.regression_latest_version || '2.5.1' }}"
+      regression_next_installed_version: "${{ steps.test6.outputs.regression_next_installed_version || 'not_installed' }}"
+      regression_policy: "approved_deferral"
+      run_id: "${{ github.run_id }}"
+      run_attempt: "${{ github.run_attempt }}"
+      job_name: "Native Arm64 smoke validation"
+      dashboard_link: "/opensource_packages/numpy"
+      timestamp: "${{ steps.metadata.outputs.timestamp || '' }}"
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: "Checkout dashboard actions"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
 
-      - name: Set test metadata
+      - name: "Record immutable run metadata"
         id: metadata
-        run: |
-          echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
-          echo "package_slug=numpy" >> "$GITHUB_OUTPUT"
-          echo "dashboard_link=/opensource_packages/numpy" >> "$GITHUB_OUTPUT"
-      - name: Install NumPy
-        id: install
-        run: |
-          echo "Installing NumPy..."
-          
-          # Install prerequisites
-          bash .github/actions/apt-bootstrap/bootstrap.sh --packages "python3-pip python3-venv python3-dev"
-          # Create venv
-          python3 -m venv venv
-          source venv/bin/activate
-          
-          # Install NumPy
-          if pip install numpy; then
-             echo "NumPy installed successfully"
-             echo "install_status=success" >> $GITHUB_OUTPUT
-          else
-             echo "NumPy installation failed"
-             echo "install_status=failed" >> $GITHUB_OUTPUT
-             exit 1
-          fi
-
-      # ============================================================
-      # CUSTOMIZE THIS: Get the package version
-      # ============================================================
-      - name: Get NumPy version
-        id: version
-        run: |
-          source venv/bin/activate
-          VERSION=$(python3 -c "import numpy; print(numpy.__version__)" 2>&1 || echo "unknown")
-          VERSION=$(echo "$VERSION" | sed 's/[",]//g' | tr -d '\\' | sed 's/\x1b\[[0-9;]*m//g')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Detected NumPy version: $VERSION"
-
-      # ============================================================
-      # ADD YOUR TESTS BELOW
-      # Each test should:
-      # 1. Have a unique id (test1, test2, etc.)
-      # 2. Track start/end time for duration
-      # 3. Set status=passed or status=failed
-      # 4. Exit 1 on failure
-      # ============================================================
-
-      - name: Test 1 - Import NumPy
-        id: test1
-        continue-on-error: true
-        run: |
-          START_TIME=$(date +%s)
-          source venv/bin/activate
-          
-          if python3 -c "import numpy; print('NumPy imported successfully')" | grep -q "NumPy imported successfully"; then
-            echo "✓ NumPy import successful"
-            echo "status=passed" >> $GITHUB_OUTPUT
-          else
-            echo "✗ NumPy import failed"
-            echo "status=failed" >> $GITHUB_OUTPUT
-            exit 1
-            fi
-          
-          END_TIME=$(date +%s)
-          echo "duration=$((END_TIME - START_TIME))" >> $GITHUB_OUTPUT
-
-      - name: Test 2 - Check installed version
-        id: test2
-        continue-on-error: true
-        run: |
-          START_TIME=$(date +%s)
-          source venv/bin/activate
-          
-          VERSION=$(python3 -c "import importlib.metadata; print(importlib.metadata.version('numpy'))" 2>&1)
-          echo "$VERSION"
-
-          if echo "$VERSION" | grep -Eq '^[0-9]'; then
-            echo "✓ Installed version resolved"
-            echo "status=passed" >> $GITHUB_OUTPUT
-          else
-            echo "✗ Version lookup failed"
-            echo "status=failed" >> $GITHUB_OUTPUT
-            exit 1
-          fi
-          
-          END_TIME=$(date +%s)
-          echo "duration=$((END_TIME - START_TIME))" >> $GITHUB_OUTPUT
-
-      - name: Test 3 - Check f2py help
-        id: test3
-        continue-on-error: true
-        run: |
-          START_TIME=$(date +%s)
-          source venv/bin/activate
-          
-          if python3 -m numpy.f2py -h > /dev/null 2>&1; then
-             echo "✓ f2py help rendered successfully"
-             echo "status=passed" >> $GITHUB_OUTPUT
-          else
-             echo "✗ f2py help failed"
-             echo "status=failed" >> $GITHUB_OUTPUT
-             exit 1
-          fi
-          
-          END_TIME=$(date +%s)
-          echo "duration=$((END_TIME - START_TIME))" >> $GITHUB_OUTPUT
-
-      - name: Test 4 - Verify architecture
-        id: test4
-        continue-on-error: true
-        run: |
-          START_TIME=$(date +%s)
-          
-          ARCH=$(uname -m)
-          echo "Detected architecture: $ARCH"
-
-          if [ "$ARCH" = "aarch64" ]; then
-             echo "✓ Running on Arm64"
-             echo "status=passed" >> $GITHUB_OUTPUT
-          else
-             echo "✗ Expected aarch64 runner"
-             echo "status=failed" >> $GITHUB_OUTPUT
-             exit 1
-          fi
-          
-          END_TIME=$(date +%s)
-          echo "duration=$((END_TIME - START_TIME))" >> $GITHUB_OUTPUT
-
-      - name: Test 5 - Run array operations
-        id: test5
-        continue-on-error: true
-        run: |
-          START_TIME=$(date +%s)
-          # Functional Validation
-          source venv/bin/activate
-
-          OUTPUT=$(python3 - <<'EOF'
-          import numpy as np
-          matrix = np.array([[1.0, 2.0], [3.0, 4.0]])
-          vector = np.array([5.0, 6.0])
-          product = matrix @ vector
-          mean = product.mean()
-          print(product.tolist())
-          print(f"mean={mean}")
-          EOF
-          )
-          echo "$OUTPUT"
-
-          if echo "$OUTPUT" | grep -q "\[17.0, 39.0\]" && echo "$OUTPUT" | grep -q "mean=28.0"; then
-             echo "✓ NumPy executed real array operations"
-             echo "status=passed" >> $GITHUB_OUTPUT
-          else
-             echo "✗ NumPy functional validation failed"
-             echo "status=failed" >> $GITHUB_OUTPUT
-             exit 1
-          fi
-          
-          END_TIME=$(date +%s)
-          echo "duration=$((END_TIME - START_TIME))" >> $GITHUB_OUTPUT
-
-            # ============================================================
-      # UPDATE THIS: Calculate summary based on your number of tests
-      # Add/remove test result checks to match your tests above
-
-      - name: Regression applicability - package manager installed
-        id: test6
+        shell: bash
+        env:
+          TRUSTED_RUNNER_ENVIRONMENT: "${{ runner.environment }}"
+          TRUSTED_RUNNER_ARCH: "${{ runner.arch }}"
         run: |
           set -euo pipefail
-          CURRENT="${{ steps.version.outputs.version || 'unknown' }}"
-          echo "current_version=$CURRENT" >> "$GITHUB_OUTPUT"
-          echo "latest_version=not_applicable" >> "$GITHUB_OUTPUT"
-          echo "next_installed_version=not_applicable" >> "$GITHUB_OUTPUT"
-          echo "decision=not_applicable_package_manager" >> "$GITHUB_OUTPUT"
-          echo "regression_result=Regression validation not applicable: tested package installed via package manager in Tests 1-5" >> "$GITHUB_OUTPUT"
-          echo "comparison=The tested package is installed via a package manager in Tests 1-5, so version-to-version regression validation is not shown under the current policy." >> "$GITHUB_OUTPUT"
-          echo "status=skipped" >> "$GITHUB_OUTPUT"
-          echo "duration=0" >> "$GITHUB_OUTPUT"
+          trusted_machine="$(/usr/bin/uname -m)"
+          printf 'trusted_runner_environment=%s\n' "$TRUSTED_RUNNER_ENVIRONMENT"
+          printf 'trusted_runner_arch=%s\n' "$TRUSTED_RUNNER_ARCH"
+          printf 'trusted_runner_machine=%s\n' "$trusted_machine"
+          [[ "$TRUSTED_RUNNER_ENVIRONMENT" == "github-hosted" ]]
+          [[ "$TRUSTED_RUNNER_ARCH" == "ARM64" ]]
+          [[ "$trusted_machine" == "aarch64" ]]
+          printf 'timestamp=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
-      - name: Calculate test summary
-        if: always()
-        id: summary
+      - name: "Prepare trusted bounded smoke executor"
+        id: prepare
+        shell: bash
         run: |
-          PASSED=0
-          FAILED=0
-          TOTAL_DURATION=0
+          set -euo pipefail
+          umask 077
+          install -d -m 0700 "$RUNNER_TEMP"
+          smoke_root="$RUNNER_TEMP/arm-smoke-numpy"
+          smoke_harness="$RUNNER_TEMP/arm-smoke-numpy-executor.py"
+          printf 'SMOKE_ROOT=%s\n' "$smoke_root" >> "$GITHUB_ENV"
+          printf 'SMOKE_HARNESS=%s\n' "$smoke_harness" >> "$GITHUB_ENV"
+          cat > "$smoke_harness" <<'PY'
+          #!/usr/bin/env python3
+          """Trusted host controller for isolated pip/npm smoke validation.
 
-          # Import NumPy
-          if [ "${{ steps.test1.outputs.status }}" == "passed" ]; then
-            PASSED=$((PASSED + 1))
-          else
-            FAILED=$((FAILED + 1))
-          fi
-          TOTAL_DURATION=$((TOTAL_DURATION + ${{ steps.test1.outputs.duration || 0 }}))
+          Package-controlled code runs only in Docker containers. The controller and its
+          GitHub output file are never mounted into those containers. This boundary
+          reduces host exposure; it is not a defense against Docker daemon or kernel
+          vulnerabilities.
+          """
 
-          # Check installed version
-          if [ "${{ steps.test2.outputs.status }}" == "passed" ]; then
-            PASSED=$((PASSED + 1))
-          else
-            FAILED=$((FAILED + 1))
-          fi
-          TOTAL_DURATION=$((TOTAL_DURATION + ${{ steps.test2.outputs.duration || 0 }}))
+          from __future__ import annotations
 
-          # Check f2py help
-          if [ "${{ steps.test3.outputs.status }}" == "passed" ]; then
-            PASSED=$((PASSED + 1))
-          else
-            FAILED=$((FAILED + 1))
-          fi
-          TOTAL_DURATION=$((TOTAL_DURATION + ${{ steps.test3.outputs.duration || 0 }}))
+          import base64
+          import hashlib
+          import json
+          import os
+          import re
+          import selectors
+          import shutil
+          import signal
+          import subprocess
+          import sys
+          import time
+          import traceback
+          from dataclasses import dataclass
+          from pathlib import Path
+          from typing import Any
 
-          # Verify architecture
-          if [ "${{ steps.test4.outputs.status }}" == "passed" ]; then
-            PASSED=$((PASSED + 1))
-          else
-            FAILED=$((FAILED + 1))
-          fi
-          TOTAL_DURATION=$((TOTAL_DURATION + ${{ steps.test4.outputs.duration || 0 }}))
+          MAX_CAPTURE = 65536
+          MAX_OUTPUT = 1048576
+          DOCKER = "/usr/bin/docker"
+          UBUNTU_IMAGE = (
+              "docker.io/library/ubuntu@"
+              "sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90"
+          )
+          IMAGE_ID_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+          ROOT = Path(os.environ["SMOKE_ROOT"]).resolve()
+          PLAN_BYTES = base64.b64decode(os.environ["SMOKE_PLAN_B64"], validate=True)
+          PLAN = json.loads(PLAN_BYTES)
+          EXPECTED_DIGEST = os.environ["SMOKE_PLAN_DIGEST"]
+          ACTUAL_DIGEST = hashlib.sha256(
+              json.dumps(PLAN, sort_keys=True, separators=(",", ":")).encode()
+          ).hexdigest()
+          if ACTUAL_DIGEST != EXPECTED_DIGEST:
+              raise RuntimeError("embedded smoke plan digest mismatch")
+          ARTIFACT_BYTES = base64.b64decode(
+              os.environ["SMOKE_ARTIFACT_PINS_B64"],
+              validate=True,
+          )
+          ARTIFACT_PINS = json.loads(ARTIFACT_BYTES)
+          EXPECTED_ARTIFACT_DIGEST = os.environ["SMOKE_ARTIFACT_PINS_DIGEST"]
+          ACTUAL_ARTIFACT_DIGEST = hashlib.sha256(
+              json.dumps(ARTIFACT_PINS, sort_keys=True, separators=(",", ":")).encode()
+          ).hexdigest()
+          if ACTUAL_ARTIFACT_DIGEST != EXPECTED_ARTIFACT_DIGEST:
+              raise RuntimeError("embedded registry artifact pin digest mismatch")
+          RECIPE = PLAN["recipe"]
+          SLUG = os.environ["SMOKE_PACKAGE_SLUG"]
+          if RECIPE.get("kind") not in {"pip", "npm"}:
+              raise RuntimeError("only isolated pip/npm recipes are executable")
+          if not isinstance(ARTIFACT_PINS, list) or not ARTIFACT_PINS:
+              raise RuntimeError("registry artifact pins are missing")
+          ARTIFACTS_BY_VERSION = {
+              pin["version"]: pin
+              for pin in ARTIFACT_PINS
+              if isinstance(pin, dict) and isinstance(pin.get("version"), str)
+          }
+          if len(ARTIFACTS_BY_VERSION) != len(ARTIFACT_PINS):
+              raise RuntimeError("registry artifact pins are malformed or duplicated")
+          if ROOT == Path("/") or len(ROOT.parts) < 3:
+              raise RuntimeError("unsafe smoke controller root")
+          LAST_INSTALL_FAILURE_CLASS = "not_run"
 
-          # Run array operations
-          if [ "${{ steps.test5.outputs.status }}" == "passed" ]; then
-            PASSED=$((PASSED + 1))
-          else
-            FAILED=$((FAILED + 1))
-          fi
-          TOTAL_DURATION=$((TOTAL_DURATION + ${{ steps.test5.outputs.duration || 0 }}))
 
-          echo "passed=$PASSED" >> $GITHUB_OUTPUT
-          echo "failed=$FAILED" >> $GITHUB_OUTPUT
-          echo "duration=$TOTAL_DURATION" >> $GITHUB_OUTPUT
+          @dataclass(frozen=True)
+          class Result:
+              argv: tuple[str, ...]
+              returncode: int
+              stdout: str
+              stderr: str
 
-          if [ $FAILED -eq 0 ]; then
-            echo "overall_status=success" >> $GITHUB_OUTPUT
-            echo "badge_status=passing" >> $GITHUB_OUTPUT
-          else
-            echo "overall_status=failure" >> $GITHUB_OUTPUT
-            echo "badge_status=failing" >> $GITHUB_OUTPUT
+
+          class SmokeTestFailure(RuntimeError):
+              """A test already emitted deterministic failure outputs."""
+
+
+          def safe_host_environment() -> dict[str, str]:
+              home = ROOT / "controller-home"
+              docker_config = ROOT / "empty-docker-config"
+              temp = ROOT / "controller-tmp"
+              for directory in (home, docker_config, temp):
+                  directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+              return {
+                  "PATH": "/usr/sbin:/usr/bin:/sbin:/bin",
+                  "HOME": str(home),
+                  "DOCKER_CONFIG": str(docker_config),
+                  "TMPDIR": str(temp),
+                  "LANG": "C.UTF-8",
+                  "LC_ALL": "C.UTF-8",
+              }
+
+
+          def append_tail(target: bytearray, chunk: bytes) -> None:
+              target.extend(chunk)
+              if len(target) > MAX_CAPTURE:
+                  del target[: len(target) - MAX_CAPTURE]
+
+
+          def terminate_group(process: subprocess.Popen[bytes]) -> None:
+              if process.poll() is not None:
+                  return
+              try:
+                  os.killpg(process.pid, signal.SIGTERM)
+                  process.wait(timeout=2)
+              except (OSError, subprocess.TimeoutExpired):
+                  try:
+                      os.killpg(process.pid, signal.SIGKILL)
+                  except OSError:
+                      process.kill()
+                  try:
+                      process.wait(timeout=2)
+                  except subprocess.TimeoutExpired:
+                      process.kill()
+
+
+          def run(argv: list[str], *, timeout: int = 300) -> Result:
+              if not argv or argv[0] != DOCKER or timeout < 1 or timeout > 900:
+                  raise ValueError("invalid bounded Docker invocation")
+              process = subprocess.Popen(
+                  argv,
+                  env=safe_host_environment(),
+                  stdin=subprocess.DEVNULL,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  start_new_session=True,
+              )
+              if process.stdout is None or process.stderr is None:
+                  terminate_group(process)
+                  raise RuntimeError("subprocess pipes unavailable")
+              selector = selectors.DefaultSelector()
+              selector.register(process.stdout, selectors.EVENT_READ, "stdout")
+              selector.register(process.stderr, selectors.EVENT_READ, "stderr")
+              tails = {"stdout": bytearray(), "stderr": bytearray()}
+              total = 0
+              deadline = time.monotonic() + timeout
+              try:
+                  while selector.get_map():
+                      remaining = deadline - time.monotonic()
+                      if remaining <= 0:
+                          terminate_group(process)
+                          return Result(tuple(argv), 124, "", "Docker command timed out")
+                      for key, _ in selector.select(min(remaining, 0.2)):
+                          chunk = os.read(key.fd, 8192)
+                          if not chunk:
+                              selector.unregister(key.fileobj)
+                              continue
+                          total += len(chunk)
+                          append_tail(tails[str(key.data)], chunk)
+                          if total > MAX_OUTPUT:
+                              terminate_group(process)
+                              return Result(tuple(argv), 125, "", "Docker output limit exceeded")
+                  returncode = process.wait(timeout=max(0.1, deadline - time.monotonic()))
+              finally:
+                  selector.close()
+                  if process.poll() is None:
+                      terminate_group(process)
+                  process.stdout.close()
+                  process.stderr.close()
+              result = Result(
+                  tuple(argv),
+                  returncode,
+                  bytes(tails["stdout"]).decode("utf-8", errors="replace"),
+                  bytes(tails["stderr"]).decode("utf-8", errors="replace"),
+              )
+              print(
+                  "bounded_docker_command="
+                  + json.dumps(
+                      {"argv": logged_argv(argv), "returncode": returncode},
+                      separators=(",", ":"),
+                  )
+              )
+              if returncode != 0:
+                  if result.stdout:
+                      print(result.stdout)
+                  if result.stderr:
+                      print(result.stderr, file=sys.stderr)
+              return result
+
+
+          def succeeded(result: Result) -> bool:
+              return result.returncode == 0
+
+
+          def logged_argv(argv: list[str]) -> list[str]:
+              logged: list[str] = []
+              for value in [Path(argv[0]).name, *argv[1:]]:
+                  if len(value) <= 200:
+                      logged.append(value)
+                      continue
+                  digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
+                  logged.append(f"<arg bytes={len(value)} sha256={digest}>")
+              return logged
+
+
+          def write_outputs(path: Path, values: dict[str, str | int]) -> None:
+              with path.open("a", encoding="utf-8") as handle:
+                  for key, raw_value in values.items():
+                      value = str(raw_value).replace("\r", " ").replace("\n", " ")[:2000]
+                      handle.write(f"{key}={value}\n")
+
+
+          def complete(
+              output_path: Path,
+              *,
+              passed: bool,
+              started: float,
+              details: str,
+              extra: dict[str, str | int] | None = None,
+          ) -> None:
+              values: dict[str, str | int] = {
+                  "status": "passed" if passed else "failed",
+                  "duration": max(0, int(time.monotonic() - started)),
+                  "details": details,
+              }
+              if extra:
+                  values.update(extra)
+              print(details)
+              write_outputs(output_path, values)
+              if not passed:
+                  raise SmokeTestFailure(details)
+
+
+          def lane_dir(lane: str) -> Path:
+              if lane not in {"baseline", "candidate"}:
+                  raise ValueError("invalid package lane")
+              return ROOT / lane
+
+
+          def dockerfile_run(argv: list[str]) -> str:
+              return "RUN " + json.dumps(argv, separators=(",", ":"))
+
+
+          def runtime_dockerfile() -> str:
+              packages = ["ca-certificates", "passwd", "python3", "python3-pip"]
+              if RECIPE["kind"] == "npm":
+                  packages.extend(["nodejs", "npm"])
+              lines = [
+                  f"FROM {UBUNTU_IMAGE}",
+                  dockerfile_run(["apt-get", "update"]),
+                  dockerfile_run(
+                      ["apt-get", "install", "-y", "--no-install-recommends", *packages]
+                  ),
+                  dockerfile_run(["groupadd", "--gid", "65532", "smoke"]),
+                  dockerfile_run(
+                      [
+                          "useradd",
+                          "--uid",
+                          "65532",
+                          "--gid",
+                          "65532",
+                          "--home-dir",
+                          "/opt/smoke/home",
+                          "--no-create-home",
+                          "--shell",
+                          "/usr/sbin/nologin",
+                          "smoke",
+                      ]
+                  ),
+                  dockerfile_run(
+                      [
+                          "install",
+                          "-d",
+                          "-m",
+                          "0755",
+                          "-o",
+                          "65532",
+                          "-g",
+                          "65532",
+                          "/opt/smoke",
+                          "/opt/smoke/home",
+                          "/opt/smoke/prefix",
+                          "/opt/smoke/work",
+                      ]
+                  ),
+                  "ENV HOME=/opt/smoke/home",
+                  "ENV LANG=C.UTF-8",
+                  "ENV LC_ALL=C.UTF-8",
+                  "ENV CI=true",
+                  "ENV PIP_DISABLE_PIP_VERSION_CHECK=1",
+                  "ENV PIP_NO_INPUT=1",
+                  "ENV NPM_CONFIG_AUDIT=false",
+                  "ENV NPM_CONFIG_FUND=false",
+                  "USER 65532:65532",
+                  "WORKDIR /opt/smoke/work",
+                  "ENTRYPOINT []",
+              ]
+              return "\n".join(lines) + "\n"
+
+
+          def inspect_image(reference: str) -> str | None:
+              inspected = run(
+                  [
+                      DOCKER,
+                      "image",
+                      "inspect",
+                      "--format",
+                      "{{.Id}} {{.Architecture}}",
+                      reference,
+                  ],
+                  timeout=60,
+              )
+              fields = inspected.stdout.strip().split()
+              if (
+                  not succeeded(inspected)
+                  or len(fields) != 2
+                  or not IMAGE_ID_RE.fullmatch(fields[0])
+                  or fields[1] != "arm64"
+              ):
+                  return None
+              return fields[0]
+
+
+          def ensure_runtime_image() -> str | None:
+              marker = ROOT / "runtime-image"
+              if marker.is_file():
+                  image = marker.read_text(encoding="utf-8").strip()
+                  return image if inspect_image(image) == image else None
+              context = ROOT / "controller-build-context"
+              if context.exists():
+                  shutil.rmtree(context)
+              context.mkdir(parents=True, mode=0o700)
+              dockerfile = context / "Dockerfile"
+              dockerfile.write_text(runtime_dockerfile(), encoding="utf-8")
+              dockerfile.chmod(0o400)
+              tag = f"arm-smoke-runtime-{RECIPE['kind']}:{os.getpid()}-{EXPECTED_DIGEST[:12]}"
+              built = run(
+                  [
+                      DOCKER,
+                      "build",
+                      "--no-cache",
+                      "--pull",
+                      "--network",
+                      "default",
+                      "--build-arg",
+                      "HTTP_PROXY=",
+                      "--build-arg",
+                      "HTTPS_PROXY=",
+                      "--build-arg",
+                      "NO_PROXY=",
+                      "--build-arg",
+                      "ALL_PROXY=",
+                      "--tag",
+                      tag,
+                      "--file",
+                      str(dockerfile),
+                      str(context),
+                  ],
+                  timeout=900,
+              )
+              image = inspect_image(tag) if succeeded(built) else None
+              if image is None:
+                  return None
+              marker.write_text(image + "\n", encoding="utf-8")
+              marker.chmod(0o600)
+              return image
+
+
+          PIP_PINNED_INSTALL_SCRIPT = r"""
+          import hashlib
+          import json
+          import pathlib
+          import re
+          import subprocess
+          import sys
+
+          pin = json.loads(sys.argv[1])
+          distribution = sys.argv[2]
+          version = sys.argv[3]
+          if pin.get("recipe_kind") != "pip" or pin.get("version") != version:
+              raise RuntimeError("pip artifact pin does not match requested release")
+          allowed = pin.get("artifact_sha256")
+          if (
+              not isinstance(allowed, list)
+              or not allowed
+              or any(not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value)
+                     for value in allowed)
+          ):
+              raise RuntimeError("pip artifact SHA256 allowlist is invalid")
+          download = pathlib.Path("/opt/smoke/work/download")
+          download.mkdir(mode=0o700)
+          subprocess.run(
+              [
+                  sys.executable,
+                  "-m",
+                  "pip",
+                  "download",
+                  "--disable-pip-version-check",
+                  "--no-deps",
+                  "--no-cache-dir",
+                  "--dest",
+                  str(download),
+                  "--",
+                  f"{distribution}=={version}",
+              ],
+              check=True,
+          )
+          artifacts = sorted(path for path in download.iterdir() if path.is_file())
+          if len(artifacts) != 1:
+              raise RuntimeError("pip download did not produce exactly one release artifact")
+          artifact = artifacts[0]
+          if artifact.stat().st_size > 268435456:
+              raise RuntimeError("pip release artifact exceeds the 256 MiB limit")
+          hasher = hashlib.sha256()
+          with artifact.open("rb") as handle:
+              while True:
+                  chunk = handle.read(65536)
+                  if not chunk:
+                      break
+                  hasher.update(chunk)
+          digest = hasher.hexdigest()
+          if digest not in allowed:
+              raise RuntimeError("pip downloaded artifact is not in the trusted registry release")
+          subprocess.run(
+              [
+                  sys.executable,
+                  "-m",
+                  "pip",
+                  "install",
+                  "--disable-pip-version-check",
+                  "--no-input",
+                  "--no-cache-dir",
+                  "--break-system-packages",
+                  "--prefix",
+                  "/opt/smoke/prefix",
+                  "--",
+                  str(artifact),
+              ],
+              check=True,
+          )
+          """
+
+
+          NPM_PINNED_INSTALL_SCRIPT = r"""
+          import base64
+          import hashlib
+          import json
+          import pathlib
+          import subprocess
+          import sys
+          import urllib.request
+
+          pin = json.loads(sys.argv[1])
+          package = sys.argv[2]
+          version = sys.argv[3]
+          urls = pin.get("artifact_urls")
+          integrity = pin.get("artifact_integrity")
+          if (
+              pin.get("recipe_kind") != "npm"
+              or pin.get("version") != version
+              or not isinstance(urls, list)
+              or len(urls) != 1
+              or not isinstance(integrity, str)
+              or not integrity.startswith("sha512-")
+          ):
+              raise RuntimeError("npm artifact pin does not match requested release")
+          request = urllib.request.Request(
+              urls[0],
+              headers={"User-Agent": "arm-ecosystem-smoke-validator/1.0"},
+          )
+          target = pathlib.Path("/opt/smoke/work/package.tgz")
+          total = 0
+          digest = hashlib.sha512()
+          with urllib.request.urlopen(request, timeout=60) as response, target.open("xb") as handle:
+              while True:
+                  chunk = response.read(65536)
+                  if not chunk:
+                      break
+                  total += len(chunk)
+                  if total > 268435456:
+                      raise RuntimeError("npm release artifact exceeds the 256 MiB limit")
+                  digest.update(chunk)
+                  handle.write(chunk)
+          actual = "sha512-" + base64.b64encode(digest.digest()).decode("ascii")
+          if actual != integrity:
+              raise RuntimeError("npm downloaded tarball failed the trusted registry SRI check")
+          subprocess.run(
+              [
+                  "/usr/bin/npm",
+                  "install",
+                  "--prefix",
+                  "/opt/smoke",
+                  "--no-audit",
+                  "--no-fund",
+                  "--package-lock=false",
+                  "--",
+                  str(target),
+              ],
+              check=True,
+          )
+          """
+
+
+          def installation_invocation(version: str) -> list[str]:
+              pin = ARTIFACTS_BY_VERSION.get(version)
+              if not isinstance(pin, dict):
+                  raise RuntimeError("requested version has no trusted registry artifact pin")
+              pin_json = json.dumps(pin, sort_keys=True, separators=(",", ":"))
+              if RECIPE["kind"] == "pip":
+                  return [
+                      "/usr/bin/python3",
+                      "-I",
+                      "-c",
+                      PIP_PINNED_INSTALL_SCRIPT,
+                      pin_json,
+                      RECIPE["distribution"],
+                      version,
+                  ]
+              return [
+                  "/usr/bin/python3",
+                  "-I",
+                  "-c",
+                  NPM_PINNED_INSTALL_SCRIPT,
+                  pin_json,
+                  RECIPE["package"],
+                  version,
+              ]
+
+
+          def install_package_image(version: str, lane: str) -> bool:
+              global LAST_INSTALL_FAILURE_CLASS
+
+              LAST_INSTALL_FAILURE_CLASS = "not_run"
+              runtime = ensure_runtime_image()
+              if runtime is None:
+                  LAST_INSTALL_FAILURE_CLASS = "runtime_image_setup_failure"
+                  return False
+              destination = lane_dir(lane)
+              if destination.exists():
+                  shutil.rmtree(destination)
+              destination.mkdir(parents=True, mode=0o700)
+              token = f"{SLUG[:36]}-{lane}-{os.getpid()}"
+              container = f"arm-smoke-install-{token}"
+              tag = f"arm-smoke-package-{SLUG[:36]}-{lane}:{os.getpid()}"
+              invocation = installation_invocation(version)
+              installed = run(
+                  [
+                      DOCKER,
+                      "run",
+                      "--name",
+                      container,
+                      "--user",
+                      "65532:65532",
+                      "--cap-drop",
+                      "ALL",
+                      "--security-opt",
+                      "no-new-privileges",
+                      "--pids-limit",
+                      "256",
+                      "--memory",
+                      "1g",
+                      "--memory-swap",
+                      "1g",
+                      "--cpus",
+                      "2",
+                      "--network",
+                      "bridge",
+                      "--tmpfs",
+                      "/tmp:rw,noexec,nosuid,nodev,size=128m,uid=65532,gid=65532,mode=0700",
+                      "--env",
+                      "HOME=/opt/smoke/home",
+                      "--env",
+                      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                      "--env",
+                      "PIP_DISABLE_PIP_VERSION_CHECK=1",
+                      "--env",
+                      "PIP_NO_INPUT=1",
+                      "--env",
+                      "NPM_CONFIG_AUDIT=false",
+                      "--env",
+                      "NPM_CONFIG_FUND=false",
+                      "--workdir",
+                      "/opt/smoke/work",
+                      runtime,
+                      *invocation,
+                  ],
+                  timeout=900,
+              )
+              try:
+                  if not succeeded(installed):
+                      LAST_INSTALL_FAILURE_CLASS = {
+                          124: "timeout",
+                          125: "output_limit",
+                      }.get(installed.returncode, "package_install_or_network_failure")
+                      return False
+                  committed = run(
+                      [DOCKER, "commit", container, tag],
+                      timeout=120,
+                  )
+                  image = inspect_image(tag) if succeeded(committed) else None
+                  if image is None:
+                      LAST_INSTALL_FAILURE_CLASS = (
+                          "container_commit_failure"
+                          if not succeeded(committed)
+                          else "package_image_identity_failure"
+                      )
+                      return False
+                  marker = destination / "image-ref"
+                  marker.write_text(image + "\n", encoding="utf-8")
+                  marker.chmod(0o600)
+                  LAST_INSTALL_FAILURE_CLASS = "none"
+                  return True
+              finally:
+                  run([DOCKER, "rm", "--force", container], timeout=60)
+
+
+          def read_lane_image(lane: str) -> str:
+              marker = lane_dir(lane) / "image-ref"
+              image = marker.read_text(encoding="utf-8").strip()
+              if not IMAGE_ID_RE.fullmatch(image) or inspect_image(image) != image:
+                  raise RuntimeError("isolated package image identity is invalid")
+              return image
+
+
+          def isolated_run(
+              lane: str,
+              entrypoint: str,
+              arguments: list[str],
+              *,
+              timeout: int,
+              workdir: str = "/work",
+          ) -> Result:
+              if workdir not in {"/work", "/opt/smoke"}:
+                  raise ValueError("invalid isolated work directory")
+              image = read_lane_image(lane)
+              return run(
+                  [
+                      DOCKER,
+                      "run",
+                      "--rm",
+                      "--user",
+                      "65532:65532",
+                      "--read-only",
+                      "--cap-drop",
+                      "ALL",
+                      "--security-opt",
+                      "no-new-privileges",
+                      "--pids-limit",
+                      "128",
+                      "--memory",
+                      "512m",
+                      "--memory-swap",
+                      "512m",
+                      "--cpus",
+                      "1",
+                      "--network",
+                      "none",
+                      "--ulimit",
+                      "core=0:0",
+                      "--ulimit",
+                      "fsize=1048576:1048576",
+                      "--ulimit",
+                      "nofile=256:256",
+                      "--tmpfs",
+                      "/tmp:rw,noexec,nosuid,nodev,size=64m,uid=65532,gid=65532,mode=0700",
+                      "--tmpfs",
+                      "/work:rw,noexec,nosuid,nodev,size=64m,uid=65532,gid=65532,mode=0700",
+                      "--env",
+                      "HOME=/tmp",
+                      "--env",
+                      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                      "--env",
+                      "PYTHONDONTWRITEBYTECODE=1",
+                      "--env",
+                      "PYTHONNOUSERSITE=1",
+                      "--env",
+                      "NODE_OPTIONS=",
+                      "--workdir",
+                      workdir,
+                      "--entrypoint",
+                      entrypoint,
+                      image,
+                      *arguments,
+                  ],
+                  timeout=timeout + 30,
+              )
+
+
+          OWNED_ARTIFACT_SCRIPT = r"""
+          import csv
+          import json
+          import os
+          import re
+          import sys
+          from email.parser import Parser
+          from pathlib import Path
+
+          MAX_FILES = 50000
+
+
+          def normalized(value):
+              return re.sub(r"[-_.]+", "-", value).casefold()
+
+
+          def require_within(path, root):
+              resolved = path.resolve(strict=True)
+              if resolved != root and root not in resolved.parents:
+                  raise RuntimeError("owned artifact escapes package root")
+              if not resolved.is_file():
+                  raise RuntimeError("owned artifact is not a regular file")
+              return resolved
+
+
+          def pip_owned(identifier):
+              root = Path("/opt/smoke/prefix").resolve(strict=True)
+              matches = []
+              for metadata in sorted(root.glob("**/*.dist-info/METADATA")):
+                  parsed = Parser().parsestr(metadata.read_text(encoding="utf-8", errors="strict"))
+                  if normalized(parsed.get("Name", "")) == normalized(identifier):
+                      matches.append((metadata.parent, parsed))
+              if len(matches) != 1:
+                  raise RuntimeError("expected exactly one target distribution metadata directory")
+              dist_info, parsed = matches[0]
+              record = dist_info / "RECORD"
+              package_directory = dist_info.parent
+              owned = set()
+              with record.open(newline="", encoding="utf-8") as handle:
+                  for row in csv.reader(handle):
+                      if not row or not row[0] or "\x00" in row[0]:
+                          raise RuntimeError("invalid wheel RECORD entry")
+                      owned.add(require_within(package_directory / row[0], root))
+                      if len(owned) > MAX_FILES:
+                          raise RuntimeError("owned artifact inventory exceeds bound")
+              return root, parsed.get("Name", ""), parsed.get("Version", ""), sorted(owned)
+
+
+          def npm_owned(identifier):
+              parts = identifier.split("/")
+              if len(parts) not in {1, 2} or any(not part for part in parts):
+                  raise RuntimeError("invalid npm package identifier")
+              root = Path("/opt/smoke/node_modules").joinpath(*parts).resolve(strict=True)
+              metadata = json.loads((root / "package.json").read_text(encoding="utf-8"))
+              owned = set()
+              for directory, directories, files in os.walk(root, followlinks=False):
+                  directories.sort()
+                  files.sort()
+                  for name in list(directories):
+                      child = Path(directory) / name
+                      if child.is_symlink():
+                          raise RuntimeError("symlinked package directories are not accepted")
+                  for name in files:
+                      owned.add(require_within(Path(directory) / name, root))
+                      if len(owned) > MAX_FILES:
+                          raise RuntimeError("owned artifact inventory exceeds bound")
+              return root, metadata.get("name", ""), metadata.get("version", ""), sorted(owned)
+
+
+          kind, identifier = sys.argv[1:3]
+          if kind == "pip":
+              root, name, version, owned_files = pip_owned(identifier)
+          elif kind == "npm":
+              root, name, version, owned_files = npm_owned(identifier)
+          else:
+              raise RuntimeError("unsupported package manager")
+          if not owned_files:
+              raise RuntimeError("owned artifact inventory is empty")
+
+          elf_count = 0
+          non_arm64 = []
+          for path in owned_files:
+              with path.open("rb") as handle:
+                  header = handle.read(20)
+              if header[:4] != b"\x7fELF":
+                  continue
+              elf_count += 1
+              if len(header) < 20 or header[5] not in {1, 2}:
+                  non_arm64.append(str(path.relative_to(root)))
+                  continue
+              byteorder = "little" if header[5] == 1 else "big"
+              machine = int.from_bytes(header[18:20], byteorder=byteorder)
+              if machine != 183:
+                  non_arm64.append(str(path.relative_to(root)))
+
+          print(
+              json.dumps(
+                  {
+                      "name": name,
+                      "version": version,
+                      "file_count": len(owned_files),
+                      "elf_count": elf_count,
+                      "non_arm64": non_arm64[:20],
+                      "scan_complete": len(non_arm64) <= 20,
+                  },
+                  sort_keys=True,
+                  separators=(",", ":"),
+              )
+          )
+          """
+
+
+          def artifact_report(lane: str) -> dict[str, Any] | None:
+              identifier = (
+                  RECIPE["distribution"] if RECIPE["kind"] == "pip" else RECIPE["package"]
+              )
+              result = isolated_run(
+                  lane,
+                  "/usr/bin/python3",
+                  ["-I", "-S", "-c", OWNED_ARTIFACT_SCRIPT, RECIPE["kind"], identifier],
+                  timeout=120,
+              )
+              if not succeeded(result) or result.stderr.strip():
+                  return None
+              try:
+                  payload: Any = json.loads(result.stdout)
+              except ValueError:
+                  return None
+              if not isinstance(payload, dict):
+                  return None
+              return payload
+
+
+          def expected_package_name() -> str:
+              return RECIPE["distribution"] if RECIPE["kind"] == "pip" else RECIPE["package"]
+
+
+          def metadata_ok(report: dict[str, Any] | None) -> bool:
+              if report is None:
+                  return False
+              observed_name = report.get("name")
+              expected_name = expected_package_name()
+              name_matches = (
+                  re.sub(r"[-_.]+", "-", str(observed_name)).casefold()
+                  == re.sub(r"[-_.]+", "-", expected_name).casefold()
+                  if RECIPE["kind"] == "pip"
+                  else observed_name == expected_name
+              )
+              return (
+                  name_matches
+                  and isinstance(report.get("file_count"), int)
+                  and report["file_count"] > 0
+              )
+
+
+          def version_ok(report: dict[str, Any] | None, expected: str) -> bool:
+              return metadata_ok(report) and report is not None and report.get("version") == expected
+
+
+          def architecture_ok(report: dict[str, Any] | None) -> bool:
+              return (
+                  metadata_ok(report)
+                  and report is not None
+                  and report.get("scan_complete") is True
+                  and isinstance(report.get("elf_count"), int)
+                  and report["elf_count"] >= 0
+                  and report.get("non_arm64") == []
+              )
+
+
+          def functional_result(lane: str) -> Result:
+              if RECIPE["kind"] == "pip":
+                  module = json.dumps(RECIPE["import_module"])
+                  script = (
+                      "import importlib,importlib.util,pathlib,sys;"
+                      "root=pathlib.Path('/opt/smoke/prefix');"
+                      "sites=sorted({str(p.parent) for p in root.glob('**/*.dist-info')});"
+                      "sys.path[:0]=sites;"
+                      f"module={module};"
+                      "spec=importlib.util.find_spec(module);"
+                      "assert spec is not None;"
+                      "origins=(([spec.origin] if spec.origin not in "
+                      "(None,'built-in','frozen') else [])+"
+                      "list(spec.submodule_search_locations or ()));"
+                      "owned=[pathlib.Path(value).resolve() for value in origins];"
+                      "resolved_root=root.resolve();"
+                      "assert owned and all("
+                      "path==resolved_root or resolved_root in path.parents for path in owned);"
+                      "importlib.import_module(module);"
+                      "print('import_ok:' + module)"
+                  )
+                  return isolated_run(
+                      lane,
+                      "/usr/bin/python3",
+                      ["-I", "-S", "-c", script],
+                      timeout=PLAN["functional_probe"]["invocation"]["timeout_seconds"],
+                  )
+              package = json.dumps(RECIPE["package"])
+              package_root = json.dumps(
+                  "/opt/smoke/node_modules/" + RECIPE["package"].replace("/", "/")
+              )
+              script = (
+                  "import {builtinModules,createRequire} from 'node:module';"
+                  "import path from 'node:path';"
+                  f"const packageName={package};"
+                  f"const packageRoot={package_root};"
+                  "if(builtinModules.includes(packageName)){throw new Error('builtin collision');}"
+                  "const require=createRequire(import.meta.url);"
+                  "const resolved=path.resolve(require.resolve(packageName));"
+                  "const root=path.resolve(packageRoot);"
+                  "if(resolved!==root&&!resolved.startsWith(root+path.sep)){"
+                  "throw new Error('resolved module is not package-owned');}"
+                  "await import(packageName);"
+                  "console.log('import_ok:' + packageName);"
+              )
+              return isolated_run(
+                  lane,
+                  "/usr/bin/node",
+                  ["--input-type=module", "--eval", script],
+                  timeout=PLAN["functional_probe"]["invocation"]["timeout_seconds"],
+                  workdir="/opt/smoke",
+              )
+
+
+          def functional_ok(result: Result) -> bool:
+              assertions = PLAN["functional_probe"]["assertions"]
+              expected_exit = [
+                  item["expected"] for item in assertions if item["kind"] == "exit_code"
+              ]
+              expected_markers = [
+                  item["value"] for item in assertions if item["kind"] == "output_contains"
+              ]
+              if any(item["kind"] not in {"exit_code", "output_contains"} for item in assertions):
+                  return False
+              if len(expected_exit) > 1 or len(expected_markers) != 1:
+                  return False
+              exit_code = expected_exit[0] if expected_exit else 0
+              lines = (result.stdout + result.stderr).splitlines()
+              return result.returncode == exit_code and expected_markers[0] in lines
+
+
+          def run_test(number: int, output_path: Path) -> None:
+              started = time.monotonic()
+              baseline = PLAN["baseline_version"]
+              if number == 1:
+                  if ROOT.exists():
+                      if ROOT.is_symlink():
+                          raise RuntimeError("controller root cannot be a symlink")
+                      shutil.rmtree(ROOT)
+                  ROOT.mkdir(parents=True, mode=0o700)
+                  passed = install_package_image(baseline, "baseline")
+                  failure_class = "none" if passed else LAST_INSTALL_FAILURE_CLASS
+                  complete(
+                      output_path,
+                      passed=passed,
+                      started=started,
+                      details=(
+                          "Exact baseline installed in an unprivileged isolated container."
+                          if passed
+                          else f"Isolated baseline installation failed ({failure_class})."
+                      ),
+                      extra={"failure_class": failure_class},
+                  )
+                  return
+
+              if number in {2, 3, 4}:
+                  report = artifact_report("baseline")
+                  if number == 2:
+                      passed = version_ok(report, baseline)
+                      details = (
+                          "Trusted metadata scan matched the exact baseline version."
+                          if passed
+                          else "Trusted metadata scan did not match the exact baseline version."
+                      )
+                  elif number == 3:
+                      passed = metadata_ok(report)
+                      details = (
+                          "Bounded package-owned artifact inventory is complete."
+                          if passed
+                          else "Package-owned artifact metadata is missing or inconsistent."
+                      )
+                  else:
+                      passed = architecture_ok(report)
+                      elf_count = report.get("elf_count", 0) if report else 0
+                      details = (
+                          f"Every package-owned ELF artifact is Arm64 ({elf_count} ELF files scanned)."
+                          if passed and elf_count
+                          else (
+                              "Complete package-owned inventory contains no ELF artifacts; "
+                              "the package is architecture-neutral."
+                              if passed
+                              else "A package-owned ELF artifact is not Arm64 or the scan was incomplete."
+                          )
+                      )
+                  complete(
+                      output_path,
+                      passed=passed,
+                      started=started,
+                      details=details,
+                  )
+                  return
+
+              if number == 5:
+                  result = functional_result("baseline")
+                  passed = functional_ok(result)
+                  complete(
+                      output_path,
+                      passed=passed,
+                      started=started,
+                      details=(
+                          "Canonical functional probe passed in a fresh read-only offline container."
+                          if passed
+                          else "Canonical functional probe failed in the isolated test container."
+                      ),
+                  )
+                  return
+
+              if number != 6:
+                  raise ValueError("executor supports exactly Tests 1-6")
+
+              policy = PLAN["regression_policy"]
+              if policy["mode"] == "approved_deferral":
+                  decision = policy["deferral_decision"]
+                  write_outputs(
+                      output_path,
+                      {
+                          "status": "skipped",
+                          "duration": max(0, int(time.monotonic() - started)),
+                          "details": f"Test 6 explicitly deferred: {decision}.",
+                          "regression_decision": decision,
+                          "emitter_regression_decision": decision,
+                          "regression_result": (
+                              "Candidate validation was explicitly deferred "
+                              "and was not counted as passed."
+                          ),
+                          "regression_latest_version": baseline,
+                          "regression_next_installed_version": "not_installed",
+                      },
+                  )
+                  return
+
+              candidate = policy["candidate_version"]
+              installed = install_package_image(candidate, "candidate")
+              install_failure_class = "none" if installed else LAST_INSTALL_FAILURE_CLASS
+              report = artifact_report("candidate") if installed else None
+              version_passed = installed and version_ok(report, candidate)
+              metadata_passed = installed and metadata_ok(report)
+              architecture_passed = installed and architecture_ok(report)
+              probe = (
+                  functional_result("candidate")
+                  if installed
+                  else Result(tuple(), 1, "", "candidate installation failed")
+              )
+              functional_passed = installed and functional_ok(probe)
+              passed = bool(
+                  installed
+                  and version_passed
+                  and metadata_passed
+                  and architecture_passed
+                  and functional_passed
+              )
+              complete(
+                  output_path,
+                  passed=passed,
+                  started=started,
+                  details=(
+                      "Candidate passed install, metadata, version, complete ELF, and functional checks."
+                      if passed
+                      else (
+                          "Candidate failed isolated installation, metadata, version, "
+                          "architecture, or functional validation."
+                      )
+                  ),
+                  extra={
+                      "regression_decision": "candidate_passed" if passed else "candidate_failed",
+                      "regression_result": (
+                          "Candidate passed native Arm64 validation."
+                          if passed
+                          else "Candidate failed native Arm64 validation."
+                      ),
+                      "regression_latest_version": candidate,
+                      "regression_next_installed_version": (
+                          candidate if version_passed else "not_verified"
+                      ),
+                      "failure_class": (
+                          "none"
+                          if passed
+                          else (
+                              install_failure_class
+                              if not installed
+                              else "package_validation_failure"
+                          )
+                      ),
+                  },
+              )
+
+
+          def main(argv: list[str]) -> int:
+              if len(argv) != 3:
+                  raise ValueError("usage: smoke-executor TEST_NUMBER GITHUB_OUTPUT")
+              output = Path(argv[2])
+              try:
+                  run_test(int(argv[1]), output)
+              except SmokeTestFailure:
+                  return 1
+              except Exception as exc:
+                  traceback.print_exc()
+                  write_outputs(
+                      output,
+                      {
+                          "status": "failed",
+                          "duration": "0",
+                          "details": f"Trusted smoke controller failed safely: {type(exc).__name__}.",
+                      },
+                  )
+                  return 1
+              return 0
+
+
+          if __name__ == "__main__":
+              raise SystemExit(main(sys.argv))
+          PY
+          chmod 0500 "$smoke_harness"
+
+      - name: "Test 1 - Install exact baseline package"
+        id: test1
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/timeout --signal=TERM --kill-after=10s 600s /usr/bin/python3 "$SMOKE_HARNESS" 1 "$GITHUB_OUTPUT"
+
+      - name: "Test 2 - Verify exact baseline version"
+        id: test2
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/timeout --signal=TERM --kill-after=10s 600s /usr/bin/python3 "$SMOKE_HARNESS" 2 "$GITHUB_OUTPUT"
+
+      - name: "Test 3 - Validate installed artifact metadata"
+        id: test3
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/timeout --signal=TERM --kill-after=10s 600s /usr/bin/python3 "$SMOKE_HARNESS" 3 "$GITHUB_OUTPUT"
+
+      - name: "Test 4 - Verify native Arm64 architecture"
+        id: test4
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/timeout --signal=TERM --kill-after=10s 600s /usr/bin/python3 "$SMOKE_HARNESS" 4 "$GITHUB_OUTPUT"
+
+      - name: "Test 5 - Run package-specific functional probe"
+        id: test5
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/timeout --signal=TERM --kill-after=10s 600s /usr/bin/python3 "$SMOKE_HARNESS" 5 "$GITHUB_OUTPUT"
+
+      - name: "Test 6 - Validate isolated candidate or explicit deferral"
+        id: test6
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/timeout --signal=TERM --kill-after=10s 900s /usr/bin/python3 "$SMOKE_HARNESS" 6 "$GITHUB_OUTPUT"
+
+      - name: "Emit canonical six-test result"
+        id: summary
+        if: always()
+        uses: ./.github/actions/emit-package-result
+        with:
+          package_slug: "numpy"
+          package_name: "NumPy"
+          version: "2.5.1"
+          install_status: "${{ steps.test1.outputs.status == 'passed' && 'success' || 'failed' }}"
+          runner_label: "ubuntu-24.04 (arm64)"
+          test1_label: "Install exact baseline package"
+          test2_label: "Verify exact baseline version"
+          test3_label: "Validate installed artifact metadata"
+          test4_label: "Verify native Arm64 architecture"
+          test5_label: "Run package-specific functional probe"
+          test1_status: "${{ steps.test1.outputs.status || 'skipped' }}"
+          test2_status: "${{ steps.test2.outputs.status || 'skipped' }}"
+          test3_status: "${{ steps.test3.outputs.status || 'skipped' }}"
+          test4_status: "${{ steps.test4.outputs.status || 'skipped' }}"
+          test5_status: "${{ steps.test5.outputs.status || 'skipped' }}"
+          test6_status: "${{ steps.test6.outputs.status || 'skipped' }}"
+          test1_duration: "${{ steps.test1.outputs.duration || '0' }}"
+          test2_duration: "${{ steps.test2.outputs.duration || '0' }}"
+          test3_duration: "${{ steps.test3.outputs.duration || '0' }}"
+          test4_duration: "${{ steps.test4.outputs.duration || '0' }}"
+          test5_duration: "${{ steps.test5.outputs.duration || '0' }}"
+          test6_duration: "${{ steps.test6.outputs.duration || '0' }}"
+          regression_decision: "${{ steps.test6.outputs.emitter_regression_decision || steps.test6.outputs.regression_decision || 'candidate_failed' }}"
+          regression_current_version: "2.5.1"
+          regression_latest_version: "${{ steps.test6.outputs.regression_latest_version || '2.5.1' }}"
+          regression_next_installed_version: "${{ steps.test6.outputs.regression_next_installed_version || 'not_installed' }}"
+          regression_result: "${{ steps.test6.outputs.regression_result || 'Regression validation did not complete.' }}"
+          regression_details: "${{ steps.test6.outputs.details || 'Regression comparison unavailable because validation did not complete.' }}"
+          fail_on_test6: "true"
+
+      - name: "Enforce strict smoke-test result"
+        id: enforce
+        if: always()
+        shell: bash
+        env:
+          SHOULD_FAIL: "${{ steps.summary.outputs.should_fail || '1' }}"
+          RUN_STATUS: "${{ steps.summary.outputs.overall_status || 'failure' }}"
+          PASSED: "${{ steps.summary.outputs.passed || '0' }}"
+          FAILED: "${{ steps.summary.outputs.failed || '0' }}"
+          SKIPPED: "${{ steps.summary.outputs.skipped || '6' }}"
+          TEST1_STATUS: "${{ steps.test1.outputs.status || 'skipped' }}"
+          TEST2_STATUS: "${{ steps.test2.outputs.status || 'skipped' }}"
+          TEST3_STATUS: "${{ steps.test3.outputs.status || 'skipped' }}"
+          TEST4_STATUS: "${{ steps.test4.outputs.status || 'skipped' }}"
+          TEST5_STATUS: "${{ steps.test5.outputs.status || 'skipped' }}"
+        run: |
+          set -euo pipefail
+          TOTAL=$((PASSED + FAILED + SKIPPED))
+          if [ "$TOTAL" -ne 6 ]; then
+            printf '%s\n' 'Invalid smoke accounting: expected exactly six tests.' >&2
             exit 1
           fi
-      - name: Create test summary
-        if: always()
-        run: |
-          echo "## NumPy Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status:** ${{ steps.summary.outputs.overall_status }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Tests Passed:** ${{ steps.summary.outputs.passed }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Tests Failed:** ${{ steps.summary.outputs.failed }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Duration:** ${{ steps.summary.outputs.duration || 0 }}s" >> $GITHUB_STEP_SUMMARY
-          echo "- **Runner:** ubuntu-24.04 (arm64)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Test Details" >> $GITHUB_STEP_SUMMARY
-          echo "1. Test 1 - Import NumPy: ${{ steps.test1.outputs.status || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "2. Test 2 - Check installed version: ${{ steps.test2.outputs.status || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "3. Test 3 - Check f2py help: ${{ steps.test3.outputs.status || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "4. Test 4 - Verify architecture: ${{ steps.test4.outputs.status || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "5. Test 5 - Run array operations: ${{ steps.test5.outputs.status || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
-
+          for status in "$TEST1_STATUS" "$TEST2_STATUS" "$TEST3_STATUS" "$TEST4_STATUS" "$TEST5_STATUS"; do
+            if [ "$status" != "passed" ]; then
+              printf '%s\n' 'A required baseline test did not pass.' >&2
+              exit 1
+            fi
+          done
+          if [ "$SHOULD_FAIL" != "0" ] || [ "$RUN_STATUS" != "success" ]; then
+            printf '%s\n' 'Canonical smoke policy rejected this result.' >&2
+            exit 1
+          fi
