@@ -25,11 +25,19 @@ EVIDENCE_ROOT = Path(".github/catalog-evidence/numpy")
 PYPI_SNAPSHOT = EVIDENCE_ROOT / "pypi.json"
 GITHUB_SNAPSHOT = EVIDENCE_ROOT / "github-commit.json"
 NPM_REVIEW = EVIDENCE_ROOT / "npm-review.md"
+NINJA_EVIDENCE_ROOT = Path(".github/catalog-evidence/ninja")
+NINJA_PYPI_SNAPSHOT = NINJA_EVIDENCE_ROOT / "pypi.json"
+NINJA_SHA256SUMS = NINJA_EVIDENCE_ROOT / "SHA256SUMS"
+NINJA_WORKFLOW_FIXTURE = Path("build_steps/fixtures/test-ninja.yml")
+CORPUS_REVIEW = Path("docs/sandbox-pip-e2e-fixture.md")
+PACKAGE_DISPLAY_PARTIAL = Path(
+    "themes/arm-design-system-hugo-theme/layouts/partials/package-display/row-sub.html"
+)
 SEED_RESULT = Path("data/test-results/numpy.json")
 SEED_INDEX = Path("data/test-results-index.json")
 SOURCE_DASHBOARD_COMMIT = "550f5cbc578783170b9b0706e9257653ed4dddea"
-SOURCE_SERVICE_COMMIT = "6aa4eebc802685281cee88dfc3101921b1408e97"
-VERIFIED_AT = "2026-07-29T14:55:00+00:00"
+SOURCE_SERVICE_COMMIT = "1ce6a0db14f99fa560f681fe8a7fd57934070bf0"
+VERIFIED_AT = "2026-07-30T19:59:51+00:00"
 VERIFIER = f"arm-ecosystem-sandbox-fixture-builder@{SOURCE_SERVICE_COMMIT}"
 PYPI_LOCATOR = "https://pypi.org/pypi/numpy/json"
 GITHUB_COMMIT = "4350526858b0e8ce8932538da664aa8d1a182410"
@@ -51,7 +59,13 @@ GITHUB_SNAPSHOT_SHA256 = (
     "56406eb1e1ad9a4abfccf6e66ff35a935c0cb3d7368a4cf1be15848d2f6c6de0"
 )
 NPM_REVIEW_SHA256 = "e0a5e28123d90cc913f33bb784d1ec09bc53e302dbeb46f9fc15784db5cce87a"
-WORKFLOW_SHA256 = "43c1f33b84fd713a3665f71d13ee268ed888c4fa05617a625ee2925dccd7c146"
+WORKFLOW_SHA256 = "0f4d6617a75c2e6634f6f27985c9ac932c5539d5d57a51e19afaef7ae78f8be0"
+NINJA_PYPI_SNAPSHOT_SHA256 = (
+    "1a5a8a5b0c93bf0004add485acc7b373d54ea486c1088c9f5f50f9bf8badb4e5"
+)
+NINJA_WORKFLOW_SHA256 = (
+    "295ec8a344e613d6dd9b489178c0eca9811bb526bb0d96f67a30661a1584e4de"
+)
 LEGACY_RUN_ID = "30413367209"
 LEGACY_RUN_ATTEMPT = "1"
 LEGACY_RUN_URL = (
@@ -215,6 +229,38 @@ def _validate_npm_review(raw: bytes) -> None:
         )
 
 
+def _validate_ninja_evidence(
+    pypi_snapshot: bytes,
+    checksums: bytes,
+    workflow: bytes,
+) -> None:
+    if _sha256(pypi_snapshot) != NINJA_PYPI_SNAPSHOT_SHA256:
+        raise SystemExit(
+            "archived Ninja PyPI evidence differs from the reviewed snapshot"
+        )
+    expected_checksums = f"{NINJA_PYPI_SNAPSHOT_SHA256}  pypi.json\n".encode("ascii")
+    if checksums != expected_checksums:
+        raise SystemExit("Ninja evidence checksum manifest is not canonical")
+    if _sha256(workflow) != NINJA_WORKFLOW_SHA256:
+        raise SystemExit(
+            "Ninja workflow differs from the reviewed official renderer output"
+        )
+
+
+def _validate_binary_scope_rendering(raw: bytes) -> None:
+    text = raw.decode("utf-8")
+    required = (
+        'support_scope "pypi_binary_distribution"',
+        "official Linux AArch64 binary wheels for",
+        "earliest stable, non-yanked PyPI",
+        "does not establish when source compatibility",
+    )
+    if any(marker not in text for marker in required):
+        raise SystemExit(
+            "dashboard template does not preserve the binary-distribution scope"
+        )
+
+
 def _workflow_env(workflow: str, name: str) -> str:
     match = re.search(
         rf'^  {re.escape(name)}: "([^"\n]+)"$', workflow, flags=re.MULTILINE
@@ -288,11 +334,17 @@ def _expected_plan() -> dict[str, Any]:
 def _expected_artifact_pins() -> list[dict[str, Any]]:
     return [
         {
-            "artifact_integrity": None,
-            "artifact_sha256": [WHEEL_SHA256],
-            "artifact_urls": [WHEEL_URL],
+            "artifacts": [
+                {
+                    "filename": WHEEL_FILENAME,
+                    "integrity": None,
+                    "sha256": WHEEL_SHA256,
+                    "url": WHEEL_URL,
+                }
+            ],
+            "binary_only": False,
             "recipe_kind": "pip",
-            "schema_version": "1.0",
+            "schema_version": "1.2",
             "version": BASELINE_VERSION,
         }
     ]
@@ -437,6 +489,11 @@ def _catalog_payload() -> dict[str, Any]:
     pypi = _read(PYPI_SNAPSHOT)
     github = _read(GITHUB_SNAPSHOT)
     npm_review = _read(NPM_REVIEW)
+    ninja_pypi = _read(NINJA_PYPI_SNAPSHOT)
+    ninja_checksums = _read(NINJA_SHA256SUMS)
+    ninja_workflow = _read(NINJA_WORKFLOW_FIXTURE)
+    corpus_review = _read(CORPUS_REVIEW)
+    package_display_partial = _read(PACKAGE_DISPLAY_PARTIAL)
     result = _decode_json(_read(SEED_RESULT), "historical NumPy seed result")
     result_index = _decode_json(_read(SEED_INDEX), "historical NumPy seed index")
 
@@ -445,6 +502,8 @@ def _catalog_payload() -> dict[str, Any]:
     _validate_pypi_snapshot(pypi_payload, pypi)
     _validate_github_snapshot(github_payload, github)
     _validate_npm_review(npm_review)
+    _validate_ninja_evidence(ninja_pypi, ninja_checksums, ninja_workflow)
+    _validate_binary_scope_rendering(package_display_partial)
     _validate_workflow(workflow)
     _validate_seed_results(result, result_index)
 
@@ -452,6 +511,7 @@ def _catalog_payload() -> dict[str, Any]:
     workflow_sha = _sha256(workflow)
     pypi_sha = _sha256(pypi)
     github_evidence_sha = _sha256(github)
+    corpus_review_sha = _sha256(corpus_review)
     pip_evidence = sorted(
         [
             {
@@ -470,13 +530,29 @@ def _catalog_payload() -> dict[str, Any]:
                 "evidence_sha256": pypi_sha,
                 "rationale": (
                     "Archived PyPI API evidence identifies the normalized numpy "
-                    "distribution and its canonical numpy/numpy source repository."
+                    "distribution and the reviewed GitHub evidence independently "
+                    "binds it to the canonical numpy/numpy source repository."
                 ),
                 "source_kind": "pypi_api",
                 "source_locator": PYPI_LOCATOR,
                 "source_revision": pypi_sha,
                 "verified_at": VERIFIED_AT,
                 "verified_by": VERIFIER,
+            },
+            {
+                "evidence_sha256": corpus_review_sha,
+                "rationale": (
+                    "A manual review of the exact one-page, one-workflow bounded "
+                    "fixture confirms that numpy is its sole pip identity. This "
+                    "exhaustive decision applies only to this sandbox corpus."
+                ),
+                "source_kind": "manual_review",
+                "source_locator": (
+                    "docs/sandbox-pip-e2e-fixture.md#identity-trust-root"
+                ),
+                "source_revision": corpus_review_sha,
+                "verified_at": VERIFIED_AT,
+                "verified_by": ("ranimandepudi+required-independent-codeowner-review"),
             },
         ],
         key=_evidence_sort_key,
@@ -521,7 +597,7 @@ def _catalog_payload() -> dict[str, Any]:
                     },
                     "pip": {
                         "evidence": pip_evidence,
-                        "exhaustive": False,
+                        "exhaustive": True,
                         "identities": ["numpy"],
                         "status": "verified",
                     },
@@ -568,11 +644,19 @@ def _manifest_payload(catalog_bytes: bytes) -> dict[str, Any]:
         Path("build_steps/tests/test_validate_pip_sandbox_candidate.py"),
         Path("build_steps/validate_package_identity_catalog.py"),
         Path("build_steps/validate_pip_sandbox_candidate.py"),
+        NINJA_WORKFLOW_FIXTURE,
         SEED_INDEX,
         SEED_RESULT,
         Path("docs/sandbox-pip-e2e-fixture.md"),
+        PACKAGE_DISPLAY_PARTIAL,
     )
-    evidence_files = (PYPI_SNAPSHOT, GITHUB_SNAPSHOT, NPM_REVIEW)
+    evidence_files = (
+        PYPI_SNAPSHOT,
+        GITHUB_SNAPSHOT,
+        NPM_REVIEW,
+        NINJA_PYPI_SNAPSHOT,
+        NINJA_SHA256SUMS,
+    )
     return {
         "catalog_sha256": _sha256(catalog_bytes),
         "evidence": {path.as_posix(): _sha256(_read(path)) for path in evidence_files},

@@ -10,14 +10,16 @@ import unittest
 from collections.abc import Callable
 from datetime import UTC, date, datetime
 from pathlib import Path
-from unittest import mock
 
 import yaml
 
 from build_steps.validate_pip_sandbox_candidate import (
     CandidateValidationError,
+    _TRUSTED_SANDBOX_PACKAGE_IDENTITIES,
     _approved_import_root,
-    _trusted_pypi_release_date,
+    _candidate_workflow_identity,
+    _normalized_package_template,
+    _trusted_pypi_boundary,
     _yaml,
 )
 from build_steps.validate_pip_sandbox_candidate import (
@@ -32,8 +34,9 @@ RUN_ATTEMPT = 1
 IMAGE_DIGEST = "sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90"
 TRUSTED_SOURCE_REVISION = "a" * 40
 TRUSTED_VERIFIED_AT = datetime(2026, 7, 29, 12, 0, tzinfo=UTC)
-TRUSTED_MINIMUM_RELEASE_DATE = date(2012, 12, 17)
+TRUSTED_MINIMUM_RELEASE_DATE = date(2021, 7, 17)
 AUTOMATION_IDENTITY = "ecosystem-package-onboarding/package-identity-catalog@1.1"
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _sha(payload: bytes) -> str:
@@ -59,7 +62,6 @@ def validate(base: Path, candidate: Path) -> None:
         candidate,
         expected_source_revision=TRUSTED_SOURCE_REVISION,
         expected_verified_at=TRUSTED_VERIFIED_AT,
-        expected_minimum_release_date=TRUSTED_MINIMUM_RELEASE_DATE,
     )
 
 
@@ -130,27 +132,30 @@ def _catalog(records: list[dict[str, object]]) -> bytes:
     ).encode()
 
 
-def _requests_page(
+def _ninja_page(
     *,
-    name: str = "Requests",
-    download_url: str = "https://github.com/psf/requests/releases",
-    minimum_version: str = "1.0.0",
+    name: str = "Ninja",
+    download_url: str = (
+        "https://github.com/scikit-build/ninja-python-distributions/releases"
+    ),
+    minimum_version: str = "1.10.0.post3",
 ) -> bytes:
     return f"""---
 name: {name}
-category: Languages and Frameworks
-description: Requests is a Python HTTP client used by this bounded Arm64 sandbox.
+category: Compilers/Tools
+description: Ninja is a small build system used by this bounded Arm64 sandbox.
 download_url: {download_url}
 works_on_arm: true
 supported_minimum_version:
   version_number: {minimum_version}
-  release_date: 2012/12/17
+  release_date: 2021/07/17
+  support_scope: pypi_binary_distribution
 optional_info:
-  homepage_url: https://requests.readthedocs.io/
-  support_caveats:
+  homepage_url: https://github.com/scikit-build/ninja-python-distributions
+  support_caveats: This minimum identifies the earliest stable, non-yanked PyPI release in the complete registry history that publishes a manylinux or musllinux AArch64 wheel. It does not claim that earlier source builds, prereleases, yanked files, or other installation paths were incompatible with Arm.
   alternative_options:
   getting_started_resources:
-    official_docs: https://requests.readthedocs.io/
+    official_docs: https://pypi.org/project/ninja/
     arm_content:
     partner_content:
   arm_recommended_minimum_version:
@@ -159,7 +164,7 @@ optional_info:
     reference_content:
     rationale:
 optional_hidden_info:
-  release_notes__supported_minimum: https://pypi.org/project/requests/{minimum_version}/
+  release_notes__supported_minimum: https://github.com/scikit-build/ninja-python-distributions/releases/tag/{minimum_version}
   release_notes__recommended_minimum:
   other_info: Bounded sandbox evidence; human review remains required.
 ---
@@ -167,15 +172,15 @@ optional_hidden_info:
 
 
 def _package_workflow(slug: str) -> bytes:
-    package_name = {"numpy": "NumPy", "requests": "Requests"}.get(
+    package_name = {"numpy": "NumPy", "ninja": "Ninja"}.get(
         slug,
         slug.replace("-", " ").title(),
     )
     repository = {
-        "requests": "https://github.com/psf/requests",
+        "ninja": "https://github.com/scikit-build/ninja-python-distributions",
     }.get(slug, f"https://github.com/{slug}/{slug}")
-    baseline_version = "1.0.0"
-    candidate_version = "1.1.0"
+    baseline_version = "1.10.0.post3"
+    candidate_version = "1.13.0"
     plan = {
         "baseline_version": baseline_version,
         "evidence_urls": [
@@ -215,25 +220,35 @@ def _package_workflow(slug: str) -> bytes:
             "timeout_seconds": 30,
         },
     }
-    pins = [
-        {
-            "artifact_integrity": None,
-            "artifact_sha256": [digest * 64],
-            "artifact_urls": [
-                (
-                    "https://files.pythonhosted.org/packages/aa/bb/"
-                    f"{slug}-{version}-py3-none-any.whl"
-                )
-            ],
-            "recipe_kind": "pip",
-            "schema_version": "1.0",
-            "version": version,
-        }
-        for version, digest in (
-            (baseline_version, "a"),
-            (candidate_version, "b"),
-        )
-    ]
+    pins = (
+        _reviewed_ninja_pins()
+        if slug == "ninja"
+        else [
+            {
+                "artifacts": [
+                    {
+                        "filename": (
+                            f"{slug}-{version}-py3-none-manylinux2014_aarch64.whl"
+                        ),
+                        "integrity": None,
+                        "sha256": digest * 64,
+                        "url": (
+                            "https://files.pythonhosted.org/packages/aa/bb/"
+                            f"{slug}-{version}-py3-none-manylinux2014_aarch64.whl"
+                        ),
+                    }
+                ],
+                "binary_only": True,
+                "recipe_kind": "pip",
+                "schema_version": "1.2",
+                "version": version,
+            }
+            for version, digest in (
+                (baseline_version, "a"),
+                (candidate_version, "b"),
+            )
+        ]
+    )
 
     def encoded(payload: object) -> tuple[str, str]:
         raw = json.dumps(
@@ -359,6 +374,34 @@ jobs:
 """.encode()
 
 
+def _reviewed_ninja_pins() -> list[dict[str, object]]:
+    workflow_path = REPOSITORY_ROOT / "build_steps/fixtures/test-ninja.yml"
+    workflow = _yaml(workflow_path.read_bytes(), str(workflow_path))
+    environment = workflow.get("env")
+    if not isinstance(environment, dict):
+        raise AssertionError("reviewed Ninja workflow lacks an environment")
+    encoded = environment.get("SMOKE_ARTIFACT_PINS_B64")
+    if not isinstance(encoded, str):
+        raise AssertionError("reviewed Ninja workflow lacks artifact pins")
+    decoded = json.loads(base64.b64decode(encoded, validate=True))
+    if not isinstance(decoded, list) or not all(
+        isinstance(item, dict) for item in decoded
+    ):
+        raise AssertionError("reviewed Ninja workflow has malformed artifact pins")
+    return decoded
+
+
+def _set_single_artifact_url(pin: dict[str, object], url: str) -> None:
+    artifacts = pin["artifacts"]
+    assert isinstance(artifacts, list) and artifacts
+    first = artifacts[0]
+    assert isinstance(first, dict)
+    replacement = dict(first)
+    replacement["filename"] = url.rsplit("/", 1)[-1]
+    replacement["url"] = url
+    pin["artifacts"] = [replacement]
+
+
 def _batch(slugs: list[str]) -> str:
     jobs = "\n".join(
         f"  test-{slug}:\n    uses: ./.github/workflows/test-{slug}.yml\n"
@@ -408,8 +451,8 @@ def _evidence_outputs(slug: str) -> dict[str, object]:
     return {
         "contract_version": "2.0",
         "package_slug": slug,
-        "package_name": "Requests",
-        "package_version": "2.32.4",
+        "package_name": "Ninja",
+        "package_version": "1.10.0.post3",
         "run_status": "success",
         "badge_status": "passing",
         "core_failed": "0",
@@ -421,9 +464,9 @@ def _evidence_outputs(slug: str) -> dict[str, object]:
         "regression_decision": "candidate_passed",
         "regression_result": "Candidate passed the bounded probe.",
         "regression_comparison": "Baseline and candidate passed the same probe.",
-        "regression_current_version": "2.32.4",
-        "regression_latest_version": "2.32.5",
-        "regression_next_installed_version": "2.32.5",
+        "regression_current_version": "1.10.0.post3",
+        "regression_latest_version": "1.13.0",
+        "regression_next_installed_version": "1.13.0",
         "regression_policy": "applicable",
         "run_id": str(RUN_ID),
         "run_attempt": str(RUN_ATTEMPT),
@@ -439,7 +482,7 @@ def _add_native_evidence(
     mutate_request: Callable[[dict[str, object]], None] | None = None,
     mutate_report: Callable[[dict[str, object]], None] | None = None,
 ) -> Path:
-    slug = "requests"
+    slug = "ninja"
     page = candidate / f"content/linux/opensource_packages/{slug}.md"
     workflow = candidate / f".github/workflows/test-{slug}.yml"
     request: dict[str, object] = {
@@ -519,10 +562,19 @@ class CandidateValidationTests(unittest.TestCase):
         _write(self.base, ".github/actions/control/action.yml", "name: control\n")
         _write(self.base, ".github/actions/service/action.yml", "name: service\n")
         _write(self.base, ".github/evidence/seed.json", "{}\n")
+        ninja_snapshot = (
+            REPOSITORY_ROOT / ".github/catalog-evidence/ninja/pypi.json"
+        ).read_bytes()
+        _write(
+            self.base,
+            ".github/catalog-evidence/ninja/pypi.json",
+            ninja_snapshot,
+        )
 
         manifest = {
             "evidence": {
                 ".github/evidence/seed.json": _sha(b"{}\n"),
+                ".github/catalog-evidence/ninja/pypi.json": _sha(ninja_snapshot),
             },
             "fixture_control_files": {
                 ".github/actions/control/action.yml": _sha(b"name: control\n"),
@@ -543,22 +595,22 @@ class CandidateValidationTests(unittest.TestCase):
         )
         shutil.copytree(self.base, self.candidate)
 
-        requests_page = _requests_page()
-        requests_workflow = _package_workflow("requests")
+        ninja_page = _ninja_page()
+        ninja_workflow = _package_workflow("ninja")
         _write(
             self.candidate,
-            "content/linux/opensource_packages/requests.md",
-            requests_page,
+            "content/linux/opensource_packages/ninja.md",
+            ninja_page,
         )
         _write(
             self.candidate,
-            ".github/workflows/test-requests.yml",
-            requests_workflow,
+            ".github/workflows/test-ninja.yml",
+            ninja_workflow,
         )
         _write(
             self.candidate,
             ".github/workflows/test-all-packages-batch1.yml",
-            _batch(["numpy", "requests"]),
+            _batch(["numpy", "ninja"]),
         )
         _write(
             self.candidate,
@@ -566,22 +618,22 @@ class CandidateValidationTests(unittest.TestCase):
             _catalog(
                 [
                     _catalog_record("numpy", numpy_page, numpy_workflow),
-                    _catalog_record("requests", requests_page, requests_workflow),
+                    _catalog_record("ninja", ninja_page, ninja_workflow),
                 ]
             ),
         )
 
     def _replace_candidate_workflow(self, old: str, new: str) -> None:
-        workflow_path = self.candidate / ".github/workflows/test-requests.yml"
+        workflow_path = self.candidate / ".github/workflows/test-ninja.yml"
         workflow = workflow_path.read_text().replace(old, new)
         self._write_candidate_workflow(workflow)
 
     def _write_candidate_workflow(self, workflow: str) -> None:
-        workflow_path = self.candidate / ".github/workflows/test-requests.yml"
+        workflow_path = self.candidate / ".github/workflows/test-ninja.yml"
         workflow_path.write_text(workflow)
         catalog_path = self.candidate / ".github/package-identity-catalog.json"
         catalog = json.loads(catalog_path.read_text())
-        record = next(item for item in catalog["records"] if item["slug"] == "requests")
+        record = next(item for item in catalog["records"] if item["slug"] == "ninja")
         workflow_digest = _sha(workflow.encode())
         record["workflow"]["sha256"] = workflow_digest
         record["registries"]["pip"]["evidence"][0]["evidence_sha256"] = workflow_digest
@@ -589,11 +641,11 @@ class CandidateValidationTests(unittest.TestCase):
         catalog_path.write_text(json.dumps(catalog, indent=2, sort_keys=True) + "\n")
 
     def _write_candidate_page(self, page: bytes) -> None:
-        page_path = self.candidate / "content/linux/opensource_packages/requests.md"
+        page_path = self.candidate / "content/linux/opensource_packages/ninja.md"
         page_path.write_bytes(page)
         catalog_path = self.candidate / ".github/package-identity-catalog.json"
         catalog = json.loads(catalog_path.read_text())
-        record = next(item for item in catalog["records"] if item["slug"] == "requests")
+        record = next(item for item in catalog["records"] if item["slug"] == "ninja")
         record["content_sha256"] = _sha(page)
         catalog_path.write_text(json.dumps(catalog, indent=2, sort_keys=True) + "\n")
 
@@ -604,7 +656,7 @@ class CandidateValidationTests(unittest.TestCase):
         mutate_pins: Callable[[list[dict[str, object]]], None] | None = None,
         repository: str | None = None,
     ) -> None:
-        workflow_path = self.candidate / ".github/workflows/test-requests.yml"
+        workflow_path = self.candidate / ".github/workflows/test-ninja.yml"
         workflow = _yaml(workflow_path.read_bytes(), "candidate test workflow")
         environment = workflow["env"]
         plan = json.loads(base64.b64decode(environment["SMOKE_PLAN_B64"]))
@@ -640,6 +692,70 @@ class CandidateValidationTests(unittest.TestCase):
 
     def test_accepts_one_exact_candidate(self) -> None:
         validate(self.base, self.candidate)
+
+    def test_rejects_candidate_without_binary_only_artifact_policy(self) -> None:
+        def mutate_pins(pins: list[dict[str, object]]) -> None:
+            for pin in pins:
+                pin["binary_only"] = False
+
+        self._mutate_candidate_plan(lambda plan: None, mutate_pins=mutate_pins)
+        with self.assertRaisesRegex(
+            CandidateValidationError,
+            "requires binary-only artifact pins",
+        ):
+            validate(self.base, self.candidate)
+
+    def test_rejects_binary_only_non_arm64_wheel(self) -> None:
+        def mutate_pins(pins: list[dict[str, object]]) -> None:
+            _set_single_artifact_url(
+                pins[1],
+                "https://files.pythonhosted.org/packages/aa/bb/"
+                "ninja-1.13.0-py3-none-any.whl",
+            )
+
+        self._mutate_candidate_plan(lambda plan: None, mutate_pins=mutate_pins)
+        with self.assertRaisesRegex(
+            CandidateValidationError,
+            "not a Linux Arm64 wheel",
+        ):
+            validate(self.base, self.candidate)
+
+    def test_rejects_artifact_digest_not_in_protected_snapshot(self) -> None:
+        def mutate_pins(pins: list[dict[str, object]]) -> None:
+            artifacts = pins[0]["artifacts"]
+            assert isinstance(artifacts, list) and artifacts
+            artifact = artifacts[0]
+            assert isinstance(artifact, dict)
+            artifact["sha256"] = "0" * 64
+
+        self._mutate_candidate_plan(lambda plan: None, mutate_pins=mutate_pins)
+
+        with self.assertRaisesRegex(
+            CandidateValidationError,
+            "artifact pins do not match the reviewed PyPI snapshot",
+        ):
+            validate(self.base, self.candidate)
+
+    def test_rejects_unreviewed_newer_candidate_version(self) -> None:
+        def mutate(plan: dict[str, object]) -> None:
+            regression = plan["regression_policy"]
+            assert isinstance(regression, dict)
+            regression["candidate_version"] = "1.14.0"
+
+        def mutate_pins(pins: list[dict[str, object]]) -> None:
+            pins[1]["version"] = "1.14.0"
+            _set_single_artifact_url(
+                pins[1],
+                "https://files.pythonhosted.org/packages/aa/bb/"
+                "ninja-1.14.0-py3-none-manylinux2014_aarch64.whl",
+            )
+
+        self._mutate_candidate_plan(mutate, mutate_pins=mutate_pins)
+        with self.assertRaisesRegex(
+            CandidateValidationError,
+            "trusted sandbox package identity",
+        ):
+            validate(self.base, self.candidate)
 
     def test_derives_catalog_provenance_from_trusted_base_commit(self) -> None:
         git = shutil.which("git")
@@ -677,18 +793,14 @@ class CandidateValidationTests(unittest.TestCase):
 
         catalog_path = self.candidate / ".github/package-identity-catalog.json"
         catalog = json.loads(catalog_path.read_text())
-        record = next(item for item in catalog["records"] if item["slug"] == "requests")
+        record = next(item for item in catalog["records"] if item["slug"] == "ninja")
         for dimension in ("pip", "npm"):
             evidence = record["registries"][dimension]["evidence"][0]
             evidence["source_revision"] = source_revision
             evidence["verified_at"] = verified_at
         catalog_path.write_text(json.dumps(catalog, indent=2, sort_keys=True) + "\n")
 
-        validate_candidate(
-            self.base,
-            self.candidate,
-            expected_minimum_release_date=TRUSTED_MINIMUM_RELEASE_DATE,
-        )
+        validate_candidate(self.base, self.candidate)
 
     def test_trusted_import_mapping_includes_reviewed_aliases(self) -> None:
         self.assertTrue(_approved_import_root("beautifulsoup4", "bs4"))
@@ -721,27 +833,26 @@ class CandidateValidationTests(unittest.TestCase):
         def mutate_pins(pins: list[dict[str, object]]) -> None:
             for pin in pins:
                 version = pin["version"]
-                pin["artifact_urls"] = [
-                    (
-                        "https://files.pythonhosted.org/packages/aa/bb/"
-                        f"beautifulsoup4-{version}-py3-none-any.whl"
-                    )
-                ]
+                _set_single_artifact_url(
+                    pin,
+                    "https://files.pythonhosted.org/packages/aa/bb/"
+                    f"beautifulsoup4-{version}-py3-none-manylinux2014_aarch64.whl",
+                )
 
         self._mutate_candidate_plan(
             mutate,
             mutate_pins=mutate_pins,
             repository="https://github.com/wention/BeautifulSoup4",
         )
-        page_path = self.candidate / "content/linux/opensource_packages/requests.md"
+        page_path = self.candidate / "content/linux/opensource_packages/ninja.md"
         page_path.write_bytes(
-            _requests_page(
+            _ninja_page(
                 download_url="https://github.com/wention/BeautifulSoup4/releases"
             )
         )
         catalog_path = self.candidate / ".github/package-identity-catalog.json"
         catalog = json.loads(catalog_path.read_text())
-        record = next(item for item in catalog["records"] if item["slug"] == "requests")
+        record = next(item for item in catalog["records"] if item["slug"] == "ninja")
         record["content_sha256"] = _sha(page_path.read_bytes())
         record["registries"]["pip"]["identities"] = ["beautifulsoup4"]
         record["registries"]["pip"]["evidence"][0]["rationale"] = (
@@ -763,12 +874,11 @@ class CandidateValidationTests(unittest.TestCase):
 
         def mutate_pins(pins: list[dict[str, object]]) -> None:
             pins[1]["version"] = "0.9.0"
-            pins[1]["artifact_urls"] = [
-                (
-                    "https://files.pythonhosted.org/packages/aa/bb/"
-                    "requests-0.9.0-py3-none-any.whl"
-                )
-            ]
+            _set_single_artifact_url(
+                pins[1],
+                "https://files.pythonhosted.org/packages/aa/bb/"
+                "ninja-0.9.0-py3-none-manylinux2014_aarch64.whl",
+            )
 
         self._mutate_candidate_plan(mutate, mutate_pins=mutate_pins)
         with self.assertRaisesRegex(
@@ -781,16 +891,15 @@ class CandidateValidationTests(unittest.TestCase):
         def mutate(plan: dict[str, object]) -> None:
             regression = plan["regression_policy"]
             assert isinstance(regression, dict)
-            regression["candidate_version"] = "1.1.0rc1"
+            regression["candidate_version"] = "1.13.0rc1"
 
         def mutate_pins(pins: list[dict[str, object]]) -> None:
-            pins[1]["version"] = "1.1.0rc1"
-            pins[1]["artifact_urls"] = [
-                (
-                    "https://files.pythonhosted.org/packages/aa/bb/"
-                    "requests-1.1.0rc1-py3-none-any.whl"
-                )
-            ]
+            pins[1]["version"] = "1.13.0rc1"
+            _set_single_artifact_url(
+                pins[1],
+                "https://files.pythonhosted.org/packages/aa/bb/"
+                "ninja-1.13.0rc1-py3-none-manylinux2014_aarch64.whl",
+            )
 
         self._mutate_candidate_plan(mutate, mutate_pins=mutate_pins)
         with self.assertRaisesRegex(
@@ -801,12 +910,11 @@ class CandidateValidationTests(unittest.TestCase):
 
     def test_rejects_artifact_filename_for_another_distribution(self) -> None:
         def mutate_pins(pins: list[dict[str, object]]) -> None:
-            pins[1]["artifact_urls"] = [
-                (
-                    "https://files.pythonhosted.org/packages/aa/bb/"
-                    "numpy-1.1.0-py3-none-any.whl"
-                )
-            ]
+            _set_single_artifact_url(
+                pins[1],
+                "https://files.pythonhosted.org/packages/aa/bb/"
+                "numpy-1.13.0-py3-none-manylinux2014_aarch64.whl",
+            )
 
         self._mutate_candidate_plan(lambda plan: None, mutate_pins=mutate_pins)
         with self.assertRaisesRegex(
@@ -820,22 +928,43 @@ class CandidateValidationTests(unittest.TestCase):
         original_catalog = catalog_path.read_text()
         for download_url in (
             "javascript:alert(1)",
-            "http://user:pass@pypi.org/project/requests",
-            "https://example.invalid/not-requests",
+            "http://user:pass@pypi.org/project/ninja",
+            "https://example.invalid/not-ninja",
             "https://github.com/numpy/numpy/releases",
-            "https://github.com/psf/requests/../../numpy/numpy",
-            "https://github.com/psf/requests/%2e%2e/%2e%2e/numpy/numpy",
-            "https://github.com/psf/requests/%252e%252e/numpy",
-            f"https://github.com/psf/requests/{_encoded_parent_segment(4)}/numpy",
-            f"https://github.com/psf/requests/{_encoded_parent_segment(9)}/numpy",
-            "https://github.com/psf/requests/%c0%ae%c0%ae/%c0%afnumpy",
-            r"https://github.com/psf/requests/..\..\numpy",
-            "https://github.com/psf/requests/releases?redirect=example.invalid",
+            (
+                "https://github.com/scikit-build/ninja-python-distributions/"
+                "../../numpy/numpy"
+            ),
+            (
+                "https://github.com/scikit-build/ninja-python-distributions/"
+                "%2e%2e/%2e%2e/numpy/numpy"
+            ),
+            (
+                "https://github.com/scikit-build/ninja-python-distributions/"
+                "%252e%252e/numpy"
+            ),
+            (
+                "https://github.com/scikit-build/ninja-python-distributions/"
+                f"{_encoded_parent_segment(4)}/numpy"
+            ),
+            (
+                "https://github.com/scikit-build/ninja-python-distributions/"
+                f"{_encoded_parent_segment(9)}/numpy"
+            ),
+            (
+                "https://github.com/scikit-build/ninja-python-distributions/"
+                "%c0%ae%c0%ae/%c0%afnumpy"
+            ),
+            r"https://github.com/scikit-build/ninja-python-distributions/..\..\numpy",
+            (
+                "https://github.com/scikit-build/ninja-python-distributions/"
+                "releases?redirect=example.invalid"
+            ),
             "https://pypi.org/project/numpy",
         ):
             with self.subTest(download_url=download_url):
                 catalog_path.write_text(original_catalog)
-                self._write_candidate_page(_requests_page(download_url=download_url))
+                self._write_candidate_page(_ninja_page(download_url=download_url))
                 with self.assertRaisesRegex(
                     CandidateValidationError,
                     "download URL|path boundary|dot path segment",
@@ -843,8 +972,8 @@ class CandidateValidationTests(unittest.TestCase):
                     validate(self.base, self.candidate)
 
     def test_rejects_category_outside_dashboard_taxonomy(self) -> None:
-        page = _requests_page().replace(
-            b"category: Languages and Frameworks",
+        page = _ninja_page().replace(
+            b"category: Compilers/Tools",
             b"category: Test fixture",
         )
         self._write_candidate_page(page)
@@ -855,12 +984,12 @@ class CandidateValidationTests(unittest.TestCase):
             validate(self.base, self.candidate)
 
     def test_rejects_multiline_frontmatter_text(self) -> None:
-        page = _requests_page().replace(
+        page = _ninja_page().replace(
             (
-                b"description: Requests is a Python HTTP client used by this bounded "
+                b"description: Ninja is a small build system used by this bounded "
                 b"Arm64 sandbox."
             ),
-            b'description: "Requests fixture\\nForged second line"',
+            b'description: "Ninja fixture\\nForged second line"',
         )
         self._write_candidate_page(page)
         with self.assertRaisesRegex(
@@ -870,7 +999,7 @@ class CandidateValidationTests(unittest.TestCase):
             validate(self.base, self.candidate)
 
     def test_rejects_public_minimum_that_differs_from_tested_baseline(self) -> None:
-        self._write_candidate_page(_requests_page(minimum_version="0.0.1"))
+        self._write_candidate_page(_ninja_page(minimum_version="0.0.1"))
         with self.assertRaisesRegex(
             CandidateValidationError,
             "public minimum version does not match the tested baseline",
@@ -878,7 +1007,7 @@ class CandidateValidationTests(unittest.TestCase):
             validate(self.base, self.candidate)
 
     def test_rejects_public_page_without_explicit_arm_support(self) -> None:
-        page = _requests_page().replace(b"works_on_arm: true", b"works_on_arm: false")
+        page = _ninja_page().replace(b"works_on_arm: true", b"works_on_arm: false")
         self._write_candidate_page(page)
         with self.assertRaisesRegex(
             CandidateValidationError,
@@ -887,8 +1016,11 @@ class CandidateValidationTests(unittest.TestCase):
             validate(self.base, self.candidate)
 
     def test_rejects_unrelated_supported_minimum_evidence(self) -> None:
-        page = _requests_page().replace(
-            b"https://pypi.org/project/requests/1.0.0/",
+        page = _ninja_page().replace(
+            (
+                b"https://github.com/scikit-build/ninja-python-distributions/"
+                b"releases/tag/1.10.0.post3"
+            ),
             b"https://example.invalid/fake-evidence",
         )
         self._write_candidate_page(page)
@@ -898,9 +1030,75 @@ class CandidateValidationTests(unittest.TestCase):
         ):
             validate(self.base, self.candidate)
 
+    def test_rejects_missing_binary_distribution_caveat(self) -> None:
+        page = _ninja_page().replace(
+            (
+                b"support_caveats: This minimum identifies the earliest stable, "
+                b"non-yanked PyPI release in the complete registry history that "
+                b"publishes a manylinux or musllinux AArch64 wheel. It does not claim "
+                b"that earlier source builds, prereleases, yanked files, or other "
+                b"installation paths were incompatible with Arm."
+            ),
+            b"support_caveats:",
+        )
+        self._write_candidate_page(page)
+        with self.assertRaisesRegex(
+            CandidateValidationError,
+            "candidate support caveats is required",
+        ):
+            validate(self.base, self.candidate)
+
+    def test_rejects_broadened_binary_distribution_claim(self) -> None:
+        page = _ninja_page().replace(
+            (
+                b"support_caveats: This minimum identifies the earliest stable, "
+                b"non-yanked PyPI release in the complete registry history that "
+                b"publishes a manylinux or musllinux AArch64 wheel. It does not claim "
+                b"that earlier source builds, prereleases, yanked files, or other "
+                b"installation paths were incompatible with Arm."
+            ),
+            b"support_caveats: This is the first version that supports Arm.",
+        )
+        self._write_candidate_page(page)
+        with self.assertRaisesRegex(
+            CandidateValidationError,
+            "does not preserve the reviewed binary scope",
+        ):
+            validate(self.base, self.candidate)
+
+    def test_rejects_broadened_support_scope(self) -> None:
+        page = _ninja_page().replace(
+            b"support_scope: pypi_binary_distribution",
+            b"support_scope: general",
+        )
+        self._write_candidate_page(page)
+        with self.assertRaisesRegex(
+            CandidateValidationError,
+            "does not preserve the reviewed binary boundary",
+        ):
+            validate(self.base, self.candidate)
+
+    def test_rejects_nonexact_supported_minimum_evidence_url(self) -> None:
+        page = _ninja_page().replace(
+            (
+                b"https://github.com/scikit-build/ninja-python-distributions/"
+                b"releases/tag/1.10.0.post3"
+            ),
+            (
+                b"https://github.com/scikit-build/ninja-python-distributions/"
+                b"releases/tag/1.10.0.post3#files"
+            ),
+        )
+        self._write_candidate_page(page)
+        with self.assertRaisesRegex(
+            CandidateValidationError,
+            "supported-minimum evidence is not bound to the reviewed release",
+        ):
+            validate(self.base, self.candidate)
+
     def test_rejects_minimum_release_date_not_in_trusted_pypi_evidence(self) -> None:
-        page = _requests_page().replace(
-            b"release_date: 2012/12/17", b"release_date: 2099/12/31", 1
+        page = _ninja_page().replace(
+            b"release_date: 2021/07/17", b"release_date: 2099/12/31", 1
         )
         self._write_candidate_page(page)
         with self.assertRaisesRegex(
@@ -910,8 +1108,8 @@ class CandidateValidationTests(unittest.TestCase):
             validate(self.base, self.candidate)
 
     def test_rejects_unrelated_official_documentation(self) -> None:
-        page = _requests_page().replace(
-            b"official_docs: https://requests.readthedocs.io/",
+        page = _ninja_page().replace(
+            b"official_docs: https://pypi.org/project/ninja/",
             b"official_docs: https://example.invalid/fake-docs",
         )
         self._write_candidate_page(page)
@@ -922,7 +1120,7 @@ class CandidateValidationTests(unittest.TestCase):
             validate(self.base, self.candidate)
 
     def test_rejects_non_arm_content_labelled_as_arm_guidance(self) -> None:
-        page = _requests_page().replace(
+        page = _ninja_page().replace(
             b"    arm_content:\n",
             b"    arm_content: https://example.invalid/fake-arm-guide\n",
         )
@@ -934,7 +1132,7 @@ class CandidateValidationTests(unittest.TestCase):
             validate(self.base, self.candidate)
 
     def test_rejects_unreviewed_arm_recommendation_claim(self) -> None:
-        page = _requests_page().replace(
+        page = _ninja_page().replace(
             b"  arm_recommended_minimum_version:\n"
             b"    version_number:\n"
             b"    release_date:\n"
@@ -970,8 +1168,11 @@ class CandidateValidationTests(unittest.TestCase):
                     suffix: str = suffix,
                 ) -> None:
                     plan["evidence_urls"] = [
-                        "https://pypi.org/pypi/requests/json",
-                        f"https://github.com/psf/requests/{suffix}",
+                        "https://pypi.org/pypi/ninja/json",
+                        (
+                            "https://github.com/scikit-build/"
+                            f"ninja-python-distributions/{suffix}"
+                        ),
                     ]
 
                 self._mutate_candidate_plan(mutate)
@@ -1000,12 +1201,11 @@ class CandidateValidationTests(unittest.TestCase):
                     pins: list[dict[str, object]],
                     suffix: str = suffix,
                 ) -> None:
-                    pins[1]["artifact_urls"] = [
-                        (
-                            f"https://files.pythonhosted.org/packages/{suffix}/"
-                            "requests-1.1.0-py3-none-any.whl"
-                        )
-                    ]
+                    _set_single_artifact_url(
+                        pins[1],
+                        f"https://files.pythonhosted.org/packages/{suffix}/"
+                        "ninja-1.13.0-py3-none-manylinux2014_aarch64.whl",
+                    )
 
                 self._mutate_candidate_plan(
                     lambda plan: None,
@@ -1020,26 +1220,69 @@ class CandidateValidationTests(unittest.TestCase):
                 ):
                     validate(self.base, self.candidate)
 
-    def test_rejects_noncanonical_trusted_pypi_redirect_authority(self) -> None:
-        for final_url in (
-            "https://user:pass@pypi.org/pypi/requests/1.0.0/json",
-            "https://pypi.org:444/pypi/requests/1.0.0/json",
+    def test_accepts_protected_complete_pypi_boundary_snapshot(self) -> None:
+        identity = _TRUSTED_SANDBOX_PACKAGE_IDENTITIES["ninja"]
+        boundary = _trusted_pypi_boundary(REPOSITORY_ROOT, identity)
+
+        self.assertEqual(
+            boundary.minimum_release_date,
+            TRUSTED_MINIMUM_RELEASE_DATE,
+        )
+        self.assertEqual(
+            [version for version, _ in boundary.artifacts_by_version],
+            ["1.10.0.post3", "1.13.0"],
+        )
+        self.assertEqual(
+            [len(artifacts) for _, artifacts in boundary.artifacts_by_version],
+            [1, 2],
+        )
+
+    def test_real_renderer_workflows_share_exact_executable_template(self) -> None:
+        numpy_path = REPOSITORY_ROOT / ".github/workflows/test-numpy.yml"
+        ninja_path = REPOSITORY_ROOT / "build_steps/fixtures/test-ninja.yml"
+        numpy = _yaml(numpy_path.read_bytes(), str(numpy_path))
+        ninja = _yaml(ninja_path.read_bytes(), str(ninja_path))
+
+        self.assertEqual(
+            _normalized_package_template(
+                numpy,
+                slug="numpy",
+                label=str(numpy_path),
+            ),
+            _normalized_package_template(
+                ninja,
+                slug="ninja",
+                label=str(ninja_path),
+            ),
+        )
+        identity = _candidate_workflow_identity(
+            ninja,
+            slug="ninja",
+            label=str(ninja_path),
+        )
+        self.assertTrue(identity.binary_only)
+        self.assertEqual(
+            [len(artifacts) for _, artifacts in identity.artifacts_by_version],
+            [1, 2],
+        )
+
+    def test_rejects_tampered_pypi_boundary_snapshot(self) -> None:
+        source = REPOSITORY_ROOT / ".github/catalog-evidence/ninja/pypi.json"
+        document = json.loads(source.read_text())
+        document["info"]["name"] = "not-ninja"
+        _write(
+            self.base,
+            ".github/catalog-evidence/ninja/pypi.json",
+            json.dumps(document),
+        )
+        with self.assertRaisesRegex(
+            CandidateValidationError,
+            "does not match the reviewed package identity",
         ):
-            with self.subTest(final_url=final_url):
-                response = mock.MagicMock()
-                response.__enter__.return_value = response
-                response.geturl.return_value = final_url
-                with (
-                    mock.patch(
-                        "build_steps.validate_pip_sandbox_candidate.urllib.request.urlopen",
-                        return_value=response,
-                    ),
-                    self.assertRaisesRegex(
-                        CandidateValidationError,
-                        "redirected outside its exact identity",
-                    ),
-                ):
-                    _trusted_pypi_release_date("requests", "1.0.0")
+            _trusted_pypi_boundary(
+                self.base,
+                _TRUSTED_SANDBOX_PACKAGE_IDENTITIES["ninja"],
+            )
 
     def test_rejects_candidate_controlled_catalog_provenance(self) -> None:
         catalog_path = self.candidate / ".github/package-identity-catalog.json"
@@ -1054,9 +1297,7 @@ class CandidateValidationTests(unittest.TestCase):
                 with self.subTest(dimension=dimension, field=field):
                     catalog = json.loads(original_catalog)
                     record = next(
-                        item
-                        for item in catalog["records"]
-                        if item["slug"] == "requests"
+                        item for item in catalog["records"] if item["slug"] == "ninja"
                     )
                     record["registries"][dimension]["evidence"][0][field] = value
                     catalog_path.write_text(
@@ -1092,12 +1333,11 @@ class CandidateValidationTests(unittest.TestCase):
 
         def mutate_pins(pins: list[dict[str, object]]) -> None:
             for pin in pins:
-                pin["artifact_urls"] = [
-                    (
-                        "https://files.pythonhosted.org/packages/aa/bb/"
-                        f"numpy-{pin['version']}-py3-none-any.whl"
-                    )
-                ]
+                _set_single_artifact_url(
+                    pin,
+                    "https://files.pythonhosted.org/packages/aa/bb/"
+                    f"numpy-{pin['version']}-py3-none-manylinux2014_aarch64.whl",
+                )
 
         self._mutate_candidate_plan(
             mutate,
@@ -1156,7 +1396,7 @@ class CandidateValidationTests(unittest.TestCase):
             validate(self.base, self.candidate)
 
     def test_rejects_page_name_that_differs_from_tested_package(self) -> None:
-        self._write_candidate_page(_requests_page(name="NumPy"))
+        self._write_candidate_page(_ninja_page(name="NumPy"))
         with self.assertRaisesRegex(
             CandidateValidationError,
             "page name does not match",
@@ -1210,7 +1450,7 @@ class CandidateValidationTests(unittest.TestCase):
         batch_path = self.candidate / ".github/workflows/test-all-packages-batch1.yml"
         batch_path.write_text(
             batch_path.read_text().replace(
-                "        test-numpy,\n        test-requests\n",
+                "        test-numpy,\n        test-ninja\n",
                 "        test-numpy\n",
             )
         )
@@ -1376,8 +1616,8 @@ class CandidateValidationTests(unittest.TestCase):
 
     def test_ignores_nonexecutable_secret_reference_in_yaml_comment(self) -> None:
         self._replace_candidate_workflow(
-            "name: Test requests",
-            "# Documentation only: ${{ secrets.NOT_EXECUTED }}\nname: Test requests",
+            "name: Test ninja",
+            "# Documentation only: ${{ secrets.NOT_EXECUTED }}\nname: Test ninja",
         )
         validate(self.base, self.candidate)
 

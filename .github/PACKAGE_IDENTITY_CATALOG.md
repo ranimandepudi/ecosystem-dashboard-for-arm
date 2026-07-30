@@ -37,8 +37,14 @@ package corpus to:
 
 The archived PyPI and GitHub snapshots under
 `.github/catalog-evidence/numpy/` support only the fixture's NumPy identity.
-The npm dimension remains unknown and non-exhaustive. Inventory alone never
-authorizes a package-identity claim.
+They establish the `numpy` registry identity and bind it to the canonical
+`numpy/numpy` repository. A separately recorded manual review of the exact
+one-page, one-workflow corpus establishes that `numpy` is the sole pip identity
+represented by this bounded fixture. Only that combined evidence makes this
+one seed record's pip dimension exhaustive. The decision does not extend to
+the production dashboard corpus or any other page. The npm dimension remains
+unknown and non-exhaustive. Inventory alone never authorizes a package-identity
+claim.
 
 ## Deterministic Format
 

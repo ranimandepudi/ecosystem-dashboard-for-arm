@@ -1,7 +1,7 @@
 {
   "corpus": {
     "content_root": "content/linux/opensource_packages",
-    "corpus_sha256": "58d2cf46c99c3b8e8f55e32ee2cf0216a04db4213e19aed8506e4705ad7b8922",
+    "corpus_sha256": "e1e9ba15e3fca0e409221b7814f4db5240149e5bea5b7b65dcc6382a05c94fef",
     "entry_count": 1
   },
   "records": [
@@ -17,8 +17,8 @@
               "source_kind": "pypi_api",
               "source_locator": "https://pypi.org/pypi/numpy/json",
               "source_revision": "796d8cfb1e101561086725e9dcecafb48c740b01e0e157b11d53958e000096e1",
-              "verified_at": "2026-07-29T14:55:00+00:00",
-              "verified_by": "arm-ecosystem-sandbox-fixture-builder@6aa4eebc802685281cee88dfc3101921b1408e97"
+              "verified_at": "2026-07-30T19:59:51+00:00",
+              "verified_by": "arm-ecosystem-sandbox-fixture-builder@1ce6a0db14f99fa560f681fe8a7fd57934070bf0"
             }
           ],
           "exhaustive": false,
@@ -33,20 +33,29 @@
               "source_kind": "github_api",
               "source_locator": "https://api.github.com/repos/numpy/numpy/commits/4350526858b0e8ce8932538da664aa8d1a182410",
               "source_revision": "4350526858b0e8ce8932538da664aa8d1a182410",
-              "verified_at": "2026-07-29T14:55:00+00:00",
-              "verified_by": "arm-ecosystem-sandbox-fixture-builder@6aa4eebc802685281cee88dfc3101921b1408e97"
+              "verified_at": "2026-07-30T19:59:51+00:00",
+              "verified_by": "arm-ecosystem-sandbox-fixture-builder@1ce6a0db14f99fa560f681fe8a7fd57934070bf0"
+            },
+            {
+              "evidence_sha256": "5f8b3f54717ed8321049dfb85947f512324ce394fc631459bef747dfa64fdcb3",
+              "rationale": "A manual review of the exact one-page, one-workflow bounded fixture confirms that numpy is its sole pip identity. This exhaustive decision applies only to this sandbox corpus.",
+              "source_kind": "manual_review",
+              "source_locator": "docs/sandbox-pip-e2e-fixture.md#identity-trust-root",
+              "source_revision": "5f8b3f54717ed8321049dfb85947f512324ce394fc631459bef747dfa64fdcb3",
+              "verified_at": "2026-07-30T19:59:51+00:00",
+              "verified_by": "ranimandepudi+required-independent-codeowner-review"
             },
             {
               "evidence_sha256": "796d8cfb1e101561086725e9dcecafb48c740b01e0e157b11d53958e000096e1",
-              "rationale": "Archived PyPI API evidence identifies the normalized numpy distribution and its canonical numpy/numpy source repository.",
+              "rationale": "Archived PyPI API evidence identifies the normalized numpy distribution and the reviewed GitHub evidence independently binds it to the canonical numpy/numpy source repository.",
               "source_kind": "pypi_api",
               "source_locator": "https://pypi.org/pypi/numpy/json",
               "source_revision": "796d8cfb1e101561086725e9dcecafb48c740b01e0e157b11d53958e000096e1",
-              "verified_at": "2026-07-29T14:55:00+00:00",
-              "verified_by": "arm-ecosystem-sandbox-fixture-builder@6aa4eebc802685281cee88dfc3101921b1408e97"
+              "verified_at": "2026-07-30T19:59:51+00:00",
+              "verified_by": "arm-ecosystem-sandbox-fixture-builder@1ce6a0db14f99fa560f681fe8a7fd57934070bf0"
             }
           ],
-          "exhaustive": false,
+          "exhaustive": true,
           "identities": [
             "numpy"
           ],
@@ -57,7 +66,7 @@
       "workflow": {
         "path": ".github/workflows/test-numpy.yml",
         "presence": "present",
-        "sha256": "43c1f33b84fd713a3665f71d13ee268ed888c4fa05617a625ee2925dccd7c146"
+        "sha256": "0f4d6617a75c2e6634f6f27985c9ac932c5539d5d57a51e19afaef7ae78f8be0"
       }
     }
   ],
