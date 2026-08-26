@@ -630,8 +630,23 @@ def _manifest_payload(catalog_bytes: bytes) -> dict[str, Any]:
         Path(".github/workflows/sandbox-dashboard-validation.yml"),
         Path(".github/workflows/test-all-packages-orchestrator.yml"),
         Path(".github/workflows/test-all-packages-summary.yml"),
+        Path(".github/actions/publish-generated-data-pr/action.yml"),
+        Path(".github/actions/publish-generated-data-pr/README.md"),
+        Path(".github/actions/publish-generated-data-pr/generated_data_pr.py"),
+        Path(
+            ".github/actions/publish-generated-data-pr/tests/test_generated_data_pr.py"
+        ),
+        Path(
+            ".github/actions/publish-generated-data-pr/tests/test_summary_slug_policy.py"
+        ),
         Path(".github/scripts/batch_artifact_attestation.py"),
+        Path(".github/scripts/generated_test_results_artifact.py"),
         Path(".github/scripts/orchestration_contract.py"),
+        Path(".github/scripts/package_result_policy.py"),
+        Path(".github/scripts/promote_package_results.py"),
+        Path(".github/scripts/summary_slug_policy.py"),
+        Path(".github/scripts/tests/test_generated_test_results_artifact.py"),
+        Path(".github/scripts/tests/test_promote_package_results.py"),
         Path(
             ".github/actions/publish-generated-data-pr/tests/test_orchestration_contract.py"
         ),

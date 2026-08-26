@@ -20,9 +20,6 @@ from generated_data_pr import (  # noqa: E402
     publish_generated_data,
 )
 
-EXPECTED_BATCH_COUNT = 22
-
-
 class FakeGitHub:
     def __init__(self) -> None:
         self.pull_requests: list[dict[str, Any]] = []
@@ -106,7 +103,7 @@ class FakeGitHub:
             "draft": True,
             "title": config.title,
             "body": body,
-            "user": {"login": "github-actions[bot]"},
+            "user": {"login": config.expected_pr_author_login},
             "base": {
                 "ref": config.base_branch,
                 "sha": config.expected_base_sha,
@@ -118,6 +115,88 @@ class FakeGitHub:
                 "repo": {"full_name": config.repository},
             },
         }
+
+
+class PublisherConfigurationTests(unittest.TestCase):
+    def test_environment_defaults_to_builtin_token_and_actions_bot(self) -> None:
+        config = Config.from_environment(_valid_environment())
+
+        self.assertEqual(config.credential_source, "github-token")
+        self.assertEqual(config.expected_pr_author_login, "github-actions[bot]")
+
+    def test_environment_accepts_github_app_installation_identity(self) -> None:
+        environment = _valid_environment()
+        environment.update(
+            {
+                "GENERATED_DATA_CREDENTIAL_SOURCE": "github-app",
+                "GENERATED_DATA_EXPECTED_PR_AUTHOR_LOGIN": (
+                    "arm-ecosystem-publisher[bot]"
+                ),
+            }
+        )
+
+        config = Config.from_environment(environment)
+
+        self.assertEqual(config.credential_source, "github-app")
+        self.assertEqual(
+            config.expected_pr_author_login,
+            "arm-ecosystem-publisher[bot]",
+        )
+
+    def test_rejects_malformed_expected_author_logins(self) -> None:
+        malformed = (
+            "",
+            " github-actions[bot]",
+            "github-actions[bot] ",
+            "-publisher[bot]",
+            "publisher-[bot]",
+            "publisher bot",
+            "owner/publisher[bot]",
+            "publisher[admin]",
+            f"{'a' * 101}[bot]",
+        )
+        for author_login in malformed:
+            with self.subTest(author_login=author_login):
+                environment = _valid_environment()
+                environment["GENERATED_DATA_EXPECTED_PR_AUTHOR_LOGIN"] = author_login
+                with self.assertRaisesRegex(PublishError, "author login is malformed"):
+                    Config.from_environment(environment)
+
+    def test_rejects_malformed_credential_sources(self) -> None:
+        for credential_source in (
+            "",
+            "github-token ",
+            "GITHUB-TOKEN",
+            "github_app",
+            "installation-token",
+            "personal-access-token",
+        ):
+            with self.subTest(credential_source=credential_source):
+                environment = _valid_environment()
+                environment["GENERATED_DATA_CREDENTIAL_SOURCE"] = credential_source
+                with self.assertRaisesRegex(PublishError, "credential source must be"):
+                    Config.from_environment(environment)
+
+    def test_rejects_author_and_credential_source_mismatches(self) -> None:
+        mismatches = (
+            ("github-token", "arm-ecosystem-publisher[bot]", "requires github-actions"),
+            ("github-app", "release-manager", "requires a GitHub App bot"),
+            ("github-app", "github-actions[bot]", "installed App bot author"),
+        )
+        for credential_source, author_login, error in mismatches:
+            with self.subTest(
+                credential_source=credential_source,
+                author_login=author_login,
+            ):
+                environment = _valid_environment()
+                environment.update(
+                    {
+                        "GENERATED_DATA_CREDENTIAL_SOURCE": credential_source,
+                        "GENERATED_DATA_EXPECTED_PR_AUTHOR_LOGIN": author_login,
+                    }
+                )
+                with self.assertRaisesRegex(PublishError, error):
+                    Config.from_environment(environment)
 
 
 class GeneratedDataPublisherTests(unittest.TestCase):
@@ -195,7 +274,7 @@ class GeneratedDataPublisherTests(unittest.TestCase):
         self.assertEqual(result.status, "closed_stale")
         self.assertEqual(self.github.pull_requests[0]["state"], "closed")
 
-    def test_pr_body_documents_no_deploy_and_external_activation_blockers(self) -> None:
+    def test_default_pr_body_describes_builtin_token_without_activation(self) -> None:
         worktree = self._clone("approval-guidance")
         (worktree / "data/generated.yml").write_text("value: proposed\n", encoding="utf-8")
         publish_generated_data(
@@ -215,10 +294,70 @@ class GeneratedDataPublisherTests(unittest.TestCase):
         self.assertIn("administrators", body)
         self.assertIn("protected production", body)
         self.assertIn("must not be merged or activated", body)
-        self.assertIn("Approve workflows to run", body)
-        self.assertIn("GitHub App or fine-grained PAT", body)
-        self.assertIn("optional only", body)
-        self.assertIn("does not change repository rules", body)
+        self.assertIn("GitHub Actions built-in `GITHUB_TOKEN`", body)
+        self.assertIn("Expected PR author: `github-actions[bot]`", body)
+        self.assertIn("may suppress recursive workflow starts", body)
+        self.assertIn("does not mint credentials, change repository rules", body)
+
+    def test_app_pr_body_describes_only_app_installation_credentials(self) -> None:
+        worktree = self._clone("app-credential-guidance")
+        (worktree / "data/generated.yml").write_text(
+            "value: proposed\n",
+            encoding="utf-8",
+        )
+        config = self._config(
+            credential_source="github-app",
+            expected_pr_author_login="arm-ecosystem-publisher[bot]",
+        )
+
+        publish_generated_data(
+            config,
+            repository_root=worktree,
+            github=self.github,
+        )
+
+        body = self.github.pull_requests[0]["body"]
+        self.assertIn("short-lived GitHub App installation token", body)
+        self.assertIn(
+            "Expected PR author: `arm-ecosystem-publisher[bot]`",
+            body,
+        )
+        self.assertIn("App-authored pull-request events", body)
+        self.assertNotIn("GITHUB_TOKEN", body)
+        self.assertNotIn("fine-grained PAT", body)
+
+    def test_app_author_ownership_comparison_is_case_insensitive(self) -> None:
+        config = self._config(
+            credential_source="github-app",
+            expected_pr_author_login="Arm-Ecosystem-Publisher[bot]",
+        )
+        first = self._clone("app-author-first")
+        (first / "data/generated.yml").write_text(
+            "value: proposed\n",
+            encoding="utf-8",
+        )
+        created = publish_generated_data(
+            config,
+            repository_root=first,
+            github=self.github,
+        )
+        self.github.pull_requests[0]["user"]["login"] = (
+            "arm-ecosystem-publisher[bot]"
+        )
+
+        second = self._clone("app-author-second")
+        (second / "data/generated.yml").write_text(
+            "value: proposed\n",
+            encoding="utf-8",
+        )
+        unchanged = publish_generated_data(
+            config,
+            repository_root=second,
+            github=self.github,
+        )
+
+        self.assertEqual(created.status, "created")
+        self.assertEqual(unchanged.status, "unchanged")
 
     def test_refuses_to_overwrite_a_manual_remote_head(self) -> None:
         first = self._clone("first-owned")
@@ -503,6 +642,35 @@ class GeneratedDataPublisherTests(unittest.TestCase):
                 github=self.github,
             )
 
+    def test_rejects_wrong_app_bot_actor(self) -> None:
+        config = self._config(
+            credential_source="github-app",
+            expected_pr_author_login="arm-ecosystem-publisher[bot]",
+        )
+        first = self._clone("first-app-pr-author")
+        (first / "data/generated.yml").write_text(
+            "value: proposed\n",
+            encoding="utf-8",
+        )
+        publish_generated_data(
+            config,
+            repository_root=first,
+            github=self.github,
+        )
+        self.github.pull_requests[0]["user"]["login"] = "other-app[bot]"
+
+        next_run = self._clone("next-app-pr-author")
+        (next_run / "data/generated.yml").write_text(
+            "value: changed\n",
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(PublishError, "wrong author"):
+            publish_generated_data(
+                config,
+                repository_root=next_run,
+                github=self.github,
+            )
+
     def test_rejects_forged_ownership_trailers_and_control_character_paths(self) -> None:
         first = self._clone("first-forged")
         (first / "data/generated.yml").write_text("value: proposed\n", encoding="utf-8")
@@ -601,6 +769,25 @@ class GeneratedDataPublisherTests(unittest.TestCase):
 
         self.assertIsNone(self._remote_head_sha())
 
+    def test_rejects_python_bytecode_outside_the_allowlist(self) -> None:
+        worktree = self._clone("unexpected-python-bytecode")
+        (worktree / "data/generated.yml").write_text(
+            "value: proposed\n",
+            encoding="utf-8",
+        )
+        cache = worktree / ".github/scripts/__pycache__"
+        cache.mkdir(parents=True)
+        (cache / "orchestration_contract.cpython-312.pyc").write_bytes(b"pyc")
+
+        with self.assertRaisesRegex(PublishError, "outside the generated-data allowlist"):
+            publish_generated_data(
+                self._config(),
+                repository_root=worktree,
+                github=self.github,
+            )
+
+        self.assertIsNone(self._remote_head_sha())
+
     def test_allows_new_regular_files_only_inside_an_allowlisted_directory(self) -> None:
         worktree = self._clone("allowlisted-new-file")
         results = worktree / "data/results"
@@ -639,6 +826,18 @@ class GeneratedDataPublisherTests(unittest.TestCase):
                 self._config(
                     paths=("data/required.yml",),
                     required_tracked_paths=("data/required.yml",),
+                ),
+                repository_root=worktree,
+                github=self.github,
+            )
+
+        worktree = self._clone("required-deleted")
+        (worktree / "data/generated.yml").unlink()
+
+        with self.assertRaisesRegex(PublishError, "file is missing"):
+            publish_generated_data(
+                self._config(
+                    required_tracked_paths=("data/generated.yml",),
                 ),
                 repository_root=worktree,
                 github=self.github,
@@ -770,213 +969,84 @@ class GitHubApiContractTests(unittest.TestCase):
         self.assertIn("page=2", endpoints[1])
 
 
-class WorkflowContractTests(unittest.TestCase):
-    def test_migrated_workflows_use_review_action_without_direct_pushes(self) -> None:
-        checkout_sha = "11d5960a326750d5838078e36cf38b85af677262"
-        hugo_sha = "2752ce1d29631191ea3f27c23495fa06139a5b78"
+class FoundationContractTests(unittest.TestCase):
+    def test_action_exposes_validated_credential_metadata_inputs(self) -> None:
+        action = (ACTION_ROOT / "action.yml").read_text(encoding="utf-8")
+
+        self.assertIn("expected-pr-author-login:", action)
+        self.assertIn("default: github-actions[bot]", action)
+        self.assertIn("credential-source:", action)
+        self.assertIn("default: github-token", action)
+        self.assertIn("GENERATED_DATA_EXPECTED_PR_AUTHOR_LOGIN:", action)
+        self.assertIn("GENERATED_DATA_CREDENTIAL_SOURCE:", action)
+
+    def test_sandbox_ci_is_read_only_and_sha_pins_external_actions(self) -> None:
         repository = ACTION_ROOT.parents[2]
-        main = (repository / ".github/workflows/main.yml").read_text(encoding="utf-8")
-        summary = (
-            repository / ".github/workflows/test-all-packages-summary.yml"
+        workflow = (
+            repository
+            / ".github/workflows/sandbox-dashboard-validation.yml"
         ).read_text(encoding="utf-8")
 
-        for workflow in (main, summary):
-            self.assertIn("./.github/actions/publish-generated-data-pr", workflow)
-            self.assertIn("pull-requests: write", workflow)
-            self.assertIn("GH_TOKEN: ${{ github.token }}", workflow)
-            self.assertNotIn("git push", workflow)
-            self.assertIn(f"actions/checkout@{checkout_sha}", workflow)
-            self.assertNotIn("actions/checkout@v", workflow)
-
-        self.assertIn("data/category_data_windows.yml", main)
-        self.assertIn("hugo deploy --force", main)
-        self.assertIn(f"peaceiris/actions-hugo@{hugo_sha}", main)
-        self.assertNotIn("peaceiris/actions-hugo@v", main)
-        self.assertIn("EXPECTED_REF: refs/heads/main", main)
-        self.assertIn('[[ "$GITHUB_REF" == "$EXPECTED_REF" ]]', main)
-        self.assertIn("id: generated_data_review", main)
-        self.assertIn("producer: site-preprocessing", main)
-        self.assertLess(
-            main.index("Open or update preprocessing data review PR"),
-            main.index("- name: Build"),
-        )
-        self.assertLess(
-            main.index('[[ "$actual_base_sha" == "$EXPECTED_BASE_SHA" ]]'),
-            main.index("hugo deploy --force"),
-        )
-        deploy_gate = (
-            "if: steps.generated_data_review.outputs.status == 'no_changes'"
-        )
-        self.assertEqual(main.count(deploy_gate), 2)
-        for blocked_status in ("created", "updated", "unchanged", "closed_stale"):
-            self.assertNotIn(
-                f"steps.generated_data_review.outputs.status == '{blocked_status}'",
-                main,
-            )
-        concurrency_contract = (
-            "concurrency:\n"
-            "  group: ${{ github.repository }}-production-deployment\n"
-            "  cancel-in-progress: false"
-        )
-        self.assertIn(concurrency_contract, main)
-        self.assertLess(main.index("concurrency:"), main.index("jobs:"))
-        build_job_start = main.index("  build_and_review:")
-        deploy_job_start = main.index("  deploy_production:")
-        build_job = main[build_job_start:deploy_job_start]
-        deploy_job = main[deploy_job_start:]
-        self.assertIn("needs: build_and_review", deploy_job)
-        self.assertIn("needs.build_and_review.result == 'success'", deploy_job)
-        self.assertIn(
-            "needs.build_and_review.outputs.generated_data_status == 'no_changes'",
-            deploy_job,
-        )
-        self.assertIn(
-            "needs.build_and_review.outputs.current_base == 'true'",
-            deploy_job,
-        )
-        self.assertIn("environment:\n      name: production", deploy_job)
-        self.assertIn(
-            "ref: ${{ needs.build_and_review.outputs.reviewed_sha }}",
-            deploy_job,
-        )
-        self.assertNotIn("secrets.AWS_", build_job)
-        self.assertEqual(deploy_job.count("secrets.AWS_"), 2)
-        self.assertLess(
-            deploy_job.index('[[ "$remote_sha" == "$EXPECTED_SHA" ]]'),
-            deploy_job.index("hugo deploy --force"),
-        )
-
-        action_start = main.index("uses: ./.github/actions/publish-generated-data-pr")
-        action_end = main.index("- name: Build")
-        preprocessing_action = main[action_start:action_end]
-        generated_files = (
-            "data/category_data.yml",
-            "data/category_data_windows.yml",
-            "data/recently_added_packages.yaml",
-        )
-        self.assertIn("paths: |", preprocessing_action)
-        self.assertIn("required-tracked-paths: |", preprocessing_action)
-        for path in generated_files:
-            self.assertEqual(preprocessing_action.count(path), 2)
-
-        self.assertIn("data/test-results/", summary)
-        self.assertIn("data/test-results-index.json", summary)
-        self.assertIn("batch${i}-test-results", summary)
-        self.assertIn("DOWNLOAD_FAILURES=$((DOWNLOAD_FAILURES + 1))", summary)
-        self.assertIn(
-            "Refusing publication because one or more batch downloads failed",
-            summary,
-        )
-        self.assertIn("GITHUB_STEP_SUMMARY", summary)
-        self.assertIn("ref: ${{ github.sha }}", summary)
-        self.assertNotIn("ref: ${{ inputs.expected_sha }}", summary)
-        self.assertNotIn("ref: ${{ github.ref }}", summary)
-        self.assertIn(
-            "required-tracked-paths: data/test-results-index.json",
-            summary,
-        )
-        self.assertLess(
-            summary.index("Remove generated-data scratch paths"),
-            summary.index("Open or update aggregated test-results review PR"),
-        )
-        self.assertEqual(summary.count("if: always()"), 1)
-        self.assertIn(
-            "if: steps.assemble.outcome == 'success' && "
-            "steps.assemble.outputs.json_count != '0'",
-            summary,
-        )
-        self.assertIn(
-            "if: steps.normalize.outcome == 'success' && "
-            "steps.assemble.outputs.json_count != '0'",
-            summary,
-        )
-        publisher_start = summary.index(
-            "- name: Open or update aggregated test-results review PR"
-        )
-        publisher_step = summary[publisher_start:]
-        for required_outcome in (
-            "steps.download.outcome == 'success'",
-            "steps.assemble.outcome == 'success'",
-            "steps.normalize.outcome == 'success'",
-            "steps.promote.outcome == 'success'",
-            "steps.publication_base.outcome == 'success'",
+        self.assertIn("permissions:\n  contents: read", workflow)
+        self.assertNotIn("contents: write", workflow)
+        self.assertNotIn("pull-requests: write", workflow)
+        self.assertNotIn("secrets.", workflow)
+        self.assertIn("runs-on: ubuntu-24.04-arm", workflow)
+        self.assertIn("python3 -m unittest -v", workflow)
+        self.assertIn("actionlint_", workflow)
+        self.assertIn("_linux_arm64.tar.gz", workflow)
+        for covered_path in (
+            "build_steps/build_pip_sandbox_fixture.py --check",
+            "build_steps/validate_package_identity_catalog.py",
+            "build_steps/validate_pip_sandbox_candidate.py",
         ):
-            self.assertIn(required_outcome, publisher_step)
-        self.assertIn("success()", publisher_step)
-        self.assertNotIn("always()", publisher_step)
-        assembly_start = summary.index(
-            "- name: Assemble candidate and previous-production staging sets"
+            self.assertIn(covered_path, workflow)
+        self.assertIn(
+            "325e971b6ba9bfa504672e29be93c24981eeb1c07576d730e9f7c8805afff0c6",
+            workflow,
         )
-        normalize_start = summary.index("- name: Validate candidate exact job URLs")
-        assembly_step = summary[assembly_start:normalize_start]
-        self.assertIn("PackageCatalog.load(Path.cwd())", assembly_step)
-        self.assertIn("catalog.from_metadata(", assembly_step)
-        self.assertIn("destinations.claim(", assembly_step)
-        self.assertIn("candidate_destinations.destination(slug)", assembly_step)
-        self.assertNotIn("package_map.get(", assembly_step)
-        self.assertLess(
-            assembly_step.index("catalog.from_metadata("),
-            assembly_step.index("destinations.claim("),
-        )
-        for scratch_path in (
-            "downloaded-results",
-            ".orchestration",
-            ".summary-package-map.json",
-            ".summary-staging",
-            "test-results",
-        ):
-            self.assertIn(scratch_path, summary)
+        self.assertIn("sha256sum --check --strict", workflow)
+        for line in workflow.splitlines():
+            if "uses:" not in line:
+                continue
+            reference = line.split("uses:", maxsplit=1)[1].strip()
+            if reference.startswith("./"):
+                self.assertTrue(reference.startswith("./trusted/.github/actions/"))
+                continue
+            _, separator, revision = reference.rpartition("@")
+            self.assertEqual(separator, "@")
+            self.assertRegex(revision, r"^[0-9a-f]{40}$")
 
-        documentation = (
-            repository / ".github/actions/publish-generated-data-pr/README.md"
-        ).read_text(encoding="utf-8")
-        self.assertIn("required approving reviews", documentation)
-        self.assertIn("required checks", documentation)
-        self.assertIn("administrators", documentation)
-        self.assertIn("protected production environment", documentation)
-        self.assertIn("Do not merge or activate", documentation)
-        self.assertIn("Approve workflows to run", documentation)
-        self.assertIn("optional only", documentation)
-        self.assertIn("Workflow permissions", documentation)
-        self.assertIn("write access remains an", documentation)
-        self.assertIn("owner-setting activation blocker", documentation)
+    def test_readme_declares_least_privilege_integration_contract(self) -> None:
+        readme = (ACTION_ROOT / "README.md").read_text(encoding="utf-8")
 
-    def test_batch_count_contract_is_ready_for_parent_integration(self) -> None:
-        repository = ACTION_ROOT.parents[2]
-        workflow_root = repository / ".github/workflows"
-        batch_numbers = sorted(
-            int(path.stem.removeprefix("test-all-packages-batch"))
-            for path in workflow_root.glob("test-all-packages-batch*.yml")
-        )
-        self.assertEqual(
-            batch_numbers,
-            list(range(1, EXPECTED_BATCH_COUNT + 1)),
-            "The workflow inventory and orchestration range must stay aligned.",
-        )
+        self.assertIn("shared publisher foundation", readme)
+        self.assertIn("Each caller must isolate", readme)
+        self.assertIn("Global Test Summary workflow", readme)
+        self.assertIn("cannot change repository permissions", readme)
+        self.assertIn("Generation and publication should be separate jobs", readme)
+        self.assertIn("contents: read", readme)
+        self.assertIn("short-lived credential", readme)
+        self.assertIn("does not activate", readme)
 
-        orchestrator = (
-            workflow_root / "test-all-packages-orchestrator.yml"
-        ).read_text(encoding="utf-8")
-        summary = (
-            workflow_root / "test-all-packages-summary.yml"
-        ).read_text(encoding="utf-8")
-        loop = f"for i in {{1..{EXPECTED_BATCH_COUNT}}}; do"
-        self.assertEqual(orchestrator.count(loop), 2)
-        self.assertEqual(summary.count(loop), 1)
 
-    def test_new_control_workflows_run_only_on_arm64(self) -> None:
-        repository = ACTION_ROOT.parents[2]
-        workflow_root = repository / ".github/workflows"
-
-        for name in (
-            "generated-data-hardening-ci.yml",
-            "package-identity-bootstrap-unit-tests.yml",
-        ):
-            workflow = (workflow_root / name).read_text(encoding="utf-8")
-            self.assertIn("runs-on: ubuntu-24.04-arm", workflow)
-            self.assertNotIn("runs-on: ubuntu-latest", workflow)
-            self.assertNotIn("runs-on: ubuntu-24.04\n", workflow)
-            self.assertNotIn("actionlint_arch: amd64", workflow)
+def _valid_environment() -> dict[str, str]:
+    return {
+        "GENERATED_DATA_PRODUCER": "test-producer",
+        "GENERATED_DATA_BASE_BRANCH": "main",
+        "GENERATED_DATA_EXPECTED_BASE_SHA": "a" * 40,
+        "GENERATED_DATA_HEAD_BRANCH": (
+            "automation/generated-data/test-producer/main"
+        ),
+        "GENERATED_DATA_TITLE": "Update generated test data",
+        "GENERATED_DATA_COMMIT_MESSAGE": "Update generated test data",
+        "GENERATED_DATA_PATHS": "data/generated.yml",
+        "GENERATED_DATA_REQUIRED_TRACKED_PATHS": "data/generated.yml",
+        "GITHUB_REPOSITORY": "example/dashboard",
+        "GITHUB_SERVER_URL": "https://github.com",
+        "GITHUB_RUN_ID": "1",
+        "GITHUB_REF_NAME": "main",
+    }
 
 
 def _git(root: Path, *arguments: str) -> subprocess.CompletedProcess[str]:

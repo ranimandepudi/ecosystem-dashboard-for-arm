@@ -21,8 +21,17 @@ _REPOSITORY_RE = re.compile(
     r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}/[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$"
 )
 _BRANCH_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]{0,239}$")
+_PR_AUTHOR_LOGIN_RE = re.compile(
+    r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,98}[A-Za-z0-9])?(?:\[bot\])?$"
+)
 _AUTOMATION_PREFIX = "automation/generated-data/"
 _MARKER_VERSION = "v1"
+_DEFAULT_PR_AUTHOR_LOGIN = "github-actions[bot]"
+_CREDENTIAL_SOURCE_GITHUB_TOKEN = "github-token"
+_CREDENTIAL_SOURCE_GITHUB_APP = "github-app"
+_CREDENTIAL_SOURCES = frozenset(
+    {_CREDENTIAL_SOURCE_GITHUB_TOKEN, _CREDENTIAL_SOURCE_GITHUB_APP}
+)
 _TRAILER_PRODUCER = "Generated-Data-Producer"
 _TRAILER_BRANCH = "Generated-Data-Branch"
 _TRAILER_BASE_BRANCH = "Generated-Data-Base-Branch"
@@ -47,6 +56,8 @@ class Config:
     server_url: str
     run_url: str
     output_path: Path | None
+    expected_pr_author_login: str = _DEFAULT_PR_AUTHOR_LOGIN
+    credential_source: str = _CREDENTIAL_SOURCE_GITHUB_TOKEN
 
     @classmethod
     def from_environment(cls, environment: Mapping[str, str]) -> Config:
@@ -78,6 +89,14 @@ class Config:
             else f"{server_url}/{values['repository']}/actions"
         )
         output = environment.get("GITHUB_OUTPUT", "").strip()
+        expected_pr_author_login = environment.get(
+            "GENERATED_DATA_EXPECTED_PR_AUTHOR_LOGIN",
+            _DEFAULT_PR_AUTHOR_LOGIN,
+        )
+        credential_source = environment.get(
+            "GENERATED_DATA_CREDENTIAL_SOURCE",
+            _CREDENTIAL_SOURCE_GITHUB_TOKEN,
+        )
         config = cls(
             producer=values["producer"],
             base_branch=values["base_branch"],
@@ -91,6 +110,8 @@ class Config:
             server_url=server_url,
             run_url=run_url,
             output_path=Path(output) if output else None,
+            expected_pr_author_login=expected_pr_author_login,
+            credential_source=credential_source,
         )
         config.validate()
         ref_name = environment.get("GITHUB_REF_NAME", "").strip()
@@ -128,6 +149,10 @@ class Config:
             raise PublishError("generated-data head branch must differ from its base")
         _validate_single_line(self.title, "title", maximum=200)
         _validate_single_line(self.commit_message, "commit message", maximum=200)
+        _validate_pr_credentials(
+            self.expected_pr_author_login,
+            self.credential_source,
+        )
         if not self.paths:
             raise PublishError("at least one generated-data path is required")
         for path in self.paths:
@@ -408,6 +433,7 @@ def publish_generated_data(
     changed_paths = _staged_paths(git)
     _verify_changed_paths(root, changed_paths, config.paths)
     _verify_index_modes(git, changed_paths)
+    _verify_required_tracked_paths(git, root, config.required_tracked_paths)
     remaining_dirty, remaining_untracked = _worktree_candidate_paths(git)
     if remaining_dirty or remaining_untracked:
         raise PublishError(
@@ -542,6 +568,40 @@ def _validate_single_line(value: str, label: str, *, maximum: int) -> None:
         or any(character in value for character in "\x00\r\n")
     ):
         raise PublishError(f"{label} must be one bounded trimmed line")
+
+
+def _validate_pr_credentials(author_login: str, credential_source: str) -> None:
+    if (
+        not isinstance(author_login, str)
+        or not _PR_AUTHOR_LOGIN_RE.fullmatch(author_login)
+        or len(author_login) > 105
+    ):
+        raise PublishError("expected PR author login is malformed")
+    if (
+        not isinstance(credential_source, str)
+        or credential_source not in _CREDENTIAL_SOURCES
+    ):
+        raise PublishError(
+            "credential source must be 'github-token' or 'github-app'"
+        )
+    normalized_author = author_login.casefold()
+    if (
+        credential_source == _CREDENTIAL_SOURCE_GITHUB_TOKEN
+        and normalized_author != _DEFAULT_PR_AUTHOR_LOGIN
+    ):
+        raise PublishError(
+            "github-token credential source requires github-actions[bot] as the "
+            "expected PR author"
+        )
+    if credential_source == _CREDENTIAL_SOURCE_GITHUB_APP:
+        if not normalized_author.endswith("[bot]"):
+            raise PublishError(
+                "github-app credential source requires a GitHub App bot author"
+            )
+        if normalized_author == _DEFAULT_PR_AUTHOR_LOGIN:
+            raise PublishError(
+                "github-app credential source requires the installed App bot author"
+            )
 
 
 def _validate_path_spec(value: str) -> None:
@@ -848,6 +908,22 @@ def _pull_request_body(
     changed_paths: Sequence[str],
 ) -> str:
     rendered_paths = "\n".join(f"- `{path}`" for path in changed_paths)
+    if config.credential_source == _CREDENTIAL_SOURCE_GITHUB_TOKEN:
+        credential_label = "GitHub Actions built-in `GITHUB_TOKEN`"
+        credential_guidance = (
+            "This pull request is created with the repository's built-in "
+            "`GITHUB_TOKEN`. GitHub may suppress recursive workflow starts or place "
+            "workflow runs behind repository approval. An authorized reviewer must "
+            "verify that every required check actually ran before merge."
+        )
+    else:
+        credential_label = "short-lived GitHub App installation token"
+        credential_guidance = (
+            "This pull request is created with a short-lived GitHub App installation "
+            "token. App-authored pull-request events can trigger repository checks, "
+            "subject to repository policy. Required checks and independent review "
+            "remain mandatory before merge."
+        )
     return (
         f"{config.ownership_marker}\n"
         "# Generated data review\n\n"
@@ -856,7 +932,9 @@ def _pull_request_body(
         f"- Producer: `{config.producer}`\n"
         f"- Reviewed base: `{config.base_branch}` at `{config.expected_base_sha}`\n"
         f"- Candidate commit: `{head_sha}`\n"
-        f"- Source run: {config.run_url}\n\n"
+        f"- Source run: {config.run_url}\n"
+        f"- Pull-request credential: {credential_label}\n"
+        f"- Expected PR author: `{config.expected_pr_author_login}`\n\n"
         "Changed files:\n"
         f"{rendered_paths}\n\n"
         "This source run will not deploy while generated changes require review. After "
@@ -867,12 +945,10 @@ def _pull_request_body(
         "checks, enforce those rules for administrators, and configure a protected "
         "production environment. The deployment workflow must not be merged or activated "
         "until owners have explicitly created and protected that environment.\n\n"
-        "## Required workflow approval\n\n"
-        "This pull request is created with `GITHUB_TOKEN`. An authorized repository "
-        "writer must select **Approve workflows to run** before its required checks can "
-        "satisfy the review gate. A separately governed GitHub App or fine-grained PAT "
-        "is optional only; it is not required by this implementation. This action does "
-        "not change repository rules, approve workflows, or configure an environment.\n\n"
+        "## Credential behavior\n\n"
+        f"{credential_guidance} The publisher validates that the pull request is owned "
+        "by the configured author. It does not mint credentials, change repository "
+        "rules, approve workflows, merge pull requests, or configure an environment.\n\n"
         "Review the generated diff and all required checks before marking this PR ready.\n"
     )
 
@@ -933,7 +1009,11 @@ def _validate_pull_request_ownership(
     if not isinstance(body, str) or config.ownership_marker not in body:
         raise PublishError("deterministic generated-data PR is not automation-owned")
     user = pull_request.get("user")
-    if not isinstance(user, Mapping) or user.get("login") != "github-actions[bot]":
+    author_login = user.get("login") if isinstance(user, Mapping) else None
+    if (
+        not isinstance(author_login, str)
+        or author_login.casefold() != config.expected_pr_author_login.casefold()
+    ):
         raise PublishError("deterministic generated-data PR has the wrong author")
     if pull_request.get("draft") is not True:
         raise PublishError(

@@ -75,6 +75,10 @@ jobs:
             build_steps.tests.test_validate_pip_sandbox_candidate
           python3 .github/actions/publish-generated-data-pr/tests/test_batch_artifact_attestation.py
           python3 .github/actions/publish-generated-data-pr/tests/test_orchestration_contract.py
+          python3 .github/actions/publish-generated-data-pr/tests/test_generated_data_pr.py
+          python3 .github/actions/publish-generated-data-pr/tests/test_summary_slug_policy.py
+          python3 .github/scripts/tests/test_generated_test_results_artifact.py
+          python3 .github/scripts/tests/test_promote_package_results.py
 
       - name: Validate candidate transition from trusted base code
         run: |
