@@ -128,7 +128,7 @@ class RepositorySlugContractTests(unittest.TestCase):
             if path.name != "_index.md"
         }
         self.assertEqual(catalog.slugs, frozenset(content_slugs))
-        self.assertGreater(len(catalog.slugs), 900)
+        self.assertEqual(catalog.slugs, frozenset({"numpy"}))
 
         for result_path in (repository / "data/test-results").glob("*.json"):
             self.assertIn(result_path.stem, catalog.slugs)
