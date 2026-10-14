@@ -333,7 +333,15 @@ jobs:
           }
 
           cleanup() {
+            RESULT=$?
+            echo "Candidate validation exit: $RESULT"
+            sudo docker logs --tail 120 "$NEXT_CONTAINER" || true
+            for LOG in /tmp/opengauss-next-version.txt /tmp/opengauss-next-help.txt /tmp/opengauss-next-smoke.txt; do
+              echo "Captured output: $LOG"
+              cat "$LOG" || true
+            done
             sudo docker rm -f "$NEXT_CONTAINER" >/dev/null 2>&1 || true
+            return "$RESULT"
           }
           trap cleanup EXIT
 
@@ -457,6 +465,8 @@ jobs:
           fi
 
           NEXT_ARCH=$(sudo docker image inspect "$NEXT_IMAGE" --format '{{.Architecture}}')
+          echo "Candidate PID 1 after first successful readiness query:"
+          sudo docker exec "$NEXT_CONTAINER" cat /proc/1/comm
           run_next_gsql_help >/tmp/opengauss-next-help.txt 2>&1
           run_next_sql "select 1;" >/tmp/opengauss-next-smoke.txt 2>&1
 
