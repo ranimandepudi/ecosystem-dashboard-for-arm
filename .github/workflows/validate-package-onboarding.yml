@@ -14,6 +14,21 @@ permissions:
   contents: read
 
 jobs:
+  openshell:
+    uses: ./.github/workflows/test-openshell.yml
+  sandbox-runtime:
+    uses: ./.github/workflows/test-anthropic-sandbox-runtime.yml
+  gvisor:
+    uses: ./.github/workflows/test-gVisor.yml
+  historical-srt-001:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # original: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify first published SRT package and native filesystem enforcement
+        run: bash .github/scripts/tests/srt_historical_001.sh
   npm-publication-evidence:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
