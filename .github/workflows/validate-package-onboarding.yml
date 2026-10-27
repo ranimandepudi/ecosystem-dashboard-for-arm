@@ -86,3 +86,453 @@ jobs:
           else
             echo 'Privileged mount/PID namespaces are restricted.'
           fi
+
+  libkrun-build-only:
+    name: "libkrun build, headers and library/API only (no guest execution)"
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 35
+    env:
+      LC_ALL: "C"
+      BASELINE_VERSION: "1.19.7"
+      SOURCE_COMMIT: "43b2f5aadeebb90f42053c9df2ec8b16583e554f"
+      SOURCE_SHA256: "7c31a3c62e696efbf13268ee6f37eb4740d82ea599dcd724525fe8f8f72729b0"
+      RUST_TOOLCHAIN: "1.94.0"
+      FIRMWARE_SHA256: "dea7905a167eee17d482200ea2fe15871aceb293b0674ac825ed7ae69759399f"
+    steps:
+      - name: "Checkout validation branch"
+        uses: "actions/checkout@11d5960a326750d5838078e36cf38b85af677262" # original: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: "Native Arm64 preparation scope"
+        run: |
+          set -euo pipefail
+          test "$(uname -s)" = Linux
+          test "$(uname -m)" = aarch64
+          uname -a
+          getconf PAGESIZE
+          if test -c /dev/kvm; then
+            echo "KVM device exists, but this job will not boot a guest."
+          else
+            echo "/dev/kvm unavailable: build/CLI/preboot API evidence only."
+          fi
+
+      - name: "Build and install pinned native libkrun and guest firmware"
+        id: "install"
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = aarch64
+          bash .github/actions/apt-bootstrap/bootstrap.sh \
+            --packages "build-essential pkg-config patchelf python3 curl ca-certificates binutils libc6-dev" \
+            --no-install-recommends true
+          rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal
+          BUILD="$RUNNER_TEMP/libkrun-source"
+          PREFIX="$RUNNER_TEMP/libkrun-install"
+          mkdir -p "$BUILD" "$PREFIX"
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/libkrun.tar.gz" \
+            "https://codeload.github.com/libkrun/libkrun/tar.gz/$SOURCE_COMMIT"
+          echo "$SOURCE_SHA256  $RUNNER_TEMP/libkrun.tar.gz" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/libkrun.tar.gz" --strip-components=1 -C "$BUILD"
+          mkdir -p "$RUNNER_TEMP/libkrun-firmware"
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/libkrunfw.tgz" \
+            "https://github.com/libkrun/libkrunfw/releases/download/v5.6.2/libkrunfw-aarch64.tgz"
+          echo "$FIRMWARE_SHA256  $RUNNER_TEMP/libkrunfw.tgz" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/libkrunfw.tgz" -C "$RUNNER_TEMP/libkrun-firmware"
+          test -f "$RUNNER_TEMP/libkrun-firmware/lib/aarch64-linux-gnu/libkrunfw.so.5.6.2"
+          echo "LIBKRUNFW_DIR=$RUNNER_TEMP/libkrun-firmware/lib/aarch64-linux-gnu" >> "$GITHUB_ENV"
+          docker info >/dev/null
+          cd "$BUILD"
+          cargo +"$RUST_TOOLCHAIN" build --release --locked -p libkrun
+          cp target/release/libkrun.so "target/release/libkrun.so.$BASELINE_VERSION"
+          make PREFIX="$PREFIX" install
+          {
+            echo "LIBKRUN_PREFIX=$PREFIX"
+            echo "LIBKRUN_SOURCE=$BUILD"
+            echo "LIBKRUN_PATH=$PREFIX/lib64/libkrun.so.$BASELINE_VERSION"
+            echo "PKG_CONFIG_PATH=$PREFIX/lib64/pkgconfig"
+          } >> "$GITHUB_ENV"
+          cat > "$RUNNER_TEMP/libkrun-api.py" <<'PY'
+          import ctypes
+          import errno
+          import os
+          from pathlib import Path
+          import sys
+          import tempfile
+          
+          path = Path(os.environ["LIBKRUN_PATH"]).resolve(strict=True)
+          lib = ctypes.CDLL(str(path))
+          def check(condition, message):
+              if not condition:
+                  raise RuntimeError(message)
+          check(str(path) in Path("/proc/self/maps").read_text(), "Pinned library not mapped")
+          lib.krun_create_ctx.argtypes = []
+          lib.krun_create_ctx.restype = ctypes.c_int32
+          lib.krun_free_ctx.argtypes = [ctypes.c_uint32]
+          lib.krun_free_ctx.restype = ctypes.c_int32
+          lib.krun_set_vm_config.argtypes = [ctypes.c_uint32, ctypes.c_uint8, ctypes.c_uint32]
+          lib.krun_set_vm_config.restype = ctypes.c_int32
+          for symbol in ("krun_set_root", "krun_set_workdir"):
+              fn = getattr(lib, symbol)
+              fn.argtypes = [ctypes.c_uint32, ctypes.c_char_p]
+              fn.restype = ctypes.c_int32
+          def create():
+              ctx = lib.krun_create_ctx()
+              check(ctx >= 0, "Context creation failed")
+              return ctx
+          mode = sys.argv[1]
+          if mode == "lifecycle":
+              contexts = [create() for _ in range(64)]
+              check(len(set(contexts)) == 64, "Live context IDs collided")
+              for ctx in contexts:
+                  check(lib.krun_free_ctx(ctx) == 0, "Context free failed")
+                  check(lib.krun_free_ctx(ctx) == -errno.ENOENT, "Double free not rejected")
+          elif mode in ("configure", "invalid"):
+              ctx = create()
+              try:
+                  if mode == "invalid":
+                      check(lib.krun_set_vm_config(ctx, 0, 256) == -errno.EINVAL, "Zero CPUs accepted")
+                      check(lib.krun_set_vm_config(ctx, 1, 0) == -errno.EINVAL, "Zero RAM accepted")
+                  check(lib.krun_set_vm_config(ctx, 1, 256) == 0, "Valid configuration rejected")
+                  check(lib.krun_set_vm_config(ctx, 2, 512) == 0, "Reconfiguration rejected")
+                  with tempfile.TemporaryDirectory() as root:
+                      check(lib.krun_set_root(ctx, os.fsencode(root)) == 0, "Root configuration rejected")
+                      check(lib.krun_set_workdir(ctx, b"/") == 0, "Workdir configuration rejected")
+              finally:
+                  check(lib.krun_free_ctx(ctx) == 0, "Context cleanup failed")
+          elif mode == "stale":
+              live, dead = create(), create()
+              check(lib.krun_free_ctx(dead) == 0, "Free failed")
+              for ctx in (dead, 0xffffffff):
+                  check(lib.krun_set_vm_config(ctx, 1, 256) == -errno.ENOENT, "Invalid context accepted")
+                  check(lib.krun_set_workdir(ctx, b"/") == -errno.ENOENT, "Invalid workdir context accepted")
+              check(lib.krun_set_vm_config(live, 1, 256) == 0, "Other context corrupted")
+              check(lib.krun_free_ctx(live) == 0, "Live context cleanup failed")
+          else:
+              raise RuntimeError("Unknown probe mode")
+          print("LIBKRUN_API_OK " + mode)
+          print("library/API smoke; guest execution not tested")
+          PY
+          echo "install_status=success" >> "$GITHUB_OUTPUT"
+
+      - name: "Record installed library metadata version (not guest execution)"
+        id: "version"
+        run: |
+          set -euo pipefail
+          VERSION=$(pkg-config --modversion libkrun)
+          test "$VERSION" = "$BASELINE_VERSION"
+          test "$(pkg-config --variable=libdir libkrun)" = "$LIBKRUN_PREFIX/lib64"
+          test -f "$LIBKRUN_PATH"
+          grep -Fx "FULL_VERSION=$VERSION" "$LIBKRUN_SOURCE/Makefile"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: "Check installed Arm64 library and SONAME"
+        id: "test1"
+        run: |
+          set -euo pipefail
+          START_TIME=$SECONDS
+          finish_test() {
+            local rc=$? status=failed
+            trap - EXIT
+            if [ "$rc" -eq 0 ]; then status=passed; fi
+            echo "status=$status" >> "$GITHUB_OUTPUT"
+            echo "duration=$((SECONDS - START_TIME))" >> "$GITHUB_OUTPUT"
+            exit "$rc"
+          }
+          trap finish_test EXIT
+          test "$(uname -s)" = Linux
+          test "$(uname -m)" = aarch64
+          readelf -h "$LIBKRUN_PATH" | grep -Eq 'Machine: +AArch64'
+          readelf -d "$LIBKRUN_PATH" | grep -F 'Library soname: [libkrun.so.1]'
+          test "$(realpath "$LIBKRUN_PREFIX/lib64/libkrun.so")" = "$LIBKRUN_PATH"
+
+      - name: "Check mapped library and context lifecycle (no VM start)"
+        id: "test2"
+        run: |
+          set -euo pipefail
+          START_TIME=$SECONDS
+          finish_test() {
+            local rc=$? status=failed
+            trap - EXIT
+            if [ "$rc" -eq 0 ]; then status=passed; fi
+            echo "status=$status" >> "$GITHUB_OUTPUT"
+            echo "duration=$((SECONDS - START_TIME))" >> "$GITHUB_OUTPUT"
+            exit "$rc"
+          }
+          trap finish_test EXIT
+          timeout 30s python3 "$RUNNER_TEMP/libkrun-api.py" lifecycle
+
+      - name: "Check valid, invalid and stale API configurations (no VM start)"
+        id: "test3"
+        run: |
+          set -euo pipefail
+          START_TIME=$SECONDS
+          finish_test() {
+            local rc=$? status=failed
+            trap - EXIT
+            if [ "$rc" -eq 0 ]; then status=passed; fi
+            echo "status=$status" >> "$GITHUB_OUTPUT"
+            echo "duration=$((SECONDS - START_TIME))" >> "$GITHUB_OUTPUT"
+            exit "$rc"
+          }
+          trap finish_test EXIT
+          timeout 30s python3 "$RUNNER_TEMP/libkrun-api.py" configure
+          timeout 30s python3 "$RUNNER_TEMP/libkrun-api.py" invalid
+          timeout 30s python3 "$RUNNER_TEMP/libkrun-api.py" stale
+
+      - name: "Compile/link installed C header and run lifecycle API only"
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/libkrun-header-check.c" <<'C'
+          #include <libkrun.h>
+          #include <stdint.h>
+          int main(void) {
+              int32_t ctx = krun_create_ctx();
+              if (ctx < 0) return 1;
+              if (krun_set_vm_config((uint32_t)ctx, 1, 256) != 0) return 2;
+              return krun_free_ctx((uint32_t)ctx) == 0 ? 0 : 3;
+          }
+          C
+          timeout -k 5s 60s cc -std=c11 -Wall -Wextra -Werror \
+            "$RUNNER_TEMP/libkrun-header-check.c" $(pkg-config --cflags --libs libkrun) \
+            -o "$RUNNER_TEMP/libkrun-header-check"
+          LD_LIBRARY_PATH="$LIBKRUN_PREFIX/lib64:$LIBKRUNFW_DIR" \
+            timeout -k 5s 20s "$RUNNER_TEMP/libkrun-header-check"
+          readelf -h "$LIBKRUNFW_DIR/libkrunfw.so.5.6.2" | grep -Eq 'Machine: +AArch64'
+          echo "LIBKRUN_BUILD_HEADERS_API_ONLY_OK; guest execution NOT tested"
+
+      - name: "Record preparation scope (not a guest test)"
+        if: "always()"
+        env:
+          JOB_STATUS: "${{ job.status }}"
+          PREPARATION_SCOPE: "libkrun build/header/library API only"
+          CHECKS: "Pinned source build, installed library/header linkage, native ELF and context lifecycle/configuration; no krun_start_enter call."
+        run: |
+          {
+            echo "## $PREPARATION_SCOPE"
+            echo "- Job status: $JOB_STATUS"
+            echo "- Checks: $CHECKS"
+            echo "- Scope: build/CLI/preboot API only; guest boot and guest execution NOT tested."
+            echo "- No KVM validation, guest runtime pass, dashboard badge, or approval is asserted."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  microsandbox-cli-only:
+    name: "Microsandbox ELF and CLI flags only (no guest execution)"
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 12
+    env:
+      LC_ALL: "C"
+      BASELINE_VERSION: "0.7.11"
+      BUNDLE_SHA256: "ab1c371e85ff101581b7cf092dbaad6f5b720736ca042aa0d6d4b950f57d6709"
+      MSB_BACKEND: "local"
+    steps:
+      - name: "Checkout validation branch"
+        uses: "actions/checkout@11d5960a326750d5838078e36cf38b85af677262" # original: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: "Native Arm64 preparation scope"
+        run: |
+          set -euo pipefail
+          test "$(uname -s)" = Linux
+          test "$(uname -m)" = aarch64
+          uname -a
+          getconf PAGESIZE
+          if test -c /dev/kvm; then
+            echo "KVM device exists, but this job will not boot a guest."
+          else
+            echo "/dev/kvm unavailable: build/CLI/preboot API evidence only."
+          fi
+
+      - name: "Install checksum-pinned native Microsandbox runtime pair"
+        id: "install"
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = aarch64
+          bash .github/actions/apt-bootstrap/bootstrap.sh \
+            --packages "curl ca-certificates binutils python3" --no-install-recommends true
+          HOME_DIR="$RUNNER_TEMP/microsandbox-smoke"
+          BUNDLE="$HOME_DIR/runtime"
+          mkdir -p "$BUNDLE"
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/microsandbox.tar.gz" \
+            "https://github.com/superradcompany/microsandbox/releases/download/v$BASELINE_VERSION/microsandbox-linux-aarch64.tar.gz"
+          echo "$BUNDLE_SHA256  $RUNNER_TEMP/microsandbox.tar.gz" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/microsandbox.tar.gz" -C "$BUNDLE"
+          test -x "$BUNDLE/msb"
+          test -f "$BUNDLE/libkrunfw.so.5.6.1"
+          {
+            echo "MSB_HOME=$HOME_DIR"
+            echo "MSB_PATH=$BUNDLE/msb"
+            echo "MSB_LIBKRUNFW_PATH=$BUNDLE/libkrunfw.so.5.6.1"
+          } >> "$GITHUB_ENV"
+          echo "install_status=success" >> "$GITHUB_OUTPUT"
+
+      - name: "Verify installed executable version (not a runtime pass)"
+        id: "version"
+        run: |
+          set -euo pipefail
+          REPORTED=$(timeout 15s "$MSB_PATH" --version)
+          VERSION=$(printf '%s\n' "$REPORTED" | sed -nE 's/^(msb|microsandbox) ([0-9]+\.[0-9]+\.[0-9]+)$/\2/p')
+          test "$VERSION" = "$BASELINE_VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: "Check installed msb and matching firmware Arm64 ELF"
+        id: "test1"
+        run: |
+          set -euo pipefail
+          START_TIME=$SECONDS
+          finish_test() {
+            local rc=$? status=failed
+            trap - EXIT
+            if declare -F cleanup >/dev/null; then cleanup; fi
+            if [ "$rc" -eq 0 ]; then status=passed; fi
+            echo "status=$status" >> "$GITHUB_OUTPUT"
+            echo "duration=$((SECONDS - START_TIME))" >> "$GITHUB_OUTPUT"
+            exit "$rc"
+          }
+          trap finish_test EXIT
+          test "$(uname -s)" = Linux
+          test "$(uname -m)" = aarch64
+          for binary in "$MSB_PATH" "$MSB_LIBKRUNFW_PATH"; do
+            readelf -h "$binary" | grep -Eq 'Machine: +AArch64'
+          done
+          readelf -d "$MSB_LIBKRUNFW_PATH" | grep -F 'Library soname: [libkrunfw.so.5]'
+
+      - name: "Check exact candidate guest-command flags without creating a guest"
+        run: |
+          set -euo pipefail
+          timeout -k 5s 15s "$MSB_PATH" --help > "$RUNNER_TEMP/msb-help.txt"
+          timeout -k 5s 15s "$MSB_PATH" run --help > "$RUNNER_TEMP/msb-run-help.txt"
+          for flag in --name --no-tty --no-stdin --cpus --memory --entrypoint; do
+            grep -F -- "$flag" "$RUNNER_TEMP/msb-run-help.txt"
+          done
+          timeout -k 5s 15s "$MSB_PATH" create --help > "$RUNNER_TEMP/msb-create-help.txt"
+          for flag in --name --cpus --memory; do
+            grep -F -- "$flag" "$RUNNER_TEMP/msb-create-help.txt"
+          done
+          timeout -k 5s 15s "$MSB_PATH" exec --help
+          timeout -k 5s 15s "$MSB_PATH" stop --help
+          timeout -k 5s 15s "$MSB_PATH" rm --help > "$RUNNER_TEMP/msb-rm-help.txt"
+          grep -F -- --force "$RUNNER_TEMP/msb-rm-help.txt"
+          echo "MICROSANDBOX_CLI_FLAGS_ONLY_OK; doctor and guest execution NOT run"
+
+      - name: "Record preparation scope (not a guest test)"
+        if: "always()"
+        env:
+          JOB_STATUS: "${{ job.status }}"
+          PREPARATION_SCOPE: "Microsandbox ELF/version/CLI flags only"
+          CHECKS: "Pinned release bundle and matching firmware ELF; exact version and candidate CLI argument availability. No doctor, image pull, sandbox creation or guest execution."
+        run: |
+          {
+            echo "## $PREPARATION_SCOPE"
+            echo "- Job status: $JOB_STATUS"
+            echo "- Checks: $CHECKS"
+            echo "- Scope: build/CLI/preboot API only; guest boot and guest execution NOT tested."
+            echo "- No KVM validation, guest runtime pass, dashboard badge, or approval is asserted."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  firecracker-preboot-only:
+    name: "Firecracker preboot control-plane/API only (no guest execution)"
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 12
+    env:
+      BASELINE_TAG: "v1.17.0"
+      BASELINE_SHA256: "e351ebe4f7a16b5873bbd51005d2e6767103cff4d5ebc829df2d3f95a93e2256"
+    steps:
+      - name: "Checkout validation branch"
+        uses: "actions/checkout@11d5960a326750d5838078e36cf38b85af677262" # original: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: "Native Arm64 preparation scope"
+        run: |
+          set -euo pipefail
+          test "$(uname -s)" = Linux
+          test "$(uname -m)" = aarch64
+          uname -a
+          getconf PAGESIZE
+          if test -c /dev/kvm; then
+            echo "KVM device exists, but this job will not boot a guest."
+          else
+            echo "/dev/kvm unavailable: build/CLI/preboot API evidence only."
+          fi
+
+      - name: "Install verified Firecracker bundle"
+        id: "install"
+        run: |
+          set -euo pipefail
+          [ "$(uname -m)" = aarch64 ]
+          sudo apt-get update
+          sudo apt-get install -y file jq cpio
+          WORK_DIR=$(mktemp -d "$RUNNER_TEMP/firecracker-install.XXXXXX")
+          ARCHIVE="$WORK_DIR/firecracker-$BASELINE_TAG-aarch64.tgz"
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 180 \
+            "https://github.com/firecracker-microvm/firecracker/releases/download/$BASELINE_TAG/firecracker-$BASELINE_TAG-aarch64.tgz" -o "$ARCHIVE"
+          printf '%s  %s\n' "$BASELINE_SHA256" "$ARCHIVE" | sha256sum -c -
+          tar -xzf "$ARCHIVE" -C "$WORK_DIR"
+          EXTRACT="$WORK_DIR/release-$BASELINE_TAG-aarch64"
+          [ -x "$EXTRACT/firecracker-$BASELINE_TAG-aarch64" ]
+          [ -x "$EXTRACT/jailer-$BASELINE_TAG-aarch64" ]
+          printf 'binary_path=%s\njailer_path=%s\narchive=%s\n' \
+            "$EXTRACT/firecracker-$BASELINE_TAG-aarch64" "$EXTRACT/jailer-$BASELINE_TAG-aarch64" "$ARCHIVE" >> "$GITHUB_OUTPUT"
+
+      - name: "Read exact installed version"
+        id: "version"
+        env:
+          BINARY: "${{ steps.install.outputs.binary_path }}"
+        run: |
+          set -euo pipefail
+          REPORTED=$(timeout --kill-after=2s 10s "$BINARY" --version)
+          printf '%s\n' "$REPORTED"
+          [ "$REPORTED" = "Firecracker $BASELINE_TAG" ]
+          VERSION=${REPORTED#Firecracker }
+          [ "$VERSION" = "$BASELINE_TAG" ]
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: "Check archive checksum and matching jailer version"
+        id: "test3"
+        env:
+          BINARY: "${{ steps.install.outputs.binary_path }}"
+          ARCHIVE: "${{ steps.install.outputs.archive }}"
+          REPORTED_VERSION: "${{ steps.version.outputs.version }}"
+          JAILER: "${{ steps.install.outputs.jailer_path }}"
+        run: |
+          set -euo pipefail
+          START_TIME=$(date +%s)
+          finish() {
+            rc=$?
+            trap - EXIT
+            status=failed
+            [ "$rc" -ne 0 ] || status=passed
+            printf 'status=%s\nduration=%s\n' "$status" "$(($(date +%s) - START_TIME))" >> "$GITHUB_OUTPUT"
+            exit "$rc"
+          }
+          trap finish EXIT
+          printf '%s  %s\n' "$BASELINE_SHA256" "$ARCHIVE" | sha256sum -c -
+          OUTPUT=$(timeout --kill-after=2s 10s "$JAILER" --version)
+          [ "$OUTPUT" = "Jailer $BASELINE_TAG" ]
+
+      - name: "Check native ELF and preboot API configuration without KVM"
+        env:
+          BINARY: "${{ steps.install.outputs.binary_path }}"
+          JAILER: "${{ steps.install.outputs.jailer_path }}"
+        run: |
+          set -euo pipefail
+          readelf -h "$BINARY" | grep -Eq 'Machine: +AArch64'
+          readelf -h "$JAILER" | grep -Eq 'Machine: +AArch64'
+          timeout -k 5s 45s bash .github/scripts/tests/firecracker_preboot_api_preparation.sh "$BINARY" "$BASELINE_TAG"
+          echo "FIRECRACKER_PREBOOT_API_ONLY_OK; guest execution NOT tested"
+
+      - name: "Record preparation scope (not a guest test)"
+        if: "always()"
+        env:
+          JOB_STATUS: "${{ job.status }}"
+          PREPARATION_SCOPE: "Firecracker preboot control-plane/API only"
+          CHECKS: "Pinned Firecracker/jailer artifacts, native ELF, exact versions and actual API GET/PUT configuration validation. No boot-source, drive, InstanceStart or guest execution."
+        run: |
+          {
+            echo "## $PREPARATION_SCOPE"
+            echo "- Job status: $JOB_STATUS"
+            echo "- Checks: $CHECKS"
+            echo "- Scope: build/CLI/preboot API only; guest boot and guest execution NOT tested."
+            echo "- No KVM validation, guest runtime pass, dashboard badge, or approval is asserted."
+          } >> "$GITHUB_STEP_SUMMARY"

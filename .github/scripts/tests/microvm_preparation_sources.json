@@ -1,0 +1,51 @@
+{
+  "scope": "Native build/CLI/preboot API preparation only; no guest or KVM validation.",
+  "candidates": {
+    "libkrun": {
+      "candidate_commit": "0d0b57f0f6e47248d92fb3da3667296834123f64",
+      "candidate_workflow": ".github/workflows/test-libkrun.yml",
+      "candidate_workflow_sha256": "bb3fb6a2cfe768cf996a01bd9d7a9cf27e8ff85f3b94aa9c9fd7a7abf2d87dbc",
+      "candidate_env": {
+        "LC_ALL": "C",
+        "BASELINE_VERSION": "1.19.7",
+        "SOURCE_COMMIT": "43b2f5aadeebb90f42053c9df2ec8b16583e554f",
+        "SOURCE_SHA256": "7c31a3c62e696efbf13268ee6f37eb4740d82ea599dcd724525fe8f8f72729b0",
+        "RUST_TOOLCHAIN": "1.94.0",
+        "FIRMWARE_SHA256": "dea7905a167eee17d482200ea2fe15871aceb293b0674ac825ed7ae69759399f"
+      },
+      "copied_run_sha256": {
+        "install": "0839c5571c5351e213b9ee4de34501c21df1c6905ff6951cbca81079682d7cac",
+        "version": "7e38f1c96071638a50c2f14c9f54be111f5603fa2c0bd66e18ab31432c977aa2"
+      }
+    },
+    "microsandbox": {
+      "candidate_commit": "3ac0251f7f7df9a8226734589bcad2d37c58c6e8",
+      "candidate_workflow": ".github/workflows/test-microsandbox.yml",
+      "candidate_workflow_sha256": "ebfaef206cbf5a8397168f865a1cac5a87888ba4053a05725da1fba001caca37",
+      "candidate_env": {
+        "LC_ALL": "C",
+        "BASELINE_VERSION": "0.7.11",
+        "BUNDLE_SHA256": "ab1c371e85ff101581b7cf092dbaad6f5b720736ca042aa0d6d4b950f57d6709"
+      },
+      "copied_run_sha256": {
+        "install": "2bf190a69dab83a31922ac1648c9d58354f3bdc80a6ed3cc3fe998fc511c016c",
+        "version": "b224a631fd08ffe7de030e7615cf60e184b3d6658220f62d2abde65f2d122480"
+      }
+    },
+    "firecracker": {
+      "candidate_commit": "a171bc738a5ad6ccdd037660b68cadd41fe559f0",
+      "candidate_workflow": ".github/workflows/test-firecraker.yml",
+      "candidate_workflow_sha256": "5cde3db32f9b749cf91cc9114c45f72a41cb6875ea11be34c4438e1adc51c082",
+      "candidate_env": {
+        "BASELINE_TAG": "v1.17.0",
+        "BASELINE_SHA256": "e351ebe4f7a16b5873bbd51005d2e6767103cff4d5ebc829df2d3f95a93e2256"
+      },
+      "copied_run_sha256": {
+        "install": "0c0b2658198fdaa77ecbf85a77b020ea263eaa0fcd3f365835623a0989dfb89d",
+        "version": "22b19062625f723ba2e5cb47017703ead0568a86f1a9652c42376beaf2b6021e"
+      },
+      "api_helper_source": ".github/scripts/tests/firecracker_api_smoke.sh",
+      "api_helper_sha256": "7cda19b141f01774528ce2f9e673c85ffd0d0820e3adb63fdd125af53f48f922"
+    }
+  }
+}
