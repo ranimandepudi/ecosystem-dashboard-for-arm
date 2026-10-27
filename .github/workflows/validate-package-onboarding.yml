@@ -14,6 +14,31 @@ permissions:
   contents: read
 
 jobs:
+  npm-publication-evidence:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    steps:
+      - name: Read authoritative Sandbox Runtime publication metadata
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, urllib.request
+          url = 'https://registry.npmjs.org/@anthropic-ai%2fsandbox-runtime'
+          with urllib.request.urlopen(url, timeout=45) as response:
+              raw = response.read(8_000_001)
+          if len(raw) > 8_000_000:
+              raise RuntimeError('Registry response exceeds evidence size limit')
+          data = json.loads(raw)
+          names = list(data.get('versions', {}))
+          selected = {}
+          for version in list(dict.fromkeys(names[:5] + ['0.0.38', '0.0.81'])):
+              package = data.get('versions', {}).get(version, {})
+              selected[version] = {key: package.get(key) for key in
+                  ('name', 'version', 'engines', 'cpu', 'os', 'dependencies', 'dist', 'repository')}
+          print(json.dumps({'source': url, 'response_sha256': hashlib.sha256(raw).hexdigest(),
+              'name': data.get('name'), 'published': {version: data.get('time', {}).get(version)
+              for version in selected}, 'created': data.get('time', {}).get('created'),
+              'versions': selected}, indent=2))
+          PY
   bubblewrap:
     uses: ./.github/workflows/test-bubblewrap.yml
   runner-capabilities:
