@@ -12,6 +12,8 @@ permissions:
   contents: read
 
 jobs:
+  bubblewrap:
+    uses: ./.github/workflows/test-bubblewrap.yml
   runner-capabilities:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
