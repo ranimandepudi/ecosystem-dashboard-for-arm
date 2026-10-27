@@ -5,7 +5,9 @@ on:
     branches:
       - validation/package-onboarding-20261027
     paths:
-      - .github/workflows/validate-package-onboarding.yml
+      - .github/workflows/**
+      - .github/scripts/**
+      - content/linux/opensource_packages/**
   workflow_dispatch:
 
 permissions:
