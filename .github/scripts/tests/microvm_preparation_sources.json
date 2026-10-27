@@ -16,7 +16,13 @@
       "copied_run_sha256": {
         "install": "0839c5571c5351e213b9ee4de34501c21df1c6905ff6951cbca81079682d7cac",
         "version": "7e38f1c96071638a50c2f14c9f54be111f5603fa2c0bd66e18ab31432c977aa2"
-      }
+      },
+      "validation_findings": [
+        {
+          "reason": "Native job 122428412003 in run 40572014422 built libkrun and passed ELF/API checks, then C compilation failed because libkrun.h declares uid_t/gid_t without including sys/types.h. The candidate guest harness has the same include order. Validation-only header consumer now includes sys/types.h before libkrun.h; candidate files remain unchanged.",
+          "evidence_url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/40572014422/job/122428412003"
+        }
+      ]
     },
     "microsandbox": {
       "candidate_commit": "3ac0251f7f7df9a8226734589bcad2d37c58c6e8",
@@ -45,7 +51,14 @@
         "version": "22b19062625f723ba2e5cb47017703ead0568a86f1a9652c42376beaf2b6021e"
       },
       "api_helper_source": ".github/scripts/tests/firecracker_api_smoke.sh",
-      "api_helper_sha256": "7cda19b141f01774528ce2f9e673c85ffd0d0820e3adb63fdd125af53f48f922"
+      "api_helper_sha256": "7cda19b141f01774528ce2f9e673c85ffd0d0820e3adb63fdd125af53f48f922",
+      "validation_run_overrides": {
+        "version": {
+          "run_sha256": "62b3893824eb186088f0ef9427ffb95f73e7d8887031a97ee3aab231db616fd6",
+          "reason": "Native job 122428411991 in run 40572014422 proved Firecracker v1.17.0 emits a successful-exit log after its version on stdout. Validation-only parser requires exactly one anchored version line matching the pinned tag and preserves nonzero process failures; candidate workflow is unchanged.",
+          "evidence_url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/40572014422/job/122428411991"
+        }
+      }
     }
   }
 }

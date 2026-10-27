@@ -2,9 +2,12 @@
 
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
+import shlex
 import subprocess
+import tempfile
 import unittest
 
 import yaml
@@ -58,6 +61,11 @@ class MicrovmPreparationTests(unittest.TestCase):
                     self.assertEqual(job["env"][name], value)
                 steps = {step["id"]: step for step in job["steps"] if "id" in step}
                 for step_id, expected in candidate["copied_run_sha256"].items():
+                    override = candidate.get("validation_run_overrides", {}).get(step_id)
+                    if override:
+                        self.assertTrue(override["reason"])
+                        self.assertIn("/actions/runs/", override["evidence_url"])
+                        expected = override["run_sha256"]
                     actual = hashlib.sha256(steps[step_id]["run"].encode()).hexdigest()
                     self.assertEqual(actual, expected, step_id)
 
@@ -96,6 +104,37 @@ class MicrovmPreparationTests(unittest.TestCase):
         self.assertIn("ctypes.CDLL(str(path))", runs)
         self.assertNotIn("krun_start_enter(", runs)
         self.assertNotIn("libkrun_guest_smoke.sh", runs)
+        self.assertLess(runs.index("#include <sys/types.h>"), runs.index("#include <libkrun.h>"))
+
+    def test_firecracker_version_parser_accepts_exit_log_but_fails_closed(self):
+        steps = self.workflow["jobs"][JOBS["firecracker"]]["steps"]
+        script = next(step["run"] for step in steps if step.get("id") == "version")
+        cases = [
+            ("Firecracker v1.17.0\n\n[timestamp] Firecracker exiting successfully. exit_code=0", 0, True),
+            ("Firecracker v1.17.1", 0, False),
+            ("[timestamp] Firecracker exiting successfully. exit_code=0", 0, False),
+            ("Firecracker v1.17.0", 1, False),
+            ("Firecracker v1.17.0\nFirecracker v1.17.0", 0, False),
+            ("", 0, False),
+        ]
+        for reported, rc, accepted in cases:
+            with self.subTest(reported=reported, rc=rc), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                binary = root / "binary"
+                binary.write_text(
+                    "#!/bin/bash\nprintf '%s\\n' " + shlex.quote(reported) + "\nexit " + str(rc) + "\n"
+                )
+                binary.chmod(0o755)
+                output = root / "output"
+                output.touch()
+                result = subprocess.run(
+                    ["/bin/bash", "-c", 'timeout() { shift; shift; "$@"; }\n' + script],
+                    env={**os.environ, "BINARY": str(binary),
+                         "BASELINE_TAG": "v1.17.0", "GITHUB_OUTPUT": str(output)},
+                    capture_output=True, text=True, timeout=10,
+                )
+                self.assertEqual(result.returncode == 0, accepted, result.stderr)
+                self.assertEqual(output.read_text(), "version=v1.17.0\n" if accepted else "")
 
     def test_microsandbox_only_parses_cli_without_doctor_or_image_pull(self):
         steps = self.workflow["jobs"][JOBS["microsandbox"]]["steps"]

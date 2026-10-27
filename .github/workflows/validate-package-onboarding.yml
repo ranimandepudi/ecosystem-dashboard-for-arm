@@ -158,7 +158,7 @@ jobs:
           from pathlib import Path
           import sys
           import tempfile
-          
+
           path = Path(os.environ["LIBKRUN_PATH"]).resolve(strict=True)
           lib = ctypes.CDLL(str(path))
           def check(condition, message):
@@ -283,6 +283,7 @@ jobs:
         run: |
           set -euo pipefail
           cat > "$RUNNER_TEMP/libkrun-header-check.c" <<'C'
+          #include <sys/types.h>
           #include <libkrun.h>
           #include <stdint.h>
           int main(void) {
@@ -483,8 +484,10 @@ jobs:
           set -euo pipefail
           REPORTED=$(timeout --kill-after=2s 10s "$BINARY" --version)
           printf '%s\n' "$REPORTED"
-          [ "$REPORTED" = "Firecracker $BASELINE_TAG" ]
-          VERSION=${REPORTED#Firecracker }
+          # Native v1.17.0 also prints a successful-exit log on stdout.
+          VERSION_LINE=$(printf '%s\n' "$REPORTED" | grep -E '^Firecracker v[0-9]+\.[0-9]+\.[0-9]+$')
+          [ "$VERSION_LINE" = "Firecracker $BASELINE_TAG" ]
+          VERSION=${VERSION_LINE#Firecracker }
           [ "$VERSION" = "$BASELINE_TAG" ]
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
