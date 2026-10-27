@@ -1,0 +1,44 @@
+name: Validate sandbox package onboarding on Arm64
+
+on:
+  push:
+    branches:
+      - validation/package-onboarding-20261027
+    paths:
+      - .github/workflows/validate-package-onboarding.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runner-capabilities:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    steps:
+      - name: Inspect native Arm sandbox prerequisites
+        shell: bash
+        run: |
+          set -u
+          uname -a
+          test "$(uname -m)" = aarch64 || exit 1
+          printf 'Host page size: '
+          getconf PAGESIZE
+          if test -c /dev/kvm; then
+            ls -l /dev/kvm
+          else
+            echo '/dev/kvm is unavailable; guest-boot validation cannot be claimed.'
+          fi
+          docker version || true
+          systemctl --user is-system-running || true
+          sysctl kernel.unprivileged_userns_clone kernel.apparmor_restrict_unprivileged_userns || true
+          if unshare --user --map-root-user --mount true; then
+            echo 'Unprivileged user/mount namespace probe passed.'
+          else
+            echo 'Unprivileged user/mount namespaces are restricted.'
+          fi
+          if sudo unshare --mount --pid --fork true; then
+            echo 'Privileged mount/PID namespace probe passed.'
+          else
+            echo 'Privileged mount/PID namespaces are restricted.'
+          fi
