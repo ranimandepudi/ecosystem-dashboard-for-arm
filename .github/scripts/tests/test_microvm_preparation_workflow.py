@@ -61,11 +61,6 @@ class MicrovmPreparationTests(unittest.TestCase):
                     self.assertEqual(job["env"][name], value)
                 steps = {step["id"]: step for step in job["steps"] if "id" in step}
                 for step_id, expected in candidate["copied_run_sha256"].items():
-                    override = candidate.get("validation_run_overrides", {}).get(step_id)
-                    if override:
-                        self.assertTrue(override["reason"])
-                        self.assertIn("/actions/runs/", override["evidence_url"])
-                        expected = override["run_sha256"]
                     actual = hashlib.sha256(steps[step_id]["run"].encode()).hexdigest()
                     self.assertEqual(actual, expected, step_id)
 
@@ -82,6 +77,10 @@ class MicrovmPreparationTests(unittest.TestCase):
                 for code in re.findall(r"<<'PY'\n(.*?)\nPY", shell, re.S):
                     compile(code, str(WORKFLOW), "exec")
         subprocess.run(["/bin/bash", "-n", str(API_HELPER)], check=True)
+        for name in ("firecracker_version.sh", "libkrun_guest_compile_source.sh"):
+            subprocess.run(
+                ["/bin/bash", "-n", str(ROOT / ".github/scripts/tests" / name)], check=True,
+            )
 
     def test_api_helper_is_exact_supplied_candidate_helper(self):
         self.assertEqual(
@@ -94,6 +93,12 @@ class MicrovmPreparationTests(unittest.TestCase):
         self.assertIn("guest boot not tested", source)
         for forbidden in ("InstanceStart", "/boot-source", "/drives", "/actions"):
             self.assertNotIn(forbidden, source)
+        for slug, field, filename in [
+            ("firecracker", "version_helper_sha256", "firecracker_version.sh"),
+            ("libkrun", "guest_harness_sha256", "libkrun_guest_compile_source.sh"),
+        ]:
+            path = ROOT / ".github/scripts/tests" / filename
+            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), self.sources[slug][field])
 
     def test_libkrun_probe_never_enters_a_vm(self):
         runs = "\n".join(
@@ -125,12 +130,17 @@ class MicrovmPreparationTests(unittest.TestCase):
                     "#!/bin/bash\nprintf '%s\\n' " + shlex.quote(reported) + "\nexit " + str(rc) + "\n"
                 )
                 binary.chmod(0o755)
+                timeout = root / "timeout"
+                timeout.write_text('#!/bin/bash\nshift\nshift\nexec "$@"\n')
+                timeout.chmod(0o755)
                 output = root / "output"
                 output.touch()
                 result = subprocess.run(
-                    ["/bin/bash", "-c", 'timeout() { shift; shift; "$@"; }\n' + script],
+                    ["/bin/bash", "-c", script],
                     env={**os.environ, "BINARY": str(binary),
-                         "BASELINE_TAG": "v1.17.0", "GITHUB_OUTPUT": str(output)},
+                         "BASELINE_TAG": "v1.17.0", "GITHUB_OUTPUT": str(output),
+                         "PATH": str(root) + os.pathsep + os.environ["PATH"]},
+                    cwd=ROOT,
                     capture_output=True, text=True, timeout=10,
                 )
                 self.assertEqual(result.returncode == 0, accepted, result.stderr)

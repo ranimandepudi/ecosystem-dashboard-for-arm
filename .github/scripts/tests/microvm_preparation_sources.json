@@ -2,7 +2,7 @@
   "scope": "Native build/CLI/preboot API preparation only; no guest or KVM validation.",
   "candidates": {
     "libkrun": {
-      "candidate_commit": "0d0b57f0f6e47248d92fb3da3667296834123f64",
+      "candidate_commit": "3887f092e9a3611a1efee59f4da1a4c7df9909e2",
       "candidate_workflow": ".github/workflows/test-libkrun.yml",
       "candidate_workflow_sha256": "bb3fb6a2cfe768cf996a01bd9d7a9cf27e8ff85f3b94aa9c9fd7a7abf2d87dbc",
       "candidate_env": {
@@ -17,6 +17,8 @@
         "install": "0839c5571c5351e213b9ee4de34501c21df1c6905ff6951cbca81079682d7cac",
         "version": "7e38f1c96071638a50c2f14c9f54be111f5603fa2c0bd66e18ab31432c977aa2"
       },
+      "guest_harness_source": ".github/scripts/tests/libkrun_guest_smoke.sh",
+      "guest_harness_sha256": "29d2b938ac0d734a13d20d988c879dc83d305dd106e2335a43ade1f56138fcf0",
       "validation_findings": [
         {
           "reason": "Native job 122428412003 in run 40572014422 built libkrun and passed ELF/API checks, then C compilation failed because libkrun.h declares uid_t/gid_t without including sys/types.h. The candidate guest harness has the same include order. Validation-only header consumer now includes sys/types.h before libkrun.h; candidate files remain unchanged.",
@@ -39,26 +41,28 @@
       }
     },
     "firecracker": {
-      "candidate_commit": "a171bc738a5ad6ccdd037660b68cadd41fe559f0",
+      "candidate_commit": "c4ba78e54aac99e1d9330fd439d23ac33f8b19b3",
       "candidate_workflow": ".github/workflows/test-firecraker.yml",
-      "candidate_workflow_sha256": "5cde3db32f9b749cf91cc9114c45f72a41cb6875ea11be34c4438e1adc51c082",
+      "candidate_workflow_sha256": "94832b9b4c314ceb5e92fd7939c9b999b216b9f3fae20e3721a61f1a5621d407",
       "candidate_env": {
         "BASELINE_TAG": "v1.17.0",
         "BASELINE_SHA256": "e351ebe4f7a16b5873bbd51005d2e6767103cff4d5ebc829df2d3f95a93e2256"
       },
       "copied_run_sha256": {
         "install": "0c0b2658198fdaa77ecbf85a77b020ea263eaa0fcd3f365835623a0989dfb89d",
-        "version": "22b19062625f723ba2e5cb47017703ead0568a86f1a9652c42376beaf2b6021e"
+        "version": "18d45b447e55ff29f09254bb5f848a524e6d1dc3575628278f5ecfdbe9f6246e",
+        "test3": "38e25e675c498845046c723e9b421f41680996826ab08a3af3727d7f24ccba1e"
       },
       "api_helper_source": ".github/scripts/tests/firecracker_api_smoke.sh",
       "api_helper_sha256": "7cda19b141f01774528ce2f9e673c85ffd0d0820e3adb63fdd125af53f48f922",
-      "validation_run_overrides": {
-        "version": {
-          "run_sha256": "62b3893824eb186088f0ef9427ffb95f73e7d8887031a97ee3aab231db616fd6",
-          "reason": "Native job 122428411991 in run 40572014422 proved Firecracker v1.17.0 emits a successful-exit log after its version on stdout. Validation-only parser requires exactly one anchored version line matching the pinned tag and preserves nonzero process failures; candidate workflow is unchanged.",
-          "evidence_url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/40572014422/job/122428411991"
+      "version_helper_source": ".github/scripts/tests/firecracker_version.sh",
+      "version_helper_sha256": "31d4ad08d4d79020e3b984dfcf62ec591b8ef0baf1e8cc77b741f2098069f8f8",
+      "validation_findings": [
+        {
+          "reason": "Parent fixed the native stdout-version framing defect in the candidate. Validation now copies the exact updated version step, jailer check and shared version helper; there is no validation-only parser override.",
+          "initial_failure_url": "https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/40572014422/job/122428411991"
         }
-      }
+      ]
     }
   }
 }
