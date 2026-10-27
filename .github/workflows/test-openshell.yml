@@ -282,7 +282,8 @@ jobs:
           }
           trap finish_test EXIT
           test "$BASELINE_READY" = success:success:success
-          SANDBOX="arm-smoke-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          SANDBOX="arm-$(printf '%s' "$GITHUB_RUN_ID:$GITHUB_RUN_ATTEMPT" | sha256sum | cut -c1-12)"
+          test "${#SANDBOX}" -le 19
           echo "OPENSHELL_SMOKE_SANDBOX=$SANDBOX" >> "$GITHUB_ENV"
           python3 - <<'PY'
           import os, pathlib

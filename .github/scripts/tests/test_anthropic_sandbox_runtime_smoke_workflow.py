@@ -1,6 +1,9 @@
 """Exercise the real inline contract shells; fixtures are not native Arm evidence."""
 
 import copy
+import contextlib
+import errno
+import io
 import json
 import os
 from pathlib import Path
@@ -8,6 +11,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 import yaml
 
@@ -189,9 +193,10 @@ class SmokeWorkflowTests(unittest.TestCase):
         self.assertNotIn("--help", "\n".join(self.steps[f"test{i}"]["run"] for i in range(1, 6)))
         page = ROOT / "content/linux/opensource_packages" / f"{SLUG}.md"
         frontmatter = yaml.safe_load(page.read_text().split("---", 2)[1])
-        self.assertIs(frontmatter["draft"], True)
-        self.assertIsNone(frontmatter["supported_minimum_version"]["version_number"])
-        self.assertIsNone(frontmatter["supported_minimum_version"]["release_date"])
+        self.assertIs(frontmatter["draft"], False)
+        self.assertEqual(frontmatter["supported_minimum_version"]["version_number"], "0.0.1")
+        self.assertEqual(frontmatter["supported_minimum_version"]["release_date"], "2025/10/20")
+        self.assertIn("40567951981/job/122414153746", page.read_text())
         self.assertEqual(frontmatter["category"], "Identity & Security")
         self.assertIn("npmjs.com/package/@anthropic-ai/sandbox-runtime", frontmatter["download_url"])
 
@@ -218,6 +223,35 @@ class SmokeWorkflowTests(unittest.TestCase):
         self.assertLessEqual(len(caveat), 550)
         for internal in ("workflow", "smoke", "regression", "synthetic"):
             self.assertNotIn(internal, caveat.lower())
+
+    def filesystem_probe(self, write_errno):
+        script = self.steps["test4"]["run"]
+        probe = script.split("-- python3 -c '\n", 1)[1].split("\n' \"$SRT_FIXTURE\"", 1)[0]
+        with tempfile.TemporaryDirectory(prefix="srt-filesystem-fixture-") as temporary:
+            root = Path(temporary)
+            (root / "secret").write_text("private fixture")
+            (root / "protected").write_text("unchanged")
+            original_open = Path.open
+
+            def restricted_open(path, mode="r", *args, **kwargs):
+                if path == root / "secret" and mode == "r":
+                    raise PermissionError(errno.EACCES, "fixture denied read")
+                if path == root / "protected" and mode == "w" and write_errno is not None:
+                    raise OSError(write_errno, "fixture write result")
+                return original_open(path, mode, *args, **kwargs)
+
+            with mock.patch.object(Path, "open", restricted_open), \
+                    mock.patch.object(sys, "argv", ["probe", str(root)]), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                exec(compile(probe, "<actual-workflow-filesystem-probe>", "exec"), {})
+
+    def test_readonly_mount_is_a_valid_write_denial(self):
+        self.filesystem_probe(errno.EROFS)
+
+    def test_write_bypass_and_unexpected_io_error_fail_the_actual_probe(self):
+        for result in (None, errno.ENOSPC, errno.ENOENT):
+            with self.subTest(result=result), self.assertRaises(AssertionError):
+                self.filesystem_probe(result)
 
 
 if __name__ == "__main__":

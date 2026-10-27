@@ -1,4 +1,4 @@
-# Draft onboarding: historical first Arm-support version requires metadata review.
+# Historical public Arm-support minimum is 0.0.1; this tests npm 0.0.81.
 # Only the immutable baseline is tested; Test 6 explicitly defers upgrade validation.
 name: Test Anthropic Sandbox Runtime Arm64 sandbox enforcement
 
@@ -319,7 +319,8 @@ jobs:
                   with (p / filename).open(mode):
                       pass
               except OSError as error:
-                  assert error.errno in (errno.EACCES, errno.EPERM), error
+                  allowed = (errno.EACCES, errno.EPERM) if mode == "r" else (errno.EACCES, errno.EPERM, errno.EROFS)
+                  assert error.errno in allowed, error
               else:
                   raise AssertionError(filename + " restriction was bypassed")
           print("FILESYSTEM_ENFORCEMENT_OK")
@@ -473,6 +474,6 @@ jobs:
               print(f"Status: {run_status}; passed: {passed}; failed: {failed}; skipped: {skipped}.", file=report)
               print("Mandatory runtime/enforcement checks fail when prerequisites are unavailable.", file=report)
               print(f"Regression decision: {decision}. No newer-version runtime comparison.", file=report)
-              print("Draft package metadata: historical first Arm-supported version is unresolved.", file=report)
+              print("Historical public Arm-support minimum: 0.0.1; tested baseline: 0.0.81. No performance recommendation is asserted.", file=report)
           sys.exit(0 if run_status == "success" else 1)
           PY

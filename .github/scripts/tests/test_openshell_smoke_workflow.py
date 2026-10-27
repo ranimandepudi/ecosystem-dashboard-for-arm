@@ -199,6 +199,18 @@ class SmokeWorkflowTests(unittest.TestCase):
         for internal in ("workflow", "smoke", "regression", "synthetic"):
             self.assertNotIn(internal, caveat.lower())
 
+    def test_sandbox_name_fits_upstream_limit_for_long_run_ids(self):
+        script = self.steps["test3"]["run"]
+        naming = next(line for line in script.splitlines() if line.startswith("SANDBOX="))
+        for run_id, attempt in (("40567951981", "1"), ("9" * 20, "123456789")):
+            process = subprocess.run(
+                ["/bin/bash", "-c", naming + '\nprintf "%s" "$SANDBOX"'],
+                text=True, capture_output=True, check=True,
+                env=dict(os.environ, GITHUB_RUN_ID=run_id, GITHUB_RUN_ATTEMPT=attempt))
+            self.assertLessEqual(len(process.stdout), 19)
+            self.assertRegex(process.stdout, r"^arm-[a-f0-9]{12}$")
+        self.assertIn('test "${#SANDBOX}" -le 19', script)
+
 
 if __name__ == "__main__":
     unittest.main()

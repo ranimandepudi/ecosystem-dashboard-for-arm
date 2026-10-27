@@ -81,6 +81,48 @@ class WorkflowFixtures(unittest.TestCase):
         self.assertEqual(("skipped", "baseline_failed"),
                          (values["status"], values["decision"]))
 
+
+    def test_pipeline_summary_matches_repository_regression_policy(self):
+        import sys
+        sys.path.insert(0, str(ROOT / ".github/scripts"))
+        import package_result_policy as policy
+
+        for fault in ({}, {"S5": "failed", "O5": "failure"},
+                      {"INSTALL_OUTCOME": "failure"}, {"VERSION_OUTCOME": "failure"},
+                      {"S1": "", "O1": "skipped", "S5": "", "O5": "skipped"}):
+            with self.subTest(fault=fault):
+                env = self.summary_env()
+                env.update(fault)
+                regression, evidence = self.shell(STEPS["test6"]["run"], env)
+                self.assertEqual(0, regression.returncode, regression.stderr)
+                env.update(S6=evidence["status"], O6="success", DECISION=evidence["decision"])
+                result, values = self.shell(STEPS["summary"]["run"], env)
+                setup_ok = env["INSTALL_OUTCOME"] == env["VERSION_OUTCOME"] == "success"
+                statuses = [
+                    "passed" if setup_ok and env[f"S{i}"] == "passed" and env[f"O{i}"] == "success"
+                    else "failed" for i in range(1, 6)
+                ]
+                details = [{"name": f"Test {i}", "status": status}
+                           for i, status in enumerate(statuses, start=1)]
+                details.append({"name": "Test 6", "status": "skipped",
+                                "decision": evidence["decision"]})
+                required = policy.validate_six_test_result(
+                    details=details, passed=int(values["passed"]),
+                    failed=int(values["failed"]), skipped=int(values["skipped"]),
+                    core_failed=int(values["core_failed"]), decision=evidence["decision"])
+                self.assertEqual(required, values["overall_status"])
+                self.assertEqual(required == "success", result.returncode == 0)
+                semantic = policy.expected_regression_metadata(
+                    decision=evidence["decision"], core_failed=int(values["core_failed"]))
+                self.assertEqual(semantic["status"], evidence["status"])
+
+    def test_public_caveats_describe_product_not_ci_progress(self):
+        page = ROOT / "content/linux/opensource_packages/gVisor.md"
+        metadata = yaml.safe_load(page.read_text().split("---", 2)[1])
+        caveats = metadata["optional_info"]["support_caveats"].lower()
+        for narration in ("smoke", "workflow", "deferred", "test 5", "test 6"):
+            self.assertNotIn(narration, caveats)
+
     def test_version_failure_has_no_invented_version(self):
         for output, rc in [("", 1), ("unparseable", 0), ("WRONG_VERSION", 0)]:
             with self.subTest(output=output, rc=rc):
@@ -184,6 +226,8 @@ class GuestFixtures(unittest.TestCase):
                 "runsc": FAKE_RUNSC,
                 "busybox": "#!/bin/sh\nexit 0\n",
                 "timeout": "#!/bin/bash\nshift; shift\nexec \"$@\"\n",
+                "mountpoint": '#!/bin/sh\ncase "$FAULT" in namespace_mount|cleanup_failure) exit 0;; *) exit 1;; esac\n',
+                "umount": '#!/bin/sh\n[ "$FAULT" != cleanup_failure ] || exit 1\necho NAMESPACE_UNMOUNTED\n',
             }.items():
                 path = work / name
                 path.write_text(text)
@@ -202,6 +246,15 @@ class GuestFixtures(unittest.TestCase):
         for fault in ("missing_marker", "missing_exit_marker", "wrong_exit", "runtime_failure", "timeout"):
             with self.subTest(fault=fault):
                 self.assertNotEqual(0, self.probe(fault).returncode)
+
+    def test_retained_namespace_is_unmounted_before_cleanup(self):
+        result = self.probe("namespace_mount")
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("NAMESPACE_UNMOUNTED", result.stdout)
+
+    def test_namespace_cleanup_failure_is_not_success(self):
+        result = self.probe("cleanup_failure")
+        self.assertNotEqual(0, result.returncode, result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

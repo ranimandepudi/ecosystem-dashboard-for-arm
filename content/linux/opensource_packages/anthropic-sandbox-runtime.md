@@ -1,13 +1,13 @@
 ---
 name: Anthropic Sandbox Runtime
-draft: true
+draft: false
 category: Identity & Security
 description: Anthropic Sandbox Runtime (srt) applies OS-level filesystem and network restrictions to agents, MCP servers, and arbitrary processes using bubblewrap on Linux.
 download_url: https://www.npmjs.com/package/@anthropic-ai/sandbox-runtime?activeTab=versions
 works_on_arm: true
 supported_minimum_version:
-    version_number: null
-    release_date: null
+    version_number: 0.0.1
+    release_date: 2025/10/20
 optional_info:
     homepage_url: https://github.com/anthropics/sandbox-runtime
     support_caveats_inline: true
@@ -15,12 +15,12 @@ optional_info:
         Version 0.0.81 on Linux Arm64 requires Node.js 22.12+, bubblewrap, socat,
         ripgrep, seccomp, and working nested user, PID, mount, and network namespaces.
         Ubuntu 24.04 AppArmor policy can block the required user namespaces.
-        The first npm release, 0.0.1 (2025-10-20), has not yet been validated on
-        Linux Arm64, so the historical minimum remains unset.
+        Historical minimum 0.0.1 (2025-10-20) is the first published release,
+        not a deployment recommendation.
     getting_started_resources:
         official_docs: https://github.com/anthropics/sandbox-runtime/blob/v0.0.81/README.md
 optional_hidden_info:
-    release_notes__supported_minimum: null
+    release_notes__supported_minimum: https://www.npmjs.com/package/@anthropic-ai/sandbox-runtime/v/0.0.1
     other_info: >-
         SPDX Apache-2.0: https://github.com/anthropics/sandbox-runtime/blob/v0.0.81/LICENSE .
         Initial source: https://github.com/anthropics/sandbox-runtime/tree/b483c6113b5a7f05d32eec16ba61734ce9bf597c .
@@ -44,8 +44,13 @@ optional_hidden_info:
         unavailable prerequisites. Only the disposable runner's documented AppArmor
         sysctl is adjusted, with restoration required. No weaker sandbox or disabled
         seccomp is used. Newer-version regression is deferred with runtime_validation_not_automated.
-        Publication evidence alone does not establish the first release's Arm support;
-        the parent will validate the historical 0.0.1 npm artifact before accepting that minimum.
+        First-release native proof:
+        https://github.com/ranimandepudi/ecosystem-dashboard-for-arm/actions/runs/40567951981/job/122414153746 .
+        On Linux AArch64 with Node 22.21.1, the SRI-verified npm 0.0.1 artifact
+        passed manifest identity, stdin/stdout, allowed reads/writes, denied secret
+        masking, descendant process I/O, and denied writes. Its CLI incorrectly
+        hardcodes 1.0.0; package.json plus SRI establish version 0.0.1.
+        This historical compatibility check is not a security certification.
         Arm CI evidence: https://github.com/anthropics/sandbox-runtime/blob/v0.0.81/.github/workflows/integration-tests.yml .
         No native run or performance result is borrowed from upstream.
 ---
