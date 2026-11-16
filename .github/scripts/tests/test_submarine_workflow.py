@@ -217,6 +217,14 @@ exit "${BUILD_RC:-0}"
         self.assertEqual("0.4.0", self.job["env"]["SUBMARINE_VERSION"])
         self.assertEqual("0.4.1", self.job["env"]["SUBMARINE_NEXT_VERSION"])
         self.assertEqual("https://github.com/FyraLabs/submarine.git", self.job["env"]["SUBMARINE_REPO"])
+        self.assertEqual(
+            "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git",
+            self.job["env"]["SUBMARINE_KERNEL_UPSTREAM"],
+        )
+        self.assertEqual(
+            "https://github.com/gregkh/linux.git",
+            self.job["env"]["SUBMARINE_KERNEL_MIRROR"],
+        )
         self.assertEqual("ubuntu-24.04-arm", self.job["runs-on"])
         self.assertEqual(
             "registry.fedoraproject.org/fedora-minimal@sha256:"
@@ -225,7 +233,41 @@ exit "${BUILD_RC:-0}"
         )
         for step, version, directory in (("install", "SUBMARINE_VERSION", "BASE_DIR"), ("test6", "LATEST", "NEXT_DIR")):
             script = self.steps[step]["run"]
-            self.assertIn(f'git clone --depth 1 --branch "v${{{version}}}" --recurse-submodules "${{SUBMARINE_REPO}}" "${{{directory}}}"', script)
+            self.assertIn(
+                f'git clone --depth 1 --branch "v${{{version}}}" '
+                f'"${{SUBMARINE_REPO}}" "${{{directory}}}"',
+                script,
+            )
+            self.assertNotIn("--recurse-submodules", script)
+            self.assertIn(
+                f'git -C "${{{directory}}}" config -f .gitmodules '
+                "--get submodule.kernel.url",
+                script,
+            )
+            self.assertIn(
+                f'git -C "${{{directory}}}" config submodule.kernel.url '
+                '"${SUBMARINE_KERNEL_MIRROR}"',
+                script,
+            )
+            self.assertIn(
+                f'git -C "${{{directory}}}" submodule update --init --depth 1 '
+                "--jobs 2 u-root kernel",
+                script,
+            )
+            self.assertIn(
+                f'EXPECTED_SUBMODULE_COMMIT=$(git -C "${{{directory}}}" '
+                'rev-parse "HEAD:${SUBMODULE}")',
+                script,
+            )
+            self.assertIn(
+                f'ACTUAL_SUBMODULE_COMMIT=$(git -C "${{{directory}}}/${{SUBMODULE}}" '
+                "rev-parse HEAD)",
+                script,
+            )
+            self.assertIn(
+                'test "${ACTUAL_SUBMODULE_COMMIT}" = "${EXPECTED_SUBMODULE_COMMIT}"',
+                script,
+            )
             self.assertEqual(1, script.count("go install "))
             self.assertEqual(1, script.count("timeout 30m bash -lc"))
         for number in range(1, 6):

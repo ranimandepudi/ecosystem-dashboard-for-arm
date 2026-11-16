@@ -86,6 +86,8 @@ jobs:
       SUBMARINE_VERSION: "0.4.0"
       SUBMARINE_NEXT_VERSION: "0.4.1"
       SUBMARINE_REPO: "https://github.com/FyraLabs/submarine.git"
+      SUBMARINE_KERNEL_UPSTREAM: "https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git"
+      SUBMARINE_KERNEL_MIRROR: "https://github.com/gregkh/linux.git"
       SUBMARINE_WORKROOT: "/tmp/submarine-smoke"
       SUBMARINE_VENV: "/tmp/submarine-smoke/venv"
 
@@ -155,8 +157,16 @@ jobs:
           "${SUBMARINE_VENV}/bin/pip" install "setuptools<81" depthcharge-tools
           echo "${SUBMARINE_VENV}/bin" >> "$GITHUB_PATH"
           export PATH="${SUBMARINE_VENV}/bin:/usr/sbin:/sbin:/usr/bin:/bin:$PATH:$HOME/go/bin"
-          git clone --depth 1 --branch "v${SUBMARINE_VERSION}" --recurse-submodules "${SUBMARINE_REPO}" "${BASE_DIR}"
+          git clone --depth 1 --branch "v${SUBMARINE_VERSION}" "${SUBMARINE_REPO}" "${BASE_DIR}"
           git config --global --add safe.directory "${BASE_DIR}"
+          test "$(git -C "${BASE_DIR}" config -f .gitmodules --get submodule.kernel.url)" = "${SUBMARINE_KERNEL_UPSTREAM}"
+          git -C "${BASE_DIR}" config submodule.kernel.url "${SUBMARINE_KERNEL_MIRROR}"
+          git -C "${BASE_DIR}" submodule update --init --depth 1 --jobs 2 u-root kernel
+          for SUBMODULE in u-root kernel; do
+            EXPECTED_SUBMODULE_COMMIT=$(git -C "${BASE_DIR}" rev-parse "HEAD:${SUBMODULE}")
+            ACTUAL_SUBMODULE_COMMIT=$(git -C "${BASE_DIR}/${SUBMODULE}" rev-parse HEAD)
+            test "${ACTUAL_SUBMODULE_COMMIT}" = "${EXPECTED_SUBMODULE_COMMIT}"
+          done
 
           UROOT_COMMIT=$(git -C "${BASE_DIR}" rev-parse HEAD:u-root)
           # Retry only dependency-download gateway failures, never the image build/tests.
@@ -350,8 +360,16 @@ jobs:
           fi
 
           rm -rf "${NEXT_DIR}"
-          git clone --depth 1 --branch "v${LATEST}" --recurse-submodules "${SUBMARINE_REPO}" "${NEXT_DIR}"
+          git clone --depth 1 --branch "v${LATEST}" "${SUBMARINE_REPO}" "${NEXT_DIR}"
           git config --global --add safe.directory "${NEXT_DIR}"
+          test "$(git -C "${NEXT_DIR}" config -f .gitmodules --get submodule.kernel.url)" = "${SUBMARINE_KERNEL_UPSTREAM}"
+          git -C "${NEXT_DIR}" config submodule.kernel.url "${SUBMARINE_KERNEL_MIRROR}"
+          git -C "${NEXT_DIR}" submodule update --init --depth 1 --jobs 2 u-root kernel
+          for SUBMODULE in u-root kernel; do
+            EXPECTED_SUBMODULE_COMMIT=$(git -C "${NEXT_DIR}" rev-parse "HEAD:${SUBMODULE}")
+            ACTUAL_SUBMODULE_COMMIT=$(git -C "${NEXT_DIR}/${SUBMODULE}" rev-parse HEAD)
+            test "${ACTUAL_SUBMODULE_COMMIT}" = "${EXPECTED_SUBMODULE_COMMIT}"
+          done
           UROOT_COMMIT=$(git -C "${NEXT_DIR}" rev-parse HEAD:u-root)
           # Retry only dependency-download gateway failures, never the image build/tests.
           UROOT_LOG=$(mktemp)
